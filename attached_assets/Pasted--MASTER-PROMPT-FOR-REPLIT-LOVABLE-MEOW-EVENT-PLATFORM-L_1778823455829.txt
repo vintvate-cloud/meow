@@ -1,0 +1,748 @@
+# MASTER PROMPT FOR REPLIT / LOVABLE — “MEOW” EVENT PLATFORM LANDING PAGE
+
+Build a premium SaaS landing page and authentication flow for **Meow** — an event hosting, RSVP, creator-community, and social gathering platform inspired by the emotional energy and playful visual confidence of Linktree’s marketing website, but adapted for a modern event ecosystem similar to Luma.
+
+The website must feel:
+
+* Editorial
+* Artistic
+* Human
+* Confident
+* Playful but premium
+* Bold without looking startup-generic
+* Creative-tech instead of “AI neon SaaS”
+* Fashion-brand level polished
+* Webby-award quality
+
+Avoid:
+
+* Neon gradients
+* Cyberpunk UI
+* Generic AI blobs
+* Dark mode with glowing borders everywhere
+* Glassmorphism overload
+* Purple/blue SaaS clichés
+* Generic Framer templates
+* Overuse of shadows
+* Overly minimal sterile Apple clone layouts
+
+The visual language should feel inspired by:
+
+* Linktree’s bold campaign art direction
+* Are.na inspired spacing
+* Swiss editorial layouts
+* Luma’s usability
+* High-end fashion campaigns
+* Creative community culture
+* Youth internet culture
+* Modern creator economy products
+
+---
+
+# BRAND NAME
+
+MEOW
+
+Short, memorable, social, playful.
+
+Tagline ideas:
+
+* “Bring people together.”
+* “Events made social.”
+* “Host your people.”
+* “Your community starts here.”
+* “Where moments become communities.”
+
+---
+
+# DESIGN DIRECTION
+
+The entire website should feel like:
+
+* A living creative campaign
+* Large typography
+* Bold color blocking
+* Rounded geometry
+* Oversized sections
+* Experimental but usable
+* Smooth and tactile
+* Heavy emphasis on whitespace and composition
+* Motion-driven storytelling
+
+Use:
+
+* Massive headlines
+* Rounded cards
+* Organic asymmetrical layouts
+* Bold photography
+* Editorial spacing
+* Dynamic layouts
+* Large border radius
+* Thick buttons
+* Soft shadows only when necessary
+* Interactive cards
+* Floating UI compositions
+
+The UI must feel:
+
+* Physical
+* Touch-friendly
+* Smooth
+* Soft
+* Delightful
+* High-end
+
+---
+
+# TECH STACK
+
+Use:
+
+* Next.js 15 App Router
+* TypeScript
+* TailwindCSS
+* Framer Motion
+* GSAP
+* Lenis smooth scrolling
+* Shadcn/ui
+* React Icons
+* Lucide Icons
+* Zustand
+* Clerk or Supabase Auth
+* Vercel optimized setup
+
+Animations:
+
+* GSAP ScrollTrigger
+* Framer Motion stagger reveals
+* Scroll velocity transforms
+* Floating parallax cards
+* Smooth image scaling
+* Marquee motion
+* Cursor-follow hover states
+* Text reveal animations
+* Magnetic buttons
+* Smooth section snapping feel
+* Layered motion depth
+
+---
+
+# GLOBAL DESIGN SYSTEM
+
+## COLORS
+
+Use rich solid colors like Linktree.
+
+Primary palette:
+
+* Lime Green: #D9FF00
+* Royal Blue: #2856E8
+* Deep Burgundy: #79001B
+* Soft Lavender: #E8C8EC
+* Warm Cream: #F3F0E8
+* Deep Navy: #111827
+* Moss Green: #6F7450
+* Bright Cyan Accent: #00B7FF
+* Purple Background: #58268C
+
+Text:
+
+* Mostly dark navy
+* Avoid pure black
+
+Backgrounds:
+
+* Solid blocks
+* No generic gradients
+
+---
+
+# TYPOGRAPHY
+
+Typography is extremely important.
+
+Use:
+
+* Instrument Sans
+  OR
+* Satoshi
+  OR
+* General Sans
+  OR
+* Neue Montreal
+
+Headlines:
+
+* Extremely bold
+* Tight line-height
+* Oversized
+* 900 weight
+
+Body:
+
+* Clean and readable
+* Medium weight
+* Spacious
+
+Typography style:
+
+* Editorial
+* Confident
+* Graphic
+
+---
+
+# PAGE STRUCTURE
+
+# LANDING PAGE
+
+---
+
+# NAVBAR
+
+Floating pill navbar like Linktree.
+
+Features:
+
+* Rounded full-width floating container
+* Sticky on scroll
+* Slight blur
+* White background
+* Large border radius
+* Smooth hover transitions
+
+Left:
+
+* Meow logo
+
+Center:
+
+* Discover
+* Events
+* Communities
+* Creators
+* Pricing
+
+Right:
+
+* Log in
+* Get Started
+
+Interactions:
+
+* Navbar compresses slightly on scroll
+* Magnetic hover
+* Subtle elevation
+
+---
+
+# HERO SECTION
+
+Massive split-screen section.
+
+LEFT SIDE:
+Huge typography.
+
+Headline:
+“Host events your people actually remember.”
+
+Subtext:
+“Meow helps creators, communities, and brands host beautiful events, collect RSVPs, grow audiences, and turn moments into movements.”
+
+CTA Row:
+
+* Start for free
+* Explore events
+
+Under CTA:
+Tiny social proof avatars + text.
+
+RIGHT SIDE:
+Large floating visual composition.
+
+NOT generic dashboard screenshots.
+
+Instead:
+Build an artistic stacked event composition like Linktree.
+
+Include:
+
+* Floating RSVP cards
+* Event tickets
+* Chat bubbles
+* QR cards
+* Guest list UI
+* Event posters
+* Mobile UI mockups
+* Profile chips
+* Animated reaction bubbles
+* Map snippets
+
+Visuals should overlap in a layered collage.
+
+Motion:
+
+* Floating idle animations
+* Scroll parallax
+* Depth movement
+* GSAP reveal sequencing
+
+Background:
+Solid royal blue OR lime green block.
+
+---
+
+# VISUAL STYLE FOR IMAGES
+
+Generate custom visuals and illustrations.
+
+Style:
+
+* Campaign photography
+* Playful studio scenes
+* People at creative events
+* Community moments
+* Fashion/editorial lighting
+* Soft shadows
+* Minimal environments
+* Strong color blocking
+
+Create visuals like:
+
+* Friends at rooftop events
+* DJs
+* Workshop hosts
+* Creators networking
+* Indie communities
+* Startup mixers
+* Creative meetups
+* Campus events
+
+Avoid:
+
+* Corporate stock images
+* AI-looking glossy renders
+* Unrealistic humans
+
+Images should feel:
+
+* Real
+* Cultural
+* Internet-native
+
+---
+
+# SECOND SECTION — “CREATE EVENTS FAST”
+
+Background:
+Royal blue.
+
+Layout:
+Left visual.
+Right text.
+
+Visual:
+Animated floating phone UI.
+
+Show:
+
+* Event creation flow
+* Beautiful RSVP UI
+* Ticket blocks
+* Calendar sync
+* Waitlist chips
+
+Text:
+“Create beautiful events in minutes.”
+
+Button:
+“Start hosting”
+
+Animations:
+
+* Floating cards
+* Stagger reveals
+* Scroll scaling
+
+---
+
+# COMMUNITY SECTION
+
+Background:
+Burgundy.
+
+Large editorial layout.
+
+Show:
+
+* Group chats
+* Community pages
+* Member avatars
+* Live discussions
+* RSVP momentum
+
+Headline:
+“Turn events into communities.”
+
+Include:
+Animated social interaction cards.
+
+---
+
+# ANALYTICS SECTION
+
+Background:
+Warm cream.
+
+Layout:
+Large floating metric cards like Linktree.
+
+Cards:
+
+* RSVPs
+* Ticket sales
+* Attendance
+* Repeat guests
+* Community growth
+
+Motion:
+Cards gently float independently.
+
+---
+
+# SOCIAL PROOF SECTION
+
+Massive typography.
+
+Example:
+“Trusted by creators, startups, and communities worldwide.”
+
+Below:
+Large artistic profile cards.
+
+Not logos-only.
+
+Use:
+
+* Creators
+* Musicians
+* Startup founders
+* Student clubs
+* Creative brands
+
+---
+
+# CONTENT GRID SECTION
+
+Create large asymmetrical card grid.
+
+Cards:
+
+* Sell tickets
+* Community chat
+* Event reminders
+* QR check-in
+* Creator pages
+* Recurring events
+* AI scheduling assistant
+* Waitlists
+
+Use:
+Different background colors.
+
+Hover interactions:
+
+* Lift
+* Rotate
+* Scale
+* Shadow depth
+
+---
+
+# TESTIMONIAL SECTION
+
+Large quote section.
+
+Huge portrait image.
+
+Minimal but emotional.
+
+Example:
+“Meow helped us turn random meetups into a thriving creative community.”
+
+---
+
+# FAQ SECTION
+
+Large rounded accordion cards.
+
+Background:
+Burgundy.
+
+Rounded giant cards.
+
+Smooth expand animation.
+
+---
+
+# FINAL CTA SECTION
+
+Huge bold typography.
+
+Background:
+Purple.
+
+Text:
+“Start your next gathering with Meow.”
+
+Input:
+Custom username field.
+
+Button:
+“Claim your Meow”
+
+Add giant abstract silhouettes in background.
+
+---
+
+# FOOTER
+
+Large rounded white container.
+
+Columns:
+
+* Product
+* Company
+* Resources
+* Legal
+* Socials
+
+Include:
+App store style buttons.
+
+Rounded social icons.
+
+---
+
+# LOGIN PAGE
+
+The auth pages MUST match the landing page aesthetic.
+
+NO generic auth UI.
+
+---
+
+# LOGIN PAGE STYLE
+
+Split layout.
+
+LEFT:
+Large campaign visual.
+
+Could be:
+
+* Event crowd
+* Floating event posters
+* Creative meetup
+* Artistic gradient blocks
+
+RIGHT:
+Minimal rounded auth card.
+
+Include:
+
+* Logo
+* Welcome back
+* Google login
+* Apple login
+* Email
+* Password
+* Continue button
+
+Use:
+Rounded thick inputs.
+Soft shadows.
+Minimal borders.
+
+Background:
+Solid color blocks.
+
+Animations:
+
+* Fade reveal
+* Floating particles
+* Smooth transitions
+
+---
+
+# SIGNUP PAGE
+
+Same design system.
+
+Extra fields:
+
+* Username
+* Community name
+* Role selector
+
+Add:
+Fun onboarding steps after signup.
+
+---
+
+# MICRO INTERACTIONS
+
+VERY IMPORTANT.
+
+Include:
+
+* Magnetic buttons
+* Hover scale
+* Floating cards
+* Cursor-aware movement
+* Smooth scrolling
+* Stagger animations
+* Scroll-trigger reveals
+* Layered parallax
+* Animated marquee
+* Floating gradients VERY subtly
+* Card stacking transitions
+* Elastic hover effects
+* Smooth page transitions
+
+Avoid:
+
+* Excessive flashy animation
+* Cheap 3D transforms
+
+Motion should feel:
+
+* Expensive
+* Intentional
+* Cinematic
+
+---
+
+# LENIS + GSAP IMPLEMENTATION
+
+Implement:
+
+* Lenis smooth scrolling
+* GSAP ScrollTrigger
+* Framer Motion stagger reveals
+* Intersection Observer animations
+
+Scrolling should feel:
+
+* Buttery
+* Heavy
+* Cinematic
+
+---
+
+# RESPONSIVENESS
+
+Mobile version must feel equally premium.
+
+Mobile navbar:
+
+* Floating rounded pill
+* Fullscreen animated menu
+
+Hero:
+
+* Stack vertically
+* Maintain oversized typography
+
+Cards:
+
+* Swipeable
+* Scroll animated
+
+---
+
+# UX FEELING
+
+The user should feel:
+
+* Excited to host
+* Part of culture
+* Like this product is premium
+* Like events are emotional experiences
+
+This should NOT feel like:
+
+* A dashboard template
+* Startup boilerplate
+* AI-generated SaaS
+* Generic Framer website
+
+It should feel:
+
+* Crafted
+* Designed
+* Art directed
+
+---
+
+# IMPORTANT VISUAL REFERENCES
+
+Use the provided screenshots as direct inspiration for:
+
+* Section composition
+* Typography scale
+* Rounded containers
+* Floating visual cards
+* Color blocking
+* Editorial spacing
+* Motion pacing
+
+But adapt everything to:
+
+* Events
+* Communities
+* RSVP culture
+* Social experiences
+
+DO NOT clone Linktree directly.
+
+Instead:
+Create a unique visual identity for “Meow” using the same emotional energy and design confidence.
+
+---
+
+# EXTRA PREMIUM TOUCHES
+
+Add:
+
+* Custom cursor
+* Noise texture overlays
+* Slight grain
+* Motion blur transitions
+* Smooth image masks
+* SVG blob reveals
+* Organic section dividers
+* Animated ticket tear effects
+* Hover sound toggle option
+* Subtle lighting gradients
+* Floating confetti on CTA interactions
+
+---
+
+# FINAL OUTPUT REQUIREMENTS
+
+The generated website must:
+
+* Feel production ready
+* Feel award-worthy
+* Look handcrafted
+* Have no generic AI SaaS look
+* Use premium spacing
+* Use refined typography hierarchy
+* Have realistic visuals
+* Have strong motion design
+* Feel culturally relevant
+* Be memorable instantly
+
+The result should feel like:
+“Linktree meets Luma meets a modern creative festival brand.”
