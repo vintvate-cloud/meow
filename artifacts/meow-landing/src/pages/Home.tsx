@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,55 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const TESTIMONIALS = [
+  {
+    quote: "Meow turned our random meetups into a thriving creative community.",
+    author: "Marcus Chen, Co-founder of The Archive Collective",
+    bg1: "#004225", // dark green
+    bg2: "#FF6B00", // orange
+  },
+  {
+    quote: "We sold out our first event in 48 hours using Meow. The RSVP page is stunning.",
+    author: "Priya Sharma, Indie Music Curator",
+    bg1: "#2856E8", // royal blue
+    bg2: "#E6E6FA", // lavender
+  },
+  {
+    quote: "Our campus club went from 20 members to 400 in one semester with Meow.",
+    author: "Jordan Lee, UCLA Events Lead",
+    bg1: "#800020", // burgundy
+    bg2: "#D9FF00", // lime
+  },
+  {
+    quote: "The analytics alone are worth it. I finally understand my audience.",
+    author: "Kai Nakamura, Creative Director",
+    bg1: "#800080", // purple
+    bg2: "#00FFFF", // cyan
+  }
+];
+
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+
+  const [phoneStep, setPhoneStep] = useState(0);
+  const [testimonialStep, setTestimonialStep] = useState(0);
+  const [activeFaq, setActiveFaq] = useState<string | undefined>();
+
+  useEffect(() => {
+    const phoneInterval = setInterval(() => {
+      setPhoneStep((prev) => (prev + 1) % 3);
+    }, 2500);
+    return () => clearInterval(phoneInterval);
+  }, []);
+
+  useEffect(() => {
+    const testimonialInterval = setInterval(() => {
+      setTestimonialStep((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 3000);
+    return () => clearInterval(testimonialInterval);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -50,7 +95,7 @@ export default function Home() {
       });
 
       // Floating metric cards animation (Analytics section)
-      gsap.utils.toArray('.metric-card').forEach((card: any, i) => {
+      gsap.utils.toArray('.metric-card-inner').forEach((card: any, i) => {
         gsap.to(card, {
           y: -15,
           duration: 2 + (i % 3) * 0.5,
@@ -92,19 +137,14 @@ export default function Home() {
           <Link href="/" className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>
             MEOW
           </Link>
-          <div className="hidden md:flex items-center gap-6 font-medium text-sm" style={{ color: '#111827' }}>
-            <span className="hover:text-primary cursor-pointer transition-colors">Discover</span>
-            <span className="hover:text-primary cursor-pointer transition-colors">Events</span>
-            <span className="hover:text-primary cursor-pointer transition-colors">Communities</span>
-            <span className="hover:text-primary cursor-pointer transition-colors">Creators</span>
-            <span className="hover:text-primary cursor-pointer transition-colors">Pricing</span>
-          </div>
           <div className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: '#111827' }}>Log in</Button>
             </Link>
             <Link href="/signup">
-              <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>Get Started</Button>
+              <motion.div whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }}>
+                <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>Get Started</Button>
+              </motion.div>
             </Link>
           </div>
         </div>
@@ -136,13 +176,17 @@ export default function Home() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <Link href="/signup">
-              <Button size="lg" className="rounded-full h-16 px-8 text-lg font-bold border-none w-full sm:w-auto" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-                Create an Event
-              </Button>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+                <Button size="lg" className="rounded-full h-16 px-8 text-lg font-bold border-none w-full sm:w-auto" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
+                  Create an Event
+                </Button>
+              </motion.div>
             </Link>
-            <Button size="lg" variant="outline" className="rounded-full h-16 px-8 text-lg font-bold border-2 bg-transparent hover:bg-[#111827]/10 w-full sm:w-auto" style={{ borderColor: '#111827', color: '#111827' }}>
-              See Pricing
-            </Button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="rounded-full h-16 px-8 text-lg font-bold border-2 bg-transparent hover:bg-[#111827]/10 w-full sm:w-auto" style={{ borderColor: '#111827', color: '#111827' }}>
+                See Pricing
+              </Button>
+            </motion.div>
           </motion.div>
           
           <motion.div 
@@ -163,8 +207,9 @@ export default function Home() {
         <div className="w-full lg:w-1/2 relative h-[600px] mt-16 lg:mt-0">
           <motion.div 
             animate={{ y: [0, -15, 0], rotate: [-2, 0, -2] }}
+            whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-10 left-10 w-64 p-6 rounded-3xl shadow-2xl z-20 gsap-parallax" style={{ backgroundColor: '#2856E8', color: 'white' }}
+            className="absolute top-10 left-10 w-64 p-6 rounded-3xl shadow-2xl z-20 gsap-parallax cursor-pointer" style={{ backgroundColor: '#2856E8', color: 'white' }}
           >
             <div className="text-sm font-bold mb-2 opacity-80">TONIGHT</div>
             <div className="text-2xl font-black mb-4 leading-tight">Design Drink & Draw</div>
@@ -176,8 +221,9 @@ export default function Home() {
 
           <motion.div 
             animate={{ y: [0, -20, 0], rotate: [2, 1, 2] }}
+            whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-40 right-10 w-72 p-6 rounded-3xl shadow-2xl z-10 gsap-parallax" style={{ backgroundColor: '#E8C8EC', color: '#111827' }}
+            className="absolute top-40 right-10 w-72 p-6 rounded-3xl shadow-2xl z-10 gsap-parallax cursor-pointer" style={{ backgroundColor: '#E8C8EC', color: '#111827' }}
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full" style={{ backgroundColor: '#79001B' }}></div>
@@ -191,8 +237,9 @@ export default function Home() {
 
           <motion.div 
             animate={{ y: [0, -12, 0], rotate: [-4, -2, -4] }}
+            whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-20 left-20 w-56 p-5 rounded-3xl shadow-2xl z-30 gsap-parallax" style={{ backgroundColor: '#F3F0E8', color: '#111827' }}
+            className="absolute bottom-20 left-20 w-56 p-5 rounded-3xl shadow-2xl z-30 gsap-parallax cursor-pointer" style={{ backgroundColor: '#F3F0E8', color: '#111827' }}
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl" style={{ backgroundColor: '#D9FF00' }}></div>
@@ -204,14 +251,14 @@ export default function Home() {
       </section>
 
       {/* Marquee */}
-      <div className="w-full overflow-hidden bg-navy py-4 border-y-2" style={{ backgroundColor: '#111827', borderColor: '#D9FF00' }}>
-        <div className="flex whitespace-nowrap" style={{ animation: 'marquee 20s linear infinite' }}>
-           {[...Array(10)].map((_, i) => (
+      <div className="w-full overflow-hidden bg-navy py-6 border-y-2 group" style={{ backgroundColor: '#111827', borderColor: '#D9FF00' }}>
+        <div className="flex whitespace-nowrap group-hover:[animation-play-state:paused]" style={{ animation: 'marquee 15s linear infinite' }}>
+           {[...Array(6)].map((_, i) => (
              <div key={i} className="flex items-center mx-4">
-               <span className="text-2xl font-black" style={{ color: '#D9FF00' }}>NO HIDDEN FEES</span>
-               <span className="mx-4 text-white text-2xl">•</span>
-               <span className="text-2xl font-black text-white">GET PAID INSTANTLY</span>
-               <span className="mx-4 text-white text-2xl">•</span>
+               <span className="text-5xl md:text-6xl font-black" style={{ color: '#D9FF00' }}>NO HIDDEN FEES</span>
+               <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
+               <span className="text-5xl md:text-6xl font-black text-white">GET PAID INSTANTLY</span>
+               <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
              </div>
            ))}
         </div>
@@ -224,33 +271,143 @@ export default function Home() {
       `}} />
 
       {/* 3. Create events fast Section */}
-      <section className="py-32 px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center gap-16" style={{ backgroundColor: '#2856E8' }}>
-        <div className="w-full lg:w-1/2 flex justify-center">
+      <section className="py-32 px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center gap-16 relative" style={{ backgroundColor: '#2856E8' }}>
+        <div className="w-full lg:w-1/2 flex justify-center relative">
+          
+          <motion.div 
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-10 right-0 lg:right-10 bg-white rounded-2xl p-4 shadow-xl z-20 hidden sm:flex items-center gap-3"
+          >
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+            <div className="text-sm font-bold text-gray-900">New RSVP — Priya just joined</div>
+          </motion.div>
+
+          <motion.div 
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute bottom-10 left-0 lg:left-10 bg-[#D9FF00] rounded-full px-5 py-2 shadow-xl z-20 hidden sm:flex items-center gap-2"
+          >
+            <div className="text-sm font-bold text-gray-900">5 min setup</div>
+          </motion.div>
+
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
-            className="w-[300px] h-[600px] rounded-[40px] border-8 shadow-2xl bg-white relative overflow-hidden"
+            className="w-[300px] h-[600px] rounded-[40px] border-8 shadow-2xl bg-white relative overflow-hidden flex flex-col"
             style={{ borderColor: '#111827' }}
           >
-            <div className="absolute top-0 w-full h-6 flex justify-center pt-2">
+            <div className="absolute top-0 w-full h-6 flex justify-center pt-2 z-50">
               <div className="w-20 h-4 rounded-full" style={{ backgroundColor: '#111827' }}></div>
             </div>
-            <div className="mt-12 px-4 space-y-4">
-              <div className="h-48 rounded-2xl w-full" style={{ backgroundColor: '#D9FF00' }}></div>
-              <div className="h-8 w-3/4 rounded-lg bg-gray-100"></div>
-              <div className="h-4 w-1/2 rounded-lg bg-gray-100"></div>
-              <div className="pt-4 space-y-2">
-                <div className="h-12 w-full rounded-xl bg-gray-100 flex items-center px-4 gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gray-300"></div>
-                  <div className="h-4 w-1/3 rounded bg-gray-200"></div>
-                </div>
-                <div className="h-12 w-full rounded-xl bg-gray-100 flex items-center px-4 gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gray-300"></div>
-                  <div className="h-4 w-1/4 rounded bg-gray-200"></div>
-                </div>
-              </div>
+            
+            <div className="flex-1 mt-8 relative">
+              <AnimatePresence mode="wait">
+                {phoneStep === 0 && (
+                  <motion.div 
+                    key="step0"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="absolute inset-0 flex flex-col px-4 pt-4 pb-16"
+                  >
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">←</div>
+                      <div className="font-bold text-gray-900">New Event</div>
+                    </div>
+                    <div className="h-32 rounded-2xl w-full flex items-center justify-center font-bold text-sm text-[#111827]" style={{ backgroundColor: '#D9FF00' }}>
+                      Event Cover
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm font-bold text-gray-800">Design Drink & Draw</div>
+                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Thu, June 12 · 7PM</div>
+                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Brooklyn, NY</div>
+                    </div>
+                    <div className="mt-auto">
+                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]" style={{ backgroundColor: '#D9FF00' }}>Next →</div>
+                    </div>
+                  </motion.div>
+                )}
+                {phoneStep === 1 && (
+                  <motion.div 
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="absolute inset-0 flex flex-col px-4 pt-4 pb-16"
+                  >
+                    <div className="font-bold text-gray-900 text-lg mb-6 mt-2">Ticket Setup</div>
+                    <div className="flex gap-3 mb-6">
+                      <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent relative">
+                        <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                        <div className="font-bold text-sm text-gray-800">Free</div>
+                      </div>
+                      <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent opacity-50">
+                        <div className="font-bold text-sm text-gray-800">Paid</div>
+                        <div className="text-xs font-bold mt-1 bg-white px-2 rounded-md">$25</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between bg-gray-100 p-3 rounded-xl mb-auto">
+                      <div className="text-sm font-bold text-gray-800">Guest Limit</div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">-</div>
+                        <div className="font-bold text-gray-900">50</div>
+                        <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">+</div>
+                      </div>
+                    </div>
+                    <div className="mt-auto">
+                      <motion.div 
+                        animate={{ scale: [1, 1.02, 1] }} 
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]" 
+                        style={{ backgroundColor: '#D9FF00' }}
+                      >
+                        Publish Event
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+                {phoneStep === 2 && (
+                  <motion.div 
+                    key="step2"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="absolute inset-0 flex flex-col items-center px-4 pt-12 pb-16 text-center"
+                  >
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
+                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+                      style={{ backgroundColor: '#D9FF00' }}
+                    >
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </motion.div>
+                    <div className="font-black text-2xl text-gray-900 mb-1">Your event is live!</div>
+                    <div className="text-sm font-medium text-gray-500 mb-8">34 people notified</div>
+                    
+                    <div className="grid grid-cols-5 gap-1 p-2 bg-gray-100 rounded-xl mb-auto">
+                      {Array.from({ length: 25 }).map((_, i) => (
+                        <div key={i} className={`w-4 h-4 rounded-sm ${i % 2 === 0 ? 'bg-[#111827]' : 'bg-white'}`}></div>
+                      ))}
+                    </div>
+
+                    <div className="mt-auto w-full">
+                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-white bg-[#111827]">Share Link</div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+            
+            <div className="absolute bottom-4 left-0 w-full flex justify-center gap-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={`w-2 h-2 rounded-full ${phoneStep === i ? 'bg-[#D9FF00]' : 'bg-gray-300'}`} />
+              ))}
+            </div>
+
           </motion.div>
         </div>
         <div className="w-full lg:w-1/2 space-y-8">
@@ -263,9 +420,11 @@ export default function Home() {
             No design skills needed. Just drop in your details, pick a vibe, and you're ready to share your page with the world.
           </p>
           <Link href="/signup">
-            <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold border-none mt-4 hover:scale-105 transition-transform" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
-              Build your page
-            </Button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block mt-4">
+              <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold border-none" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
+                Build your page
+              </Button>
+            </motion.div>
           </Link>
         </div>
       </section>
@@ -338,42 +497,50 @@ export default function Home() {
            <div className="absolute inset-0 grid grid-cols-2 gap-4 p-4">
              {/* Card 1 */}
              <div className="metric-card bg-[#6F7450] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg relative overflow-hidden h-full">
-                <div className="text-5xl font-black tracking-tighter">12,847</div>
-                <div className="text-lg font-bold opacity-90 mt-2">RSVPs Collected</div>
-                <svg className="absolute bottom-0 right-0 w-full opacity-30" viewBox="0 0 200 50" preserveAspectRatio="none">
-                  <path d="M0,50 Q50,0 100,50 T200,50 L200,100 L0,100 Z" fill="currentColor"/>
-                </svg>
+                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                  <div className="text-5xl font-black tracking-tighter">12,847</div>
+                  <div className="text-lg font-bold opacity-90 mt-2">RSVPs Collected</div>
+                  <svg className="absolute bottom-0 right-0 w-full opacity-30 pointer-events-none" viewBox="0 0 200 50" preserveAspectRatio="none">
+                    <path d="M0,50 Q50,0 100,50 T200,50 L200,100 L0,100 Z" fill="currentColor"/>
+                  </svg>
+                </motion.div>
              </div>
              {/* Card 2 */}
-             <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] flex flex-col justify-between shadow-lg h-full" style={{ marginTop: '40px' }}>
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinelinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
-                </div>
-                <div>
-                  <div className="text-5xl font-black tracking-tighter">4,291</div>
-                  <div className="text-lg font-bold opacity-80 mt-1">Tickets Sold</div>
-                </div>
+             <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] shadow-lg h-full" style={{ marginTop: '40px' }}>
+                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
+                  </div>
+                  <div>
+                    <div className="text-5xl font-black tracking-tighter">4,291</div>
+                    <div className="text-lg font-bold opacity-80 mt-1">Tickets Sold</div>
+                  </div>
+                </motion.div>
              </div>
              {/* Card 3 */}
-             <div className="metric-card bg-[#FF00B7] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg h-full" style={{ marginTop: '-20px' }}>
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold">$</span>
-                </div>
-                <div>
-                  <div className="text-5xl font-black tracking-tighter">68%</div>
-                  <div className="text-lg font-bold opacity-90 mt-1">Return Guests</div>
-                </div>
+             <div className="metric-card bg-[#FF00B7] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '-20px' }}>
+                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold">$</span>
+                  </div>
+                  <div>
+                    <div className="text-5xl font-black tracking-tighter">68%</div>
+                    <div className="text-lg font-bold opacity-90 mt-1">Return Guests</div>
+                  </div>
+                </motion.div>
              </div>
              {/* Card 4 */}
-             <div className="metric-card bg-[#111827] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg h-full" style={{ marginTop: '20px' }}>
-                <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full">
-                  <div className="w-4 h-4 bg-[#00B7FF] rounded-full"></div>
-                  <span className="text-xs font-bold">New York, USA</span>
-                </div>
-                <div>
-                  <div className="text-5xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>3,200</div>
-                  <div className="text-lg font-bold opacity-80 mt-1">Communities</div>
-                </div>
+             <div className="metric-card bg-[#111827] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '20px' }}>
+                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                  <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full">
+                    <div className="w-4 h-4 bg-[#00B7FF] rounded-full"></div>
+                    <span className="text-xs font-bold">New York, USA</span>
+                  </div>
+                  <div>
+                    <div className="text-5xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>3,200</div>
+                    <div className="text-lg font-bold opacity-80 mt-1">Communities</div>
+                  </div>
+                </motion.div>
              </div>
            </div>
         </div>
@@ -384,9 +551,11 @@ export default function Home() {
           <p className="text-xl lg:text-2xl text-gray-600 font-medium max-w-lg">
             Get real-time insights into ticket sales, RSVP sources, and attendee retention. Know exactly what your community wants.
           </p>
-          <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold mt-4" style={{ backgroundColor: '#111827', color: 'white' }}>
-            View Demo Dashboard
-          </Button>
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block mt-4">
+            <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold" style={{ backgroundColor: '#111827', color: 'white' }}>
+              View Demo Dashboard
+            </Button>
+          </motion.div>
         </div>
       </section>
 
@@ -398,22 +567,22 @@ export default function Home() {
              
              {/* Mini Cards Row */}
              <div className="flex justify-center gap-4">
-                <div className="w-24 h-32 bg-white rounded-2xl shadow-xl p-2 flex flex-col gap-2 transform -rotate-6">
+                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-white rounded-2xl shadow-xl p-2 flex flex-col gap-2 transform -rotate-6 cursor-pointer">
                   <div className="w-full h-16 bg-[#2856E8] rounded-xl"></div>
                   <div className="h-2 w-full bg-gray-200 rounded-full"></div>
                   <div className="h-2 w-2/3 bg-gray-200 rounded-full"></div>
-                </div>
-                <div className="w-24 h-32 bg-[#111827] rounded-2xl shadow-xl p-3 flex flex-col gap-3 transform translate-y-4">
+                </motion.div>
+                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#111827] rounded-2xl shadow-xl p-3 flex flex-col gap-3 transform translate-y-4 cursor-pointer">
                   <div className="h-2 w-full bg-gray-700 rounded-full"></div>
                   <div className="h-2 w-5/6 bg-gray-700 rounded-full"></div>
                   <div className="h-2 w-full bg-gray-700 rounded-full"></div>
                   <div className="h-2 w-4/6 bg-gray-700 rounded-full"></div>
-                </div>
-                <div className="w-24 h-32 bg-[#FF00B7] rounded-2xl shadow-xl p-2 flex items-center justify-center transform rotate-6">
+                </motion.div>
+                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#FF00B7] rounded-2xl shadow-xl p-2 flex items-center justify-center transform rotate-6 cursor-pointer">
                   <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center pl-1">
                     <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-[#FF00B7] border-b-4 border-b-transparent"></div>
                   </div>
-                </div>
+                </motion.div>
              </div>
 
              <h3 className="gsap-heading text-4xl lg:text-5xl font-black leading-tight text-center" style={{ color: '#111827' }}>
@@ -422,18 +591,18 @@ export default function Home() {
 
              {/* Stacked Cards */}
              <div className="relative h-40 flex justify-center mt-12">
-               <div className="absolute w-40 h-16 bg-[#00B7FF] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform -rotate-12 -translate-x-12">
+               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#00B7FF] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform -rotate-12 -translate-x-12 cursor-pointer z-10">
                  <span>T-Shirt</span><span>$30</span>
-               </div>
-               <div className="absolute w-40 h-16 bg-[#79001B] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform -rotate-3 -translate-y-4">
+               </motion.div>
+               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#79001B] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform -rotate-3 -translate-y-4 cursor-pointer z-20">
                  <span>VIP Pass</span><span>$40</span>
-               </div>
-               <div className="absolute w-40 h-16 bg-[#D9FF00] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform rotate-6 translate-x-10 translate-y-2">
+               </motion.div>
+               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#D9FF00] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform rotate-6 translate-x-10 translate-y-2 cursor-pointer z-30">
                  <span>Poster</span><span>$20</span>
-               </div>
-               <div className="absolute w-40 h-16 bg-[#58268C] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform rotate-12 translate-x-24 -translate-y-6">
+               </motion.div>
+               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#58268C] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform rotate-12 translate-x-24 -translate-y-6 cursor-pointer z-40">
                  <span>Sticker</span><span>$10</span>
-               </div>
+               </motion.div>
              </div>
 
            </div>
@@ -491,58 +660,89 @@ export default function Home() {
          <div className="w-full overflow-x-auto pb-10 hide-scrollbar flex justify-center">
            <div className="flex px-10 gap-4 min-w-max items-center justify-center mx-auto">
              
-             <div className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2" style={{ backgroundColor: '#00B7FF' }}>
+             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2 cursor-pointer transition-colors" style={{ backgroundColor: '#00B7FF' }}>
                <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
                  DJ Emilio — Artist
                </div>
-             </div>
+             </motion.div>
              
-             <div className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4" style={{ backgroundColor: '#111827' }}>
+             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4 cursor-pointer transition-colors" style={{ backgroundColor: '#111827' }}>
                <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
                  Studio Clay — Brand
                </div>
-             </div>
+             </motion.div>
 
-             <div className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3" style={{ backgroundColor: '#E8C8EC' }}>
+             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3 cursor-pointer transition-colors" style={{ backgroundColor: '#E8C8EC' }}>
                <div className="mt-8 w-20 h-20 bg-white rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2856E8' }}>BFC</div>
                <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
                  Brooklyn FC — Sports
                </div>
-             </div>
+             </motion.div>
 
-             <div className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2" style={{ backgroundColor: '#D2B48C' }}>
+             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2 cursor-pointer transition-colors" style={{ backgroundColor: '#D2B48C' }}>
                <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
                  Aisha K. — Creator
                </div>
-             </div>
+             </motion.div>
 
-             <div className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1" style={{ backgroundColor: '#D9FF00' }}>
+             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF00' }}>
                <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
                  The Archive — Club
                </div>
-             </div>
+             </motion.div>
 
            </div>
          </div>
          <style dangerouslySetInnerHTML={{__html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}} />
       </section>
 
-      {/* D. Testimonial Section */}
-      <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white">
-        <div className="relative w-48 h-48 mb-12">
-          {/* Abstract background shape */}
-          <div className="absolute top-0 right-0 w-32 h-40 rounded-full transform rotate-45 mix-blend-multiply" style={{ backgroundColor: '#FF6B00' }}></div>
-          {/* Foreground portrait shape */}
-          <div className="absolute bottom-0 left-0 w-40 h-48 rounded-[40px] transform -rotate-12 shadow-2xl z-10" style={{ backgroundColor: '#2D4A22' }}></div>
-        </div>
+      {/* D. Testimonial Section - Auto-playing Carousel */}
+      <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white relative overflow-hidden">
         
-        <div className="max-w-4xl space-y-8">
-          <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: '#111827' }}>
-            "Meow turned our random meetups into a thriving creative community."
-          </h2>
-          <p className="text-xl font-bold opacity-60" style={{ color: '#111827' }}>
-            — Marcus Chen, Co-founder of The Archive Collective
-          </p>
+        <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}>
+          <div className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">←</div>
+        </div>
+        <div className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev + 1) % TESTIMONIALS.length)}>
+          <div className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">→</div>
+        </div>
+
+        <div className="max-w-4xl min-h-[400px] flex flex-col items-center justify-center relative">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={testimonialStep}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center"
+            >
+              <div className="relative w-48 h-48 mb-12">
+                {/* Abstract background shape */}
+                <div className="absolute top-0 right-0 w-32 h-40 rounded-full transform rotate-45 mix-blend-multiply" style={{ backgroundColor: TESTIMONIALS[testimonialStep].bg2 }}></div>
+                {/* Foreground portrait shape */}
+                <div className="absolute bottom-0 left-0 w-40 h-48 rounded-[40px] transform -rotate-12 shadow-2xl z-10" style={{ backgroundColor: TESTIMONIALS[testimonialStep].bg1 }}></div>
+              </div>
+              
+              <div className="space-y-8">
+                <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: '#111827' }}>
+                  "{TESTIMONIALS[testimonialStep].quote}"
+                </h2>
+                <p className="text-xl font-bold opacity-60" style={{ color: '#111827' }}>
+                  — {TESTIMONIALS[testimonialStep].author}
+                </p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="flex gap-2 mt-12">
+          {TESTIMONIALS.map((_, i) => (
+            <div 
+              key={i} 
+              onClick={() => setTestimonialStep(i)}
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all ${testimonialStep === i ? 'bg-[#111827]' : 'bg-gray-200 hover:bg-gray-300'}`} 
+            />
+          ))}
         </div>
       </section>
 
@@ -553,7 +753,7 @@ export default function Home() {
             Common Questions
           </h2>
           
-          <Accordion type="single" collapsible className="space-y-4 w-full">
+          <Accordion type="single" collapsible className="space-y-4 w-full" onValueChange={setActiveFaq}>
             {[
               "How is Meow different from Eventbrite?",
               "Is Meow free to use?",
@@ -561,7 +761,11 @@ export default function Home() {
               "How do communities work on Meow?",
               "Can I embed my Meow page elsewhere?"
             ].map((q, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="bg-white rounded-3xl px-6 border-none">
+              <AccordionItem 
+                key={i} 
+                value={`item-${i}`} 
+                className={`bg-white rounded-3xl px-6 border-none transition-all duration-300 ${activeFaq === `item-${i}` ? 'border-l-4 border-l-[#D9FF00]' : 'border-l-4 border-l-transparent'}`}
+              >
                 <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline" style={{ color: '#111827' }}>
                   {q}
                 </AccordionTrigger>
@@ -582,7 +786,7 @@ export default function Home() {
           </h2>
           <p className="text-2xl text-white/80 font-medium">Claim your link and host your first event today.</p>
           
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 max-w-xl mx-auto mt-8 bg-white p-2 rounded-full shadow-2xl">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 max-w-xl mx-auto mt-8 bg-white p-2 rounded-full shadow-2xl transition-all focus-within:border-2 focus-within:border-[#D9FF00]">
             <div className="flex-1 flex items-center px-4 w-full sm:w-auto">
               <span className="text-xl font-bold opacity-40 mr-1" style={{ color: '#111827' }}>meow.so/</span>
               <input 
@@ -593,9 +797,11 @@ export default function Home() {
               />
             </div>
             <Link href="/signup">
-              <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold w-full sm:w-auto" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
-                Claim Link
-              </Button>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+                <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold w-full sm:w-auto" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
+                  Claim Link
+                </Button>
+              </motion.div>
             </Link>
           </div>
         </div>
@@ -648,7 +854,9 @@ export default function Home() {
                 <Button variant="ghost" className="rounded-full font-bold">Log in</Button>
               </Link>
               <Link href="/signup">
-                <Button className="rounded-full font-bold px-8" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>Get Started</Button>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                  <Button className="rounded-full font-bold px-8 border-none" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>Get Started</Button>
+                </motion.div>
               </Link>
             </div>
           </div>
