@@ -1,20 +1,57 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SiGoogle } from "react-icons/si";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login, loginWithGoogle } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await login(email, password);
+      toast({ title: "Welcome back!", description: "You have successfully logged in." });
+      setLocation("/");
+    } catch (error: any) {
+      toast({ 
+        title: "Login failed", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      setLocation("/");
+    } catch (error: any) {
+      toast({ 
+        title: "Google login failed", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">
       {/* Navbar overlay */}
       <div className="absolute top-6 left-6 z-50 flex items-center gap-6">
-        <Link href="/" className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>
-          MEOW
+        <Link href="/" className="flex items-center">
+          <img src="/meow logo.png" alt="MEOW" className="h-12 md:h-16 w-auto object-contain" />
         </Link>
         <Link href="/" className="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity" style={{ color: '#111827' }}>
           Back to home
@@ -39,20 +76,6 @@ export default function Login() {
           <div className="h-3 w-3/4 bg-black/10 rounded-full mb-2"></div>
           <div className="h-3 w-2/3 bg-black/10 rounded-full"></div>
         </motion.div>
-        
-        <motion.div 
-          animate={{ y: [0, 15, 0], rotate: [0, 3, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute left-10 bottom-1/4 w-56 p-5 rounded-3xl shadow-xl hidden md:block" style={{ backgroundColor: '#2856E8' }}
-        >
-           <div className="flex gap-3 items-center">
-             <div className="w-10 h-10 rounded-full" style={{ backgroundColor: '#D9FF00' }}></div>
-             <div>
-               <div className="h-3 w-20 bg-white/40 rounded-full mb-2"></div>
-               <div className="h-2 w-16 bg-white/20 rounded-full"></div>
-             </div>
-           </div>
-        </motion.div>
       </div>
 
       {/* Right side */}
@@ -63,7 +86,7 @@ export default function Login() {
             <p className="text-gray-500 font-medium">Enter your details to access your account.</p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleLogin}>
             <div className="space-y-4">
               <Input 
                 type="email" 
@@ -71,6 +94,7 @@ export default function Login() {
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <Input 
                 type="password" 
@@ -78,6 +102,7 @@ export default function Login() {
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             
@@ -85,8 +110,13 @@ export default function Login() {
               <span className="text-sm font-bold cursor-pointer" style={{ color: '#2856E8' }}>Forgot password?</span>
             </div>
 
-            <Button type="submit" className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02]" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-              Log in
+            <Button 
+              type="submit" 
+              className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02]" 
+              style={{ backgroundColor: '#111827', color: '#D9FF00' }}
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log in"}
             </Button>
           </form>
 
@@ -96,7 +126,12 @@ export default function Login() {
             <div className="flex-grow border-t border-gray-200"></div>
           </div>
 
-          <Button variant="outline" className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50">
+          <Button 
+            variant="outline" 
+            className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
             <SiGoogle className="mr-2 h-5 w-5" />
             Continue with Google
           </Button>
@@ -114,3 +149,4 @@ export default function Login() {
     </div>
   );
 }
+

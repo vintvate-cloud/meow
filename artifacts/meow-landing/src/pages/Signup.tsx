@@ -1,21 +1,60 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SiGoogle } from "react-icons/si";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { updateProfile } from "firebase/auth";
 
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signup, loginWithGoogle } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const userCredential = await signup(email, password);
+      await updateProfile(userCredential.user, { displayName: name });
+      toast({ title: "Account created!", description: "Welcome to Meow." });
+      setLocation("/");
+    } catch (error: any) {
+      toast({ 
+        title: "Signup failed", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      setLocation("/");
+    } catch (error: any) {
+      toast({ 
+        title: "Google login failed", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">
       {/* Navbar overlay */}
       <div className="absolute top-6 left-6 z-50 flex items-center gap-6">
-        <Link href="/" className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>
-          MEOW
+        <Link href="/" className="flex items-center">
+          <img src="/meow logo.png" alt="MEOW" className="h-12 md:h-16 w-auto object-contain" />
         </Link>
         <Link href="/" className="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity text-white md:text-navy">
           <span className="hidden md:inline" style={{ color: '#111827' }}>Back to home</span>
@@ -55,7 +94,7 @@ export default function Signup() {
             <p className="text-gray-500 font-medium">Join thousands of creators hosting events on Meow.</p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleSignup}>
             <div className="space-y-4">
               <Input 
                 type="text" 
@@ -63,6 +102,7 @@ export default function Signup() {
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
               />
               <Input 
                 type="email" 
@@ -70,6 +110,7 @@ export default function Signup() {
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <Input 
                 type="password" 
@@ -77,11 +118,17 @@ export default function Signup() {
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
 
-            <Button type="submit" className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02] mt-4" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
-              Create account
+            <Button 
+              type="submit" 
+              className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02] mt-4" 
+              style={{ backgroundColor: '#D9FF00', color: '#111827' }}
+              disabled={loading}
+            >
+              {loading ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
@@ -91,7 +138,12 @@ export default function Signup() {
             <div className="flex-grow border-t border-gray-200"></div>
           </div>
 
-          <Button variant="outline" className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50">
+          <Button 
+            variant="outline" 
+            className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
             <SiGoogle className="mr-2 h-5 w-5" />
             Continue with Google
           </Button>
@@ -113,3 +165,4 @@ export default function Signup() {
     </div>
   );
 }
+

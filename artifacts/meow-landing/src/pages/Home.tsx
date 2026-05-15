@@ -131,12 +131,12 @@ export default function Home() {
   return (
     <div ref={containerRef} className="min-h-screen w-full font-sans bg-background text-foreground overflow-x-hidden">
       
-      {/* 1. Floating Navbar */}
       <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-full max-w-[1200px] z-50 px-4">
-        <div className="nav-inner bg-white text-navy flex items-center justify-between px-6 py-4 rounded-full shadow-lg border border-gray-100 transition-all">
-          <Link href="/" className="text-2xl font-black tracking-tight" style={{ color: '#111827' }}>
-            MEOW
+        <div className="nav-inner bg-white text-navy flex items-center justify-between px-6 h-16 md:h-20 rounded-full shadow-lg border border-gray-100 transition-all">
+          <Link href="/" className="relative flex items-center h-full w-32 md:w-48">
+            <img src="/meow logo.png" alt="MEOW" className="absolute left-0 h-24 md:h-32 w-auto object-contain transition-transform hover:scale-110" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }} />
           </Link>
+
           <div className="flex items-center gap-2">
             <Link href="/login">
               <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: '#111827' }}>Log in</Button>
@@ -848,7 +848,9 @@ export default function Home() {
             </div>
           </div>
           <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <Link href="/" className="text-4xl font-black tracking-tight" style={{ color: '#111827' }}>MEOW</Link>
+            <Link href="/" className="flex items-center">
+              <img src="/meow logo.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
+            </Link>
             <div className="flex gap-4">
               <Link href="/login">
                 <Button variant="ghost" className="rounded-full font-bold">Log in</Button>
