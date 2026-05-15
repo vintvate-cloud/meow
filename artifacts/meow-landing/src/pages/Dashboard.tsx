@@ -1,7 +1,10 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useEffect, useState } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { 
   LogOut, 
   Plus, 
@@ -10,11 +13,38 @@ import {
   BarChart3, 
   Settings, 
   Search,
-  Bell
+  Bell,
+  ExternalLink
 } from "lucide-react";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (!user) return;
+      try {
+        const q = query(
+          collection(db, "events"), 
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const eventData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEvents(eventData);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [user]);
+
+  const totalRsvps = events.reduce((acc, event) => acc + (event.rsvpCount || 0), 0);
 
   return (
     <div className="min-h-screen bg-[#F3F0E8] flex font-sans">
@@ -52,7 +82,9 @@ export default function Dashboard() {
             <h1 className="text-4xl font-black tracking-tight" style={{ color: '#111827' }}>
               Welcome back, {user?.displayName?.split(' ')[0] || 'Creator'}!
             </h1>
-            <p className="text-gray-500 font-medium mt-1">You have 3 events coming up this week.</p>
+            <p className="text-gray-500 font-medium mt-1">
+              {events.length === 0 ? "You haven't created any events yet." : `You have ${events.length} active events.`}
+            </p>
           </div>
           
           <div className="flex items-center gap-4 w-full md:w-auto">
@@ -67,18 +99,20 @@ export default function Dashboard() {
             <Button className="w-12 h-12 rounded-full p-0 bg-white border border-gray-100 text-gray-400 hover:text-navy">
               <Bell className="w-5 h-5" />
             </Button>
-            <Button className="rounded-full h-12 px-6 font-bold shadow-xl border-none hidden md:flex" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-              <Plus className="w-5 h-5 mr-2" />
-              Create Event
-            </Button>
+            <Link href="/create-event">
+              <Button className="rounded-full h-12 px-6 font-bold shadow-xl border-none hidden md:flex" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
+                <Plus className="w-5 h-5 mr-2" />
+                Create Event
+              </Button>
+            </Link>
           </div>
         </header>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <StatCard label="Total RSVPs" value="1,284" change="+12%" color="#2856E8" />
-          <StatCard label="Ticket Sales" value="$4,590" change="+8%" color="#79001B" />
-          <StatCard label="Member Growth" value="245" change="+15%" color="#00B7FF" />
+          <StatCard label="Total RSVPs" value={totalRsvps.toLocaleString()} change="+0%" color="#2856E8" />
+          <StatCard label="Active Events" value={events.length.toString()} change="+0%" color="#79001B" />
+          <StatCard label="Member Growth" value="0" change="+0%" color="#00B7FF" />
         </div>
 
         {/* Content Grid */}
@@ -91,28 +125,28 @@ export default function Dashboard() {
             </div>
             
             <div className="space-y-4">
-              <EventCard 
-                title="Design Drink & Draw" 
-                date="Thu, Jun 12 · 7:00 PM" 
-                rsvps={42} 
-                status="Active"
-                color="#D9FF00"
-              />
-              <EventCard 
-                title="Brooklyn Pottery Club" 
-                date="Sat, Jun 14 · 2:00 PM" 
-                rsvps={128} 
-                status="Sold Out"
-                color="#E8C8EC"
-              />
-              <EventCard 
-                title="Indie Music Night" 
-                date="Fri, Jun 20 · 9:00 PM" 
-                rsvps={85} 
-                status="Active"
-                color="#2856E8"
-                dark
-              />
+              {loading ? (
+                <div className="p-12 text-center font-bold opacity-20">Loading events...</div>
+              ) : events.length === 0 ? (
+                <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
+                  <p className="text-gray-400 font-bold">You don't have any events yet.</p>
+                  <Link href="/create-event">
+                    <Button variant="outline" className="rounded-full font-bold">Start your first one</Button>
+                  </Link>
+                </div>
+              ) : (
+                events.map(event => (
+                  <EventCard 
+                    key={event.id}
+                    id={event.id}
+                    title={event.title} 
+                    date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 
+                    rsvps={event.rsvpCount || 0} 
+                    status="Active"
+                    color={event.color}
+                  />
+                ))
+              )}
             </div>
           </div>
 
@@ -120,18 +154,20 @@ export default function Dashboard() {
           <div className="space-y-6">
             <h2 className="text-2xl font-black">Quick Actions</h2>
             <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 space-y-4">
+              <Link href="/create-event">
+                <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold justify-start">
+                  <Plus className="w-5 h-5 mr-3" /> Create new event
+                </Button>
+              </Link>
               <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold justify-start">
-                <Plus className="w-5 h-5 mr-3" /> Add new ticket type
-              </Button>
-              <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold justify-start">
-                <Users className="w-5 h-5 mr-3" /> Invite co-host
+                <Users className="w-5 h-5 mr-3" /> Manage communities
               </Button>
               
               <div className="pt-4">
                 <div className="bg-[#D9FF00]/10 p-6 rounded-2xl border border-[#D9FF00]/20">
                   <div className="font-black text-sm mb-2" style={{ color: '#111827' }}>PRO TIP</div>
-                  <p className="text-sm font-medium opacity-70 mb-4">Adding a cover photo increases RSVP rates by up to 40%.</p>
-                  <Button size="sm" className="rounded-full font-bold bg-[#111827] text-[#D9FF00]">Add Cover</Button>
+                  <p className="text-sm font-medium opacity-70 mb-4">Sharing your link on Twitter increases visibility by 2x.</p>
+                  <Button size="sm" className="rounded-full font-bold bg-[#111827] text-[#D9FF00]">Share Profile</Button>
                 </div>
               </div>
             </div>
@@ -139,9 +175,11 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <Button className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl md:hidden z-30" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-        <Plus className="w-8 h-8" />
-      </Button>
+      <Link href="/create-event">
+        <Button className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl md:hidden z-30" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
+          <Plus className="w-8 h-8" />
+        </Button>
+      </Link>
     </div>
   );
 }
@@ -168,19 +206,24 @@ function StatCard({ label, value, change, color }: any) {
   );
 }
 
-function EventCard({ title, date, rsvps, status, color, dark = false }: any) {
+function EventCard({ id, title, date, rsvps, status, color, dark = false }: any) {
+  const [, setLocation] = useLocation();
+  
   return (
     <motion.div 
       whileHover={{ scale: 1.01, x: 4 }}
+      onClick={() => setLocation(`/e/${id}`)}
       className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group cursor-pointer"
     >
       <div className="flex items-center gap-6">
         <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-black" style={{ backgroundColor: color, color: dark ? 'white' : '#111827' }}>
-          <div className="text-xs opacity-60">JUN</div>
-          <div className="text-xl">12</div>
+          <div className="text-[10px] opacity-60 uppercase">{date.split(' ')[0]}</div>
+          <div className="text-xl">{date.split(' ')[1]}</div>
         </div>
         <div>
-          <h4 className="text-xl font-black">{title}</h4>
+          <h4 className="text-xl font-black group-hover:text-navy transition-colors flex items-center gap-2">
+            {title} <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-40" />
+          </h4>
           <div className="text-sm font-medium text-gray-400">{date}</div>
         </div>
       </div>
@@ -197,3 +240,4 @@ function EventCard({ title, date, rsvps, status, color, dark = false }: any) {
     </motion.div>
   );
 }
+

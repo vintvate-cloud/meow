@@ -8,6 +8,8 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
+import CreateEvent from "@/pages/CreateEvent";
+import EventDetails from "@/pages/EventDetails";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -30,7 +32,6 @@ function ProtectedRoute({ component: Component, path }: { component: any, path: 
 
 function Router() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
 
   return (
     <Switch>
@@ -40,10 +41,13 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
+      <ProtectedRoute path="/create-event" component={CreateEvent} />
+      <Route path="/e/:id" component={EventDetails} />
       <Route component={NotFound} />
     </Switch>
   );
 }
+
 
 function App() {
   return (
