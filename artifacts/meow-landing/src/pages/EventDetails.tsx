@@ -6,7 +6,9 @@ import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -14,7 +16,9 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [rsvpDone, setRsvpDone] = useState(false);
+  const [rsvpId, setRsvpId] = useState("");
   const [email, setEmail] = useState("");
+  const [customResponses, setCustomResponses] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,7 +39,19 @@ export default function EventDetails() {
       }
     };
     fetchEvent();
-  }, [id]);
+  }, [id, toast]);
+
+  useEffect(() => {
+    // Initialize custom responses state when event loads
+    if (event?.customFields) {
+      const initial: Record<string, string> = {};
+      event.customFields.forEach((field: any) => {
+        initial[field.label] = "";
+      });
+      setCustomResponses(initial);
+    }
+  }, [event]);
+
 
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +60,16 @@ export default function EventDetails() {
 
     try {
       // 1. Add to RSVPs collection
-      await addDoc(collection(db, "events", id, "rsvps"), {
+      const rsvpDoc = await addDoc(collection(db, "events", id, "rsvps"), {
         email,
+        customResponses,
         createdAt: serverTimestamp(),
+        checkedIn: false,
+        confirmationSent: false
       });
+
+      setRsvpId(rsvpDoc.id);
+
 
       // 2. Increment count on event doc
       await updateDoc(doc(db, "events", id), {
@@ -62,6 +84,7 @@ export default function EventDetails() {
       setRsvpLoading(false);
     }
   };
+
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
@@ -158,21 +181,39 @@ export default function EventDetails() {
                   <p className="text-gray-500 font-medium">RSVP now to get location details and event updates.</p>
                   
                   <form onSubmit={handleRSVP} className="space-y-4">
-                    <Input 
-                      placeholder="Enter your email" 
-                      className="h-14 rounded-2xl border-2 font-bold" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Email Address</label>
+                      <Input 
+                        placeholder="Enter your email" 
+                        className="h-14 rounded-2xl border-2 font-bold" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    {event.customFields?.map((field: any, idx: number) => (
+                      <div key={idx} className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">{field.label}</label>
+                        <Input 
+                          placeholder={field.placeholder} 
+                          className="h-14 rounded-2xl border-2 font-bold" 
+                          value={customResponses[field.label] || ""}
+                          onChange={(e) => setCustomResponses({ ...customResponses, [field.label]: e.target.value })}
+                          required={field.required}
+                        />
+                      </div>
+                    ))}
+
                     <Button 
                       disabled={rsvpLoading}
-                      className="w-full h-14 rounded-2xl font-black text-lg shadow-xl border-none" 
+                      className="w-full h-14 rounded-2xl font-black text-lg shadow-xl border-none pt-1" 
                       style={{ backgroundColor: '#111827', color: event.color }}
                     >
                       {rsvpLoading ? "Joining..." : "RSVP Now"}
                     </Button>
                   </form>
+
                   
                   <div className="pt-4 flex justify-center">
                     <button className="flex items-center gap-2 text-sm font-black opacity-40 hover:opacity-100 transition-opacity">
@@ -185,19 +226,34 @@ export default function EventDetails() {
                   key="done"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-[#D9FF00] p-10 rounded-[40px] shadow-2xl text-center space-y-6"
+                  className="bg-white p-10 rounded-[40px] shadow-2xl text-center space-y-6 border-4 border-[#D9FF00]"
                 >
                   <div className="flex justify-center">
-                    <div className="w-20 h-20 bg-[#111827] rounded-full flex items-center justify-center text-[#D9FF00]">
+                    <div className="w-20 h-20 bg-[#D9FF00] rounded-full flex items-center justify-center text-[#111827]">
                       <CheckCircle2 className="w-10 h-10" />
                     </div>
                   </div>
                   <h3 className="text-3xl font-black text-navy leading-tight">You're on the list!</h3>
-                  <p className="text-navy font-bold opacity-70">We've sent a confirmation to your email.</p>
-                  <Button variant="outline" className="w-full h-12 rounded-xl border-2 border-navy text-navy font-bold bg-transparent">
-                    Add to Calendar
+                  
+                  <div className="bg-[#F3F0E8] p-8 rounded-3xl space-y-4">
+                    <p className="text-navy font-bold opacity-70 text-lg">
+                      Your request is <span className="text-[#111827]">pending approval</span> from the host.
+                    </p>
+                    <p className="text-sm font-medium text-gray-500">
+                      You'll receive an email with your unique QR code once the host confirms your attendance.
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={() => setRsvpDone(false)}
+                    variant="outline" 
+                    className="w-full h-12 rounded-xl border-2 border-navy text-navy font-bold bg-transparent"
+                  >
+                    Got it
                   </Button>
                 </motion.div>
+
+
               )}
             </AnimatePresence>
             

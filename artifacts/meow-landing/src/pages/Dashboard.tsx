@@ -29,11 +29,12 @@ export default function Dashboard() {
       try {
         const q = query(
           collection(db, "events"), 
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc")
+          where("userId", "==", user.uid)
         );
         const querySnapshot = await getDocs(q);
         const eventData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort in memory to avoid needing a Firestore composite index
+        eventData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setEvents(eventData);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -41,6 +42,7 @@ export default function Dashboard() {
         setLoading(false);
       }
     };
+
     fetchEvents();
   }, [user]);
 
@@ -212,7 +214,8 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false }: any)
   return (
     <motion.div 
       whileHover={{ scale: 1.01, x: 4 }}
-      onClick={() => setLocation(`/e/${id}`)}
+      onClick={() => setLocation(`/manage/${id}`)}
+
       className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group cursor-pointer"
     >
       <div className="flex items-center gap-6">

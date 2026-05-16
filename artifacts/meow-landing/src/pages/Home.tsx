@@ -153,13 +153,21 @@ export default function Home() {
       {/* 2. Hero Section */}
       <section ref={heroRef} className="min-h-[100svh] pt-32 pb-20 px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden" style={{ backgroundColor: '#D9FF00' }}>
         <div className="w-full lg:w-1/2 z-10 space-y-8 max-w-2xl pt-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 border border-black/10 mb-6"
+          >
+            <span className="text-xs font-black tracking-[0.2em] text-[#111827]">MEET • ENGAGE • ORGANIZE • WELCOME</span>
+          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[clamp(4rem,8vw,8rem)] leading-[0.9] font-black tracking-tighter" style={{ color: '#111827' }}
+            className="text-[clamp(3.5rem,7vw,7rem)] leading-[0.9] font-black tracking-tighter" style={{ color: '#111827' }}
           >
-            Host events your people actually remember.
+            The internet was made for communities. So was MEOW.
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -167,7 +175,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="text-xl md:text-2xl max-w-lg font-medium opacity-90" style={{ color: '#111827' }}
           >
-            Create beautiful pages, collect RSVPs effortlessly, and turn one-off moments into thriving communities.
+            Host events, collect RSVPs, spark conversations, and turn moments into movements.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -848,9 +856,14 @@ export default function Home() {
             </div>
           </div>
           <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <Link href="/" className="flex items-center">
-              <img src="/meow logo.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link href="/" className="flex items-center">
+                <img src="/meow logo.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
+              </Link>
+              <div className="text-[10px] font-black tracking-[0.3em] opacity-40 uppercase pl-1">
+                Meet • Engage • Organize • Welcome
+              </div>
+            </div>
             <div className="flex gap-4">
               <Link href="/login">
                 <Button variant="ghost" className="rounded-full font-bold">Log in</Button>

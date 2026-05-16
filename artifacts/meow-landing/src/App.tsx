@@ -10,7 +10,12 @@ import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
 import CreateEvent from "@/pages/CreateEvent";
 import EventDetails from "@/pages/EventDetails";
+import ManageEvent from "@/pages/ManageEvent";
+import QRScanner from "@/pages/QRScanner";
+import Ticket from "@/pages/Ticket";
 import { useEffect } from "react";
+
+
 
 const queryClient = new QueryClient();
 
@@ -42,7 +47,12 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/create-event" component={CreateEvent} />
+      <ProtectedRoute path="/manage/:id" component={ManageEvent} />
+      <ProtectedRoute path="/scan/:id" component={QRScanner} />
       <Route path="/e/:id" component={EventDetails} />
+      <Route path="/ticket/:eventId/:rsvpId" component={Ticket} />
+
+
       <Route component={NotFound} />
     </Switch>
   );

@@ -77,6 +77,8 @@
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
     "firebase": "^12.13.0",
-    "gsap": "^3.15.0"
+    "gsap": "^3.15.0",
+    "html5-qrcode": "^2.3.8",
+    "qrcode.react": "^4.2.0"
   }
 }

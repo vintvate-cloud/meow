@@ -8,7 +8,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users } from "lucide-react";
+
 
 const COLORS = ["#D9FF00", "#E8C8EC", "#2856E8", "#00B7FF", "#79001B", "#58268C"];
 
@@ -26,6 +27,22 @@ export default function CreateEvent() {
     color: COLORS[0],
   });
 
+  const [customFields, setCustomFields] = useState<any[]>([]);
+
+  const addField = () => {
+    setCustomFields([...customFields, { label: "", placeholder: "", required: false }]);
+  };
+
+  const removeField = (index: number) => {
+    setCustomFields(customFields.filter((_, i) => i !== index));
+  };
+
+  const updateField = (index: number, key: string, value: any) => {
+    const updated = [...customFields];
+    updated[index][key] = value;
+    setCustomFields(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -34,11 +51,13 @@ export default function CreateEvent() {
     try {
       const docRef = await addDoc(collection(db, "events"), {
         ...formData,
+        customFields,
         userId: user.uid,
         userName: user.displayName,
         createdAt: serverTimestamp(),
         rsvpCount: 0,
       });
+
 
       toast({
         title: "Event created!",
@@ -142,6 +161,54 @@ export default function CreateEvent() {
               />
             </div>
           </div>
+
+          {/* RSVP Form Builder */}
+          <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-black flex items-center gap-2">
+                <Users className="w-5 h-5" /> RSVP Form Questions
+              </h2>
+              <Button type="button" onClick={addField} variant="outline" className="rounded-full font-bold border-2">
+                <Plus className="w-4 h-4 mr-2" /> Add Question
+              </Button>
+            </div>
+            
+            <p className="text-gray-400 font-medium text-sm">Ask your guests for extra info (e.g., food preferences, instagram handle).</p>
+
+            <div className="space-y-4">
+              {customFields.map((field, index) => (
+                <div key={index} className="p-6 rounded-3xl border-2 border-gray-100 space-y-4 relative group">
+                  <button 
+                    type="button" 
+                    onClick={() => removeField(index)}
+                    className="absolute top-4 right-4 text-red-400 hover:text-red-600 font-bold"
+                  >
+                    Remove
+                  </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input 
+                      placeholder="Question (e.g. What's your IG?)" 
+                      className="rounded-xl border-2" 
+                      value={field.label}
+                      onChange={(e) => updateField(index, 'label', e.target.value)}
+                    />
+                    <Input 
+                      placeholder="Placeholder text" 
+                      className="rounded-xl border-2" 
+                      value={field.placeholder}
+                      onChange={(e) => updateField(index, 'placeholder', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+              {customFields.length === 0 && (
+                <div className="p-8 text-center text-gray-300 font-bold italic border-2 border-dashed rounded-3xl">
+                  Only asking for email by default.
+                </div>
+              )}
+            </div>
+          </div>
+
 
           <Button 
             type="submit" 
