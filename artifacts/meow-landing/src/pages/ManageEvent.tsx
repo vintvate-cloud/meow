@@ -15,8 +15,12 @@ import {
   MoreHorizontal,
   Mail,
   CheckCircle,
-  Clock
+  Clock,
+  Globe,
+  Lock
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function ManageEvent() {
   const { id } = useParams();
@@ -106,6 +110,21 @@ export default function ManageEvent() {
 
 
 
+  const toggleVisibility = async (checked: boolean) => {
+    if (!id) return;
+    try {
+      await updateDoc(doc(db, "events", id), { isPublic: checked });
+      setEvent({ ...event, isPublic: checked });
+      toast({
+        title: checked ? "Event is now Public" : "Event is now Private",
+        description: checked ? "It will show up on the Explore page." : "Only people with the link can access it."
+      });
+    } catch (error: any) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    }
+  };
+
+
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
 
@@ -120,25 +139,25 @@ export default function ManageEvent() {
         </button>
 
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white" style={{ backgroundColor: event.color }}>
+          <div className="w-full">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shrink-0" style={{ backgroundColor: event.color }}>
                 Active Event
               </span>
               <span className="text-sm font-bold text-gray-400">Created {event.createdAt?.toDate().toLocaleDateString()}</span>
             </div>
-            <h1 className="text-5xl font-black tracking-tight" style={{ color: '#111827' }}>{event.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight" style={{ color: '#101828' }}>{event.title}</h1>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link href={`/e/${id}`}>
-              <Button variant="outline" className="rounded-full font-bold border-2 h-12 px-6">
-                <ExternalLink className="w-4 h-4 mr-2" /> View Public Page
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
+            <Link href={`/e/${id}`} className="flex-1 md:flex-none">
+              <Button variant="outline" className="w-full rounded-2xl font-bold border-2 h-12 px-6">
+                <ExternalLink className="w-4 h-4 mr-2" /> View Page
               </Button>
             </Link>
-            <Link href={`/scan/${id}`}>
-              <Button className="rounded-full font-bold h-12 px-6 shadow-lg border-none" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-                <QrCode className="w-4 h-4 mr-2" /> Scan Tickets
+            <Link href={`/scan/${id}`} className="flex-1 md:flex-none">
+              <Button className="w-full rounded-2xl font-bold h-12 px-6 shadow-lg border-none" style={{ backgroundColor: '#101828', color: '#D9FF3F' }}>
+                <QrCode className="w-4 h-4 mr-2" /> Scan
               </Button>
             </Link>
           </div>
@@ -182,13 +201,13 @@ export default function ManageEvent() {
                   </div>
                 ) : (
                   attendees.map((a) => (
-                    <div key={a.id} className="p-6 flex items-center justify-between group hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-[#F3F0E8] flex items-center justify-center font-black text-gray-400">
+                    <div key={a.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="w-12 h-12 rounded-full bg-[#F3F0E8] flex-shrink-0 flex items-center justify-center font-black text-gray-400">
                           {a.email[0].toUpperCase()}
                         </div>
-                        <div>
-                          <div className="font-bold text-lg">{a.email}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-lg truncate">{a.email}</div>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {Object.entries(a.customResponses || {}).map(([label, value]: any) => (
                               <span key={label} className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
@@ -198,7 +217,7 @@ export default function ManageEvent() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-none pt-4 sm:pt-0">
                         {a.checkedIn ? (
                           <span className="flex items-center gap-1 text-green-600 font-bold text-sm bg-green-50 px-3 py-1 rounded-full">
                             <CheckCircle className="w-4 h-4" /> Checked In
@@ -213,28 +232,26 @@ export default function ManageEvent() {
                                 navigator.clipboard.writeText(`${window.location.origin}/ticket/${id}/${a.id}`);
                                 toast({ title: "Ticket link copied!" });
                               }}
-                              className="text-[10px] font-black text-gray-300 hover:text-navy uppercase tracking-widest"
+                              className="text-[10px] font-black text-gray-300 hover:text-[#101828] uppercase tracking-widest"
                             >
                               Copy Ticket Link
                             </button>
                           </div>
-
                         ) : (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => sendIndividualConfirmation(a.id)}
-                            className="rounded-full font-bold border-2 text-xs"
+                            className="rounded-2xl font-black border-2 text-xs h-10 px-4"
                           >
-                            Send Confirmation
+                            Approve Guest
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className="rounded-full opacity-0 group-hover:opacity-100">
+                        <Button variant="ghost" size="icon" className="rounded-full sm:opacity-0 group-hover:opacity-100">
                           <MoreHorizontal className="w-5 h-5" />
                         </Button>
                       </div>
                     </div>
-
                   ))
                 )}
               </div>
@@ -277,6 +294,24 @@ export default function ManageEvent() {
               <Button className="w-full rounded-2xl h-12 font-bold" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
                 Broadcast Message
               </Button>
+            </div>
+
+            <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="font-black flex items-center gap-2">
+                    {event.isPublic ? <Globe className="w-4 h-4 text-blue-500" /> : <Lock className="w-4 h-4 text-gray-400" />}
+                    Visibility
+                  </Label>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    {event.isPublic ? "Public" : "Private"}
+                  </p>
+                </div>
+                <Switch 
+                  checked={event.isPublic} 
+                  onCheckedChange={toggleVisibility} 
+                />
+              </div>
             </div>
           </div>
         </div>

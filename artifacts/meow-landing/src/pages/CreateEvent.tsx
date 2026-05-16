@@ -8,7 +8,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 
 const COLORS = ["#D9FF00", "#E8C8EC", "#2856E8", "#00B7FF", "#79001B", "#58268C"];
@@ -25,6 +27,7 @@ export default function CreateEvent() {
     date: "",
     location: "",
     color: COLORS[0],
+    isPublic: true,
   });
 
   const [customFields, setCustomFields] = useState<any[]>([]);
@@ -158,6 +161,24 @@ export default function CreateEvent() {
                 className="min-h-[150px] rounded-2xl font-medium border-2 p-4"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+
+            <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-lg font-black flex items-center gap-2">
+                  {formData.isPublic ? <Globe className="w-5 h-5 text-blue-500" /> : <Lock className="w-5 h-5 text-gray-400" />}
+                  {formData.isPublic ? "Public Event" : "Private Event"}
+                </Label>
+                <p className="text-sm text-gray-400 font-medium">
+                  {formData.isPublic 
+                    ? "Visible on the Explore page for everyone." 
+                    : "Only people with the link can view this event."}
+                </p>
+              </div>
+              <Switch 
+                checked={formData.isPublic} 
+                onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })} 
               />
             </div>
           </div>

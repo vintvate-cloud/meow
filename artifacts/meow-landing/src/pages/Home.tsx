@@ -594,23 +594,45 @@ export default function Home() {
         <div className="w-full lg:w-1/2 p-12 lg:p-20 flex flex-col justify-center" style={{ backgroundColor: '#E8C8EC' }}>
           <div className="max-w-md mx-auto w-full space-y-16">
 
-            {/* Mini Cards Row */}
-            <div className="flex justify-center gap-4">
-              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-white rounded-2xl shadow-xl p-2 flex flex-col gap-2 transform -rotate-6 cursor-pointer">
-                <div className="w-full h-16 bg-[#2856E8] rounded-xl"></div>
-                <div className="h-2 w-full bg-gray-200 rounded-full"></div>
-                <div className="h-2 w-2/3 bg-gray-200 rounded-full"></div>
-              </motion.div>
-              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#111827] rounded-2xl shadow-xl p-3 flex flex-col gap-3 transform translate-y-4 cursor-pointer">
-                <div className="h-2 w-full bg-gray-700 rounded-full"></div>
-                <div className="h-2 w-5/6 bg-gray-700 rounded-full"></div>
-                <div className="h-2 w-full bg-gray-700 rounded-full"></div>
-                <div className="h-2 w-4/6 bg-gray-700 rounded-full"></div>
-              </motion.div>
-              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#FF00B7] rounded-2xl shadow-xl p-2 flex items-center justify-center transform rotate-6 cursor-pointer">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center pl-1">
-                  <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-[#FF00B7] border-b-4 border-b-transparent"></div>
+            {/* Mini Cards Row - Upgraded to Premium Post Previews */}
+            <div className="flex justify-center gap-6 mb-10">
+              <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-white rounded-3xl shadow-2xl p-3 flex flex-col gap-2 transform -rotate-6 cursor-pointer border border-gray-100 relative overflow-hidden">
+                <div className="w-full h-24 bg-gradient-to-br from-[#2457FF] to-[#00B7FF] rounded-2xl flex items-center justify-center text-white/40">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                 </div>
+                <div className="space-y-1.5 mt-1">
+                  <div className="h-2 w-full bg-gray-100 rounded-full"></div>
+                  <div className="h-2 w-2/3 bg-gray-100 rounded-full"></div>
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center">
+                  <div className="flex -space-x-1.5">
+                    <div className="w-4 h-4 rounded-full bg-gray-200 border border-white"></div>
+                    <div className="w-4 h-4 rounded-full bg-gray-300 border border-white"></div>
+                  </div>
+                  <div className="text-[8px] font-black opacity-30 tracking-tighter">84 RSVPs</div>
+                </div>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-[#101828] rounded-3xl shadow-2xl p-4 flex flex-col gap-3 transform translate-y-4 cursor-pointer border border-white/5">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-[#D9FF3F] rounded-full animate-pulse"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-1.5 w-full bg-white/10 rounded-full"></div>
+                  <div className="h-1.5 w-5/6 bg-white/10 rounded-full"></div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full"></div>
+                </div>
+                <div className="mt-auto flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Live</div>
+                </div>
+              </motion.div>
+
+              <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-[#FF00B7] rounded-3xl shadow-2xl p-3 flex flex-col items-center justify-center transform rotate-6 cursor-pointer relative">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg group">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF00B7" strokeWidth="3" className="ml-1"><path d="M5 3l14 9-14 9V3z"></path></svg>
+                </div>
+                <div className="absolute bottom-4 text-[10px] font-black text-white uppercase tracking-widest">Tutorial</div>
               </motion.div>
             </div>
 
@@ -618,41 +640,83 @@ export default function Home() {
               Share every type of content — events, tickets, video, community updates
             </h3>
 
-            {/* Stacked Cards */}
-            <div className="relative h-40 flex justify-center mt-12 feature-stagger">
-              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#00B7FF] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform -rotate-12 -translate-x-12 cursor-pointer z-10">
-                <span>T-Shirt</span><span>$30</span>
+            {/* Stacked Product Cards - Upgraded with Icons and Depth */}
+            <div className="relative h-48 flex justify-center mt-12 feature-stagger">
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#00B7FF] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] transform -rotate-12 -translate-x-16 cursor-pointer z-10 border-2 border-black/5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase opacity-40">Merch</span>
+                  <span className="text-lg">T-Shirt</span>
+                </div>
+                <span className="text-xl">$30</span>
               </motion.div>
-              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#7A1029] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform -rotate-3 -translate-y-4 cursor-pointer z-20">
-                <span>VIP Pass</span><span>$40</span>
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#7A1029] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-white transform -rotate-3 -translate-y-4 cursor-pointer z-20 border-2 border-white/5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase opacity-40">Ticket</span>
+                  <span className="text-lg">VIP Pass</span>
+                </div>
+                <span className="text-xl">$40</span>
               </motion.div>
-              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#D9FF3F] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform rotate-6 translate-x-10 translate-y-2 cursor-pointer z-30">
-                <span>Poster</span><span>$20</span>
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#D9FF3F] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] transform rotate-6 translate-x-12 translate-y-2 cursor-pointer z-30 border-2 border-black/5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase opacity-40">Digital</span>
+                  <span className="text-lg">Poster</span>
+                </div>
+                <span className="text-xl">$20</span>
               </motion.div>
-              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#7B5EA7] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform rotate-12 translate-x-24 -translate-y-6 cursor-pointer z-40">
-                <span>Sticker</span><span>$10</span>
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#7B5EA7] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-white transform rotate-12 translate-x-28 -translate-y-6 cursor-pointer z-40 border-2 border-white/5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase opacity-40">Access</span>
+                  <span className="text-lg">Sticker</span>
+                </div>
+                <span className="text-xl">$10</span>
               </motion.div>
             </div>
 
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="w-full lg:w-1/2 p-12 lg:p-20 flex justify-center items-center relative overflow-hidden" style={{ backgroundColor: '#2856E8' }}>
-          <div className="relative w-full max-w-[320px] aspect-[9/19] bg-[#F3F0E8] rounded-[40px] border-8 shadow-2xl p-6 z-10" style={{ borderColor: '#111827' }}>
-            <div className="flex flex-col items-center mt-8 space-y-4">
-              <div className="w-24 h-24 bg-[#FF00B7] rounded-full"></div>
-              <h4 className="text-2xl font-black" style={{ color: '#111827' }}>@emilio</h4>
-              <div className="flex gap-2">
-                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
-                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
-                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
+        {/* Right Column - Upgraded Device Mockup */}
+        <div className="w-full lg:w-1/2 p-12 lg:p-20 flex justify-center items-center relative overflow-hidden" style={{ backgroundColor: '#2457FF' }}>
+          <div className="relative w-full max-w-[320px] aspect-[9/19] bg-[#F8F4EC] rounded-[50px] border-[12px] shadow-2xl p-6 z-10 overflow-hidden" style={{ borderColor: '#101828' }}>
+            {/* Status Bar */}
+            <div className="absolute top-0 left-0 right-0 h-10 px-8 flex justify-between items-center z-20">
+              <span className="text-[10px] font-black text-[#101828]">9:41</span>
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 bg-[#101828] rounded-sm opacity-20"></div>
+                <div className="w-3 h-3 bg-[#101828] rounded-sm opacity-20"></div>
+                <div className="w-5 h-2.5 bg-[#101828] rounded-sm opacity-80 mt-0.5"></div>
+              </div>
+            </div>
+            {/* Notch */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#101828] rounded-b-2xl z-30"></div>
+            <div className="flex flex-col items-center mt-12 space-y-4">
+              <div className="w-24 h-24 bg-gradient-to-tr from-[#FF00B7] to-[#7B5EA7] rounded-full shadow-lg border-4 border-white"></div>
+              <div className="text-center">
+                <h4 className="text-2xl font-black flex items-center gap-1 justify-center" style={{ color: '#101828' }}>
+                  @emilio
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#2457FF"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"></path></svg>
+                </h4>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#101828]/40 mt-1">Creator & Artist</div>
+              </div>
+              <div className="flex gap-2 py-2">
+                <div className="w-10 h-10 bg-[#101828]/5 rounded-2xl flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101828" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></div>
+                <div className="w-10 h-10 bg-[#101828]/5 rounded-2xl flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101828" strokeWidth="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></div>
+                <div className="w-10 h-10 bg-[#101828]/5 rounded-2xl flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101828" strokeWidth="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg></div>
               </div>
 
               <div className="w-full space-y-3 mt-4">
-                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Next Show Tickets</div>
-                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Listen to New EP</div>
-                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Merch Store</div>
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                  <span>Next Show Tickets</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                </motion.div>
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                  <span>Listen to New EP</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                </motion.div>
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                  <span>Merch Store</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                </motion.div>
               </div>
             </div>
           </div>
@@ -660,27 +724,27 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 15, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute left-[5%] top-[25%] bg-[#D9FF00] rounded-2xl p-4 shadow-xl z-20 hidden sm:block"
+            className="absolute left-[5%] top-[25%] bg-[#D9FF3F] rounded-2xl p-5 shadow-2xl z-20 hidden sm:block border-2 border-[#101828]/10"
           >
-            <div className="font-black text-xl" style={{ color: '#111827' }}>23</div>
-            <div className="text-sm font-bold opacity-80" style={{ color: '#111827' }}>Emails received</div>
+            <div className="font-black text-2xl text-[#101828]">23</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#101828]/60">Emails received</div>
           </motion.div>
 
           <motion.div
             animate={{ y: [0, -15, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute right-[5%] bottom-[25%] bg-white rounded-2xl p-5 shadow-xl z-20 w-48 hidden sm:block"
+            className="absolute right-[5%] bottom-[25%] bg-white rounded-3xl p-6 shadow-2xl z-20 w-56 hidden sm:block border border-gray-100"
           >
-            <div className="text-sm font-bold mb-2" style={{ color: '#111827' }}>Add a question</div>
-            <div className="w-full h-8 bg-gray-100 rounded mb-2"></div>
-            <Button className="w-full h-8 text-xs font-bold bg-[#2856E8] text-white rounded">Save</Button>
+            <div className="text-xs font-black uppercase tracking-widest text-[#101828]/40 mb-3">RSVP Questions</div>
+            <div className="w-full h-10 bg-gray-50 rounded-xl mb-3 flex items-center px-3 text-[10px] font-bold text-gray-400">Your favorite artist?</div>
+            <Button className="w-full h-10 text-xs font-black bg-[#2457FF] text-white rounded-xl shadow-lg shadow-blue-500/20">Save Questions</Button>
           </motion.div>
         </div>
       </section>
 
       {/* B. Social Proof Section with Portrait Cards */}
       <section className="py-24 overflow-hidden" style={{ backgroundColor: '#F3F0E8' }}>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -694,25 +758,25 @@ export default function Home() {
 
         <div className="w-full overflow-x-auto pb-10 hide-scrollbar flex justify-center">
           <div className="flex px-10 gap-4 min-w-max items-center justify-center mx-auto">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2 cursor-pointer transition-colors" style={{ backgroundColor: '#2457FF' }}
             >
               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
                 DJ Emilio — Artist
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4 cursor-pointer transition-colors" style={{ backgroundColor: '#101828' }}
             >
               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
@@ -720,12 +784,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3 cursor-pointer transition-colors" style={{ backgroundColor: '#7A1029' }}
             >
               <div className="mt-8 w-20 h-20 bg-white rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2457FF' }}>BFC</div>
@@ -734,12 +798,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
             >
               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
@@ -747,12 +811,12 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
             >
               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
@@ -816,7 +880,7 @@ export default function Home() {
 
       {/* E. FAQ Section */}
       <section className="py-32 px-6 lg:px-12" style={{ backgroundColor: '#79001B' }}>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -942,38 +1006,38 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="mt-20 overflow-hidden py-10">
-          <div className="flex justify-center items-end gap-1 px-4 max-w-[1400px] mx-auto">
+        <div className="mt-10 sm:mt-20 overflow-hidden py-5 sm:py-10">
+          <div className="flex justify-center items-end gap-0 px-1 sm:px-4 max-w-[1400px] mx-auto">
             {[
               { letter: 'M', word: 'Meet' },
               { letter: 'E', word: 'Engage' },
               { letter: 'O', word: 'Organize', image: '/meowimage.png' },
               { letter: 'W', word: 'Welcome' }
             ].map((item, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
-                initial={{ y: 200, opacity: 0 }}
+                initial={{ y: 100, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col items-center px-2 relative"
+                className="flex flex-col items-center px-0.5 sm:px-2 relative"
               >
                 <div className="relative flex items-center justify-center">
-                  <span className="text-[25vw] font-black tracking-tighter leading-none text-[#101828] select-none">
+                  <span className="text-[24vw] sm:text-[25vw] font-black tracking-tighter leading-none text-[#101828] select-none">
                     {item.letter}
                   </span>
                   {item.image && (
-                    <motion.img 
+                    <motion.img
                       initial={{ scale: 0, opacity: 0 }}
                       whileInView={{ scale: 1, opacity: 1 }}
                       transition={{ delay: 0.5, duration: 0.8, type: "spring" }}
-                      src={item.image} 
-                      className="absolute w-[16vw] h-[16vw] object-cover rounded-full border-4 border-[#101828] bg-[#D9FF3F]" 
+                      src={item.image}
+                      className="absolute w-[15vw] sm:w-[16vw] h-[15vw] sm:h-[16vw] object-cover rounded-full border-2 sm:border-4 border-[#101828] bg-[#D9FF3F]"
                       alt="Cat"
                     />
                   )}
                 </div>
-                <span className="text-[1.5vw] md:text-[1vw] font-black tracking-[0.2em] uppercase text-[#101828]/60 mt-[-2vw]">
+                <span className="text-[2.2vw] sm:text-[1vw] font-black tracking-tighter sm:tracking-[0.2em] uppercase text-[#101828]/60 mt-[-1vw] sm:mt-[-2vw]">
                   {item.word}
                 </span>
               </motion.div>

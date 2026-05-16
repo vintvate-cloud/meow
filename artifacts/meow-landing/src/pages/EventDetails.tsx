@@ -99,13 +99,13 @@ export default function EventDetails() {
           <div className="absolute bottom-20 right-20 w-96 h-96 rounded-[80px] rotate-45 border-8 border-white"></div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 flex flex-col justify-end">
+        <div className="absolute bottom-0 left-0 w-full p-6 md:p-16 flex flex-col justify-end">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="max-w-4xl"
           >
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white drop-shadow-sm leading-[0.9]">
+            <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white drop-shadow-sm leading-[0.9]">
               {event.title}
             </h1>
           </motion.div>
@@ -115,34 +115,34 @@ export default function EventDetails() {
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Left Column: Info */}
         <div className="lg:col-span-2 space-y-12">
-          <div className="flex flex-wrap gap-8 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap gap-6 sm:gap-8 items-start sm:items-center">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex-shrink-0 flex items-center justify-center shadow-sm">
                 <Calendar className="w-6 h-6" style={{ color: event.color }} />
               </div>
               <div>
-                <div className="text-xs font-black uppercase tracking-widest text-gray-400">Date & Time</div>
-                <div className="font-bold text-lg">{new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' })}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Date & Time</div>
+                <div className="font-bold text-base sm:text-lg">{new Date(event.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex-shrink-0 flex items-center justify-center shadow-sm">
                 <MapPin className="w-6 h-6" style={{ color: event.color }} />
               </div>
               <div>
-                <div className="text-xs font-black uppercase tracking-widest text-gray-400">Location</div>
-                <div className="font-bold text-lg">{event.location}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Location</div>
+                <div className="font-bold text-base sm:text-lg">{event.location}</div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex-shrink-0 flex items-center justify-center shadow-sm">
                 <Users className="w-6 h-6" style={{ color: event.color }} />
               </div>
               <div>
-                <div className="text-xs font-black uppercase tracking-widest text-gray-400">RSVPs</div>
-                <div className="font-bold text-lg">{event.rsvpCount || 0} Attending</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">RSVPs</div>
+                <div className="font-bold text-base sm:text-lg">{event.rsvpCount || 0} Attending</div>
               </div>
             </div>
           </div>

@@ -14,7 +14,8 @@ import {
   Settings,
   Search,
   Bell,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -50,17 +51,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F3F0E8] flex font-sans">
-      {/* Sidebar */}
-      <aside className="w-20 md:w-64 bg-white border-r border-gray-100 flex flex-col p-4 z-20 transition-all">
+      {/* Sidebar (Desktop only) */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col p-6 z-20 sticky top-0 h-screen">
         <div className="flex items-center gap-3 px-2 mb-12">
           <Link href="/" className="flex items-center">
             <img src="/meow logo.png" alt="MEOW" className="h-10 w-auto object-contain" />
           </Link>
-          <span className="font-black text-2xl tracking-tighter hidden md:block">MEOW</span>
+          <span className="font-black text-2xl tracking-tighter" style={{ color: '#101828' }}>MEOW</span>
         </div>
 
         <nav className="flex-1 space-y-2">
           <NavItem icon={<Calendar className="w-5 h-5" />} label="Events" active />
+          <Link href="/explore">
+            <NavItem icon={<Globe className="w-5 h-5" />} label="Explore" />
+          </Link>
           <NavItem icon={<Users className="w-5 h-5" />} label="Communities" />
           <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Analytics" />
           <NavItem icon={<Settings className="w-5 h-5" />} label="Settings" />
@@ -72,37 +76,59 @@ export default function Dashboard() {
             className="flex items-center gap-3 w-full p-3 rounded-2xl hover:bg-red-50 text-red-600 transition-colors group"
           >
             <LogOut className="w-5 h-5" />
-            <span className="font-bold hidden md:block">Log out</span>
+            <span className="font-bold">Log out</span>
           </button>
         </div>
       </aside>
 
+      {/* Bottom Nav (Mobile only) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <NavItem icon={<Calendar className="w-6 h-6" />} label="Events" active isMobile />
+        <Link href="/explore">
+          <NavItem icon={<Globe className="w-6 h-6" />} label="Explore" isMobile />
+        </Link>
+        <Link href="/create-event">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center -translate-y-6 shadow-2xl border-4 border-[#F3F0E8] transition-transform active:scale-90" style={{ backgroundColor: '#101828' }}>
+            <Plus className="w-8 h-8 text-[#D9FF3F]" />
+          </div>
+        </Link>
+        <NavItem icon={<Users className="w-6 h-6" />} label="Groups" isMobile />
+        <NavItem icon={<Settings className="w-6 h-6" />} label="Settings" isMobile />
+      </nav>
+
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-12 overflow-y-auto">
+      <main className="flex-1 p-6 md:p-12 pb-32 md:pb-12 overflow-y-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight" style={{ color: '#111827' }}>
-              Welcome back, {user?.displayName?.split(' ')[0] || 'Creator'}!
-            </h1>
-            <p className="text-gray-500 font-medium mt-1">
-              {events.length === 0 ? "You haven't created any events yet." : `You have ${events.length} active events.`}
-            </p>
+          <div className="w-full flex justify-between items-center md:block">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight" style={{ color: '#101828' }}>
+                Hey, {user?.displayName?.split(' ')[0] || 'Creator'}!
+              </h1>
+              <p className="text-gray-500 font-medium mt-1 text-sm md:text-base">
+                {events.length === 0 ? "Let's build something." : `${events.length} active events`}
+              </p>
+            </div>
+            <div className="md:hidden">
+              <button onClick={() => logout()} className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="relative flex-1 md:flex-initial">
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search events..."
-                className="bg-white border border-gray-100 rounded-full h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF00]"
+                placeholder="Search..."
+                className="bg-white border border-gray-100 rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all"
               />
             </div>
-            <Button className="w-12 h-12 rounded-full p-0 bg-white border border-gray-100 text-gray-400 hover:text-navy">
+            <Button className="w-12 h-12 rounded-2xl p-0 bg-white border border-gray-100 text-gray-400 hover:text-[#101828]">
               <Bell className="w-5 h-5" />
             </Button>
             <Link href="/create-event">
-              <Button className="rounded-full h-12 px-6 font-bold shadow-xl border-none hidden md:flex" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
+              <Button className="rounded-2xl h-12 px-6 font-black shadow-xl border-none hidden md:flex" style={{ backgroundColor: '#101828', color: '#D9FF3F' }}>
                 <Plus className="w-5 h-5 mr-2" />
                 Create Event
               </Button>
@@ -176,21 +202,24 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
-      <Link href="/create-event">
-        <Button className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-2xl md:hidden z-30" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-          <Plus className="w-8 h-8" />
-        </Button>
-      </Link>
     </div>
   );
 }
 
-function NavItem({ icon, label, active = false }: { icon: any, label: string, active?: boolean }) {
+function NavItem({ icon, label, active = false, isMobile = false }: { icon: any, label: string, active?: boolean, isMobile?: boolean }) {
+  if (isMobile) {
+    return (
+      <button className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-[#101828]' : 'text-gray-300'}`}>
+        <div className={active ? 'scale-110' : ''}>{icon}</div>
+        <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
+      </button>
+    );
+  }
+
   return (
-    <button className={`flex items-center gap-3 w-full p-3 rounded-2xl transition-all group ${active ? 'bg-[#D9FF00] text-navy' : 'hover:bg-gray-50 text-gray-400 hover:text-navy'}`}>
+    <button className={`flex items-center gap-3 w-full p-3 rounded-2xl transition-all group ${active ? 'bg-[#D9FF3F] text-[#101828]' : 'hover:bg-gray-50 text-gray-400 hover:text-[#101828]'}`}>
       <div className={active ? '' : 'group-hover:scale-110 transition-transform'}>{icon}</div>
-      <span className={`font-bold hidden md:block ${active ? '' : ''}`}>{label}</span>
+      <span className="font-bold">{label}</span>
     </button>
   );
 }
