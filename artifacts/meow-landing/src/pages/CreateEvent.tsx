@@ -78,7 +78,7 @@ export default function CreateEvent() {
   return (
     <div className="min-h-screen bg-[#F3F0E8] p-6 md:p-12 font-sans">
       <div className="max-w-3xl mx-auto">
-        <button 
+        <button
           onClick={() => setLocation("/dashboard")}
           className="flex items-center gap-2 font-bold text-gray-500 hover:text-navy mb-8 transition-colors"
         >
@@ -172,29 +172,29 @@ export default function CreateEvent() {
                 <Plus className="w-4 h-4 mr-2" /> Add Question
               </Button>
             </div>
-            
+
             <p className="text-gray-400 font-medium text-sm">Ask your guests for extra info (e.g., food preferences, instagram handle).</p>
 
             <div className="space-y-4">
               {customFields.map((field, index) => (
                 <div key={index} className="p-6 rounded-3xl border-2 border-gray-100 space-y-4 relative group">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => removeField(index)}
                     className="absolute top-4 right-4 text-red-400 hover:text-red-600 font-bold"
                   >
                     Remove
                   </button>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input 
-                      placeholder="Question (e.g. What's your IG?)" 
-                      className="rounded-xl border-2" 
+                    <Input
+                      placeholder="Question (e.g. What's your IG?)"
+                      className="rounded-xl border-2"
                       value={field.label}
                       onChange={(e) => updateField(index, 'label', e.target.value)}
                     />
-                    <Input 
-                      placeholder="Placeholder text" 
-                      className="rounded-xl border-2" 
+                    <Input
+                      placeholder="Placeholder text"
+                      className="rounded-xl border-2"
                       value={field.placeholder}
                       onChange={(e) => updateField(index, 'placeholder', e.target.value)}
                     />
@@ -210,8 +210,8 @@ export default function CreateEvent() {
           </div>
 
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading}
             className="w-full h-20 rounded-[32px] text-2xl font-black shadow-2xl transition-transform hover:scale-[1.02] border-none"
             style={{ backgroundColor: '#111827', color: '#D9FF00' }}

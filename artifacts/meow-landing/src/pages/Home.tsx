@@ -106,6 +106,22 @@ export default function Home() {
         });
       });
 
+      // Hero Parallax on mouse move
+      const handleMouseMove = (e: MouseEvent) => {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth - 0.5) * 40;
+        const yPos = (clientY / window.innerHeight - 0.5) * 40;
+
+        gsap.to('.gsap-parallax', {
+          x: (i) => xPos * (i + 1) * 0.5,
+          y: (i) => yPos * (i + 1) * 0.5,
+          duration: 1,
+          ease: "power2.out",
+          overwrite: true
+        });
+      };
+      window.addEventListener('mousemove', handleMouseMove);
+
       // Subtle parallax on feature cards
       gsap.utils.toArray('.gsap-parallax').forEach((card: any, i) => {
         gsap.fromTo(card,
@@ -130,7 +146,7 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="min-h-screen w-full font-sans bg-background text-foreground overflow-x-hidden">
-      
+
       <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-full max-w-[1200px] z-50 px-4">
         <div className="nav-inner bg-white text-navy flex items-center justify-between px-6 h-16 md:h-20 rounded-full shadow-lg border border-gray-100 transition-all">
           <Link href="/" className="relative flex items-center h-full w-32 md:w-48">
@@ -151,33 +167,38 @@ export default function Home() {
       </nav>
 
       {/* 2. Hero Section */}
-      <section ref={heroRef} className="min-h-[100svh] pt-32 pb-20 px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden" style={{ backgroundColor: '#D9FF00' }}>
-        <div className="w-full lg:w-1/2 z-10 space-y-8 max-w-2xl pt-10">
+      <section ref={heroRef} className="min-h-[100svh] pt-32 pb-20 px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden" style={{ backgroundColor: '#D9FF3F' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.1 }}
+          className="w-full lg:w-1/2 z-10 space-y-8 max-w-2xl pt-10"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 border border-black/10 mb-6"
           >
-            <span className="text-xs font-black tracking-[0.2em] text-[#111827]">MEET • ENGAGE • ORGANIZE • WELCOME</span>
+            <span className="text-xs font-black tracking-[0.2em] text-[#101828]">MEET • ENGAGE • ORGANIZE • WELCOME</span>
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[clamp(3.5rem,7vw,7rem)] leading-[0.9] font-black tracking-tighter" style={{ color: '#111827' }}
+            className="text-[clamp(3.5rem,7vw,7rem)] leading-[0.9] font-black tracking-tighter" style={{ color: '#101828' }}
           >
             The internet was made for communities. So was MEOW.
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xl md:text-2xl max-w-lg font-medium opacity-90" style={{ color: '#111827' }}
+            className="text-xl md:text-2xl max-w-lg font-medium opacity-90" style={{ color: '#101828' }}
           >
             Host events, collect RSVPs, spark conversations, and turn moments into movements.
           </motion.p>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
@@ -196,28 +217,27 @@ export default function Home() {
               </Button>
             </motion.div>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
             className="flex items-center gap-3 pt-4"
           >
             <div className="flex -space-x-3">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-[#D9FF00] bg-gray-300 overflow-hidden" style={{ backgroundColor: i%2===0 ? '#E8C8EC' : '#F3F0E8' }} />
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-[#101828] bg-gray-300 overflow-hidden" style={{ backgroundColor: i % 2 === 0 ? '#2457FF' : '#F8F4EC' }} />
               ))}
             </div>
-            <span className="font-bold text-sm" style={{ color: '#111827' }}>10,000+ events hosted this week</span>
+            <span className="font-bold text-sm" style={{ color: '#101828' }}>10,000+ events hosted this week</span>
           </motion.div>
-        </div>
+        </motion.div>
 
         <div className="w-full lg:w-1/2 relative h-[600px] mt-16 lg:mt-0">
-          <motion.div 
-            animate={{ y: [0, -15, 0], rotate: [-2, 0, -2] }}
-            whileHover={{ scale: 1.05, rotate: 0 }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-10 left-10 w-64 p-6 rounded-3xl shadow-2xl z-20 gsap-parallax cursor-pointer" style={{ backgroundColor: '#2856E8', color: 'white' }}
+          <motion.div
+            whileHover={{ y: -10, scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="absolute top-10 left-10 w-64 p-6 rounded-3xl shadow-2xl z-20 gsap-parallax cursor-pointer" style={{ backgroundColor: '#2457FF', color: 'white' }}
           >
             <div className="text-sm font-bold mb-2 opacity-80">TONIGHT</div>
             <div className="text-2xl font-black mb-4 leading-tight">Design Drink & Draw</div>
@@ -227,7 +247,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             animate={{ y: [0, -20, 0], rotate: [2, 1, 2] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
@@ -243,7 +263,7 @@ export default function Home() {
             <Button className="w-full rounded-full h-10 font-bold border-none" style={{ backgroundColor: '#111827', color: '#E8C8EC' }}>Accept Invite</Button>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             animate={{ y: [0, -12, 0], rotate: [-4, -2, -4] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
@@ -261,17 +281,18 @@ export default function Home() {
       {/* Marquee */}
       <div className="w-full overflow-hidden bg-navy py-6 border-y-2 group" style={{ backgroundColor: '#111827', borderColor: '#D9FF00' }}>
         <div className="flex whitespace-nowrap group-hover:[animation-play-state:paused]" style={{ animation: 'marquee 15s linear infinite' }}>
-           {[...Array(6)].map((_, i) => (
-             <div key={i} className="flex items-center mx-4">
-               <span className="text-5xl md:text-6xl font-black" style={{ color: '#D9FF00' }}>NO HIDDEN FEES</span>
-               <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
-               <span className="text-5xl md:text-6xl font-black text-white">GET PAID INSTANTLY</span>
-               <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
-             </div>
-           ))}
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex items-center mx-4">
+              <span className="text-5xl md:text-6xl font-black" style={{ color: '#D9FF00' }}>NO HIDDEN FEES</span>
+              <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
+              <span className="text-5xl md:text-6xl font-black text-white">GET PAID INSTANTLY</span>
+              <span className="mx-6 text-white text-5xl md:text-6xl">•</span>
+            </div>
+          ))}
         </div>
       </div>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes marquee {
           0% { transform: translateX(0%); }
           100% { transform: translateX(-50%); }
@@ -281,8 +302,8 @@ export default function Home() {
       {/* 3. Create events fast Section */}
       <section className="py-32 px-6 lg:px-12 flex flex-col-reverse lg:flex-row items-center gap-16 relative" style={{ backgroundColor: '#2856E8' }}>
         <div className="w-full lg:w-1/2 flex justify-center relative">
-          
-          <motion.div 
+
+          <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-10 right-0 lg:right-10 bg-white rounded-2xl p-4 shadow-xl z-20 hidden sm:flex items-center gap-3"
@@ -291,7 +312,7 @@ export default function Home() {
             <div className="text-sm font-bold text-gray-900">New RSVP — Priya just joined</div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute bottom-10 left-0 lg:left-10 bg-[#D9FF00] rounded-full px-5 py-2 shadow-xl z-20 hidden sm:flex items-center gap-2"
@@ -299,7 +320,7 @@ export default function Home() {
             <div className="text-sm font-bold text-gray-900">5 min setup</div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -309,11 +330,11 @@ export default function Home() {
             <div className="absolute top-0 w-full h-6 flex justify-center pt-2 z-50">
               <div className="w-20 h-4 rounded-full" style={{ backgroundColor: '#111827' }}></div>
             </div>
-            
+
             <div className="flex-1 mt-8 relative">
               <AnimatePresence mode="wait">
                 {phoneStep === 0 && (
-                  <motion.div 
+                  <motion.div
                     key="step0"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -338,7 +359,7 @@ export default function Home() {
                   </motion.div>
                 )}
                 {phoneStep === 1 && (
-                  <motion.div 
+                  <motion.div
                     key="step1"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -365,10 +386,10 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <motion.div 
-                        animate={{ scale: [1, 1.02, 1] }} 
+                      <motion.div
+                        animate={{ scale: [1, 1.02, 1] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]" 
+                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]"
                         style={{ backgroundColor: '#D9FF00' }}
                       >
                         Publish Event
@@ -377,14 +398,14 @@ export default function Home() {
                   </motion.div>
                 )}
                 {phoneStep === 2 && (
-                  <motion.div 
+                  <motion.div
                     key="step2"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     className="absolute inset-0 flex flex-col items-center px-4 pt-12 pb-16 text-center"
                   >
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
@@ -395,7 +416,7 @@ export default function Home() {
                     </motion.div>
                     <div className="font-black text-2xl text-gray-900 mb-1">Your event is live!</div>
                     <div className="text-sm font-medium text-gray-500 mb-8">34 people notified</div>
-                    
+
                     <div className="grid grid-cols-5 gap-1 p-2 bg-gray-100 rounded-xl mb-auto">
                       {Array.from({ length: 25 }).map((_, i) => (
                         <div key={i} className={`w-4 h-4 rounded-sm ${i % 2 === 0 ? 'bg-[#111827]' : 'bg-white'}`}></div>
@@ -409,7 +430,7 @@ export default function Home() {
                 )}
               </AnimatePresence>
             </div>
-            
+
             <div className="absolute bottom-4 left-0 w-full flex justify-center gap-2">
               {[0, 1, 2].map((i) => (
                 <div key={i} className={`w-2 h-2 rounded-full ${phoneStep === i ? 'bg-[#D9FF00]' : 'bg-gray-300'}`} />
@@ -419,7 +440,7 @@ export default function Home() {
           </motion.div>
         </div>
         <div className="w-full lg:w-1/2 space-y-8">
-          <h2 
+          <h2
             className="gsap-heading text-5xl lg:text-7xl font-black leading-none" style={{ color: '#D9FF00' }}
           >
             Create beautiful events in minutes.
@@ -447,10 +468,10 @@ export default function Home() {
             Keep the conversation going long after the party ends. Chat with attendees, share photos, and hype up the next one.
           </p>
         </div>
-        
+
         <div className="relative h-[500px] w-full max-w-5xl mx-auto">
           {/* Decorative collage built with framer-motion staggers */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -465,7 +486,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -479,7 +500,7 @@ export default function Home() {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -502,55 +523,55 @@ export default function Home() {
       {/* A. Analytics Section */}
       <section className="py-32 px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16" style={{ backgroundColor: '#F3F0E8' }}>
         <div className="w-full lg:w-1/2 relative h-[600px] md:h-[500px]">
-           <div className="absolute inset-0 grid grid-cols-2 gap-4 p-4">
-             {/* Card 1 */}
-             <div className="metric-card bg-[#6F7450] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg relative overflow-hidden h-full">
-                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                  <div className="text-5xl font-black tracking-tighter">12,847</div>
-                  <div className="text-lg font-bold opacity-90 mt-2">RSVPs Collected</div>
-                  <svg className="absolute bottom-0 right-0 w-full opacity-30 pointer-events-none" viewBox="0 0 200 50" preserveAspectRatio="none">
-                    <path d="M0,50 Q50,0 100,50 T200,50 L200,100 L0,100 Z" fill="currentColor"/>
-                  </svg>
-                </motion.div>
-             </div>
-             {/* Card 2 */}
-             <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] shadow-lg h-full" style={{ marginTop: '40px' }}>
-                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
-                  </div>
-                  <div>
-                    <div className="text-5xl font-black tracking-tighter">4,291</div>
-                    <div className="text-lg font-bold opacity-80 mt-1">Tickets Sold</div>
-                  </div>
-                </motion.div>
-             </div>
-             {/* Card 3 */}
-             <div className="metric-card bg-[#FF00B7] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '-20px' }}>
-                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold">$</span>
-                  </div>
-                  <div>
-                    <div className="text-5xl font-black tracking-tighter">68%</div>
-                    <div className="text-lg font-bold opacity-90 mt-1">Return Guests</div>
-                  </div>
-                </motion.div>
-             </div>
-             {/* Card 4 */}
-             <div className="metric-card bg-[#111827] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '20px' }}>
-                <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                  <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full">
-                    <div className="w-4 h-4 bg-[#00B7FF] rounded-full"></div>
-                    <span className="text-xs font-bold">New York, USA</span>
-                  </div>
-                  <div>
-                    <div className="text-5xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>3,200</div>
-                    <div className="text-lg font-bold opacity-80 mt-1">Communities</div>
-                  </div>
-                </motion.div>
-             </div>
-           </div>
+          <div className="absolute inset-0 grid grid-cols-2 gap-4 p-4">
+            {/* Card 1 */}
+            <div className="metric-card bg-[#6F7450] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg relative overflow-hidden h-full">
+              <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                <div className="text-5xl font-black tracking-tighter">12,847</div>
+                <div className="text-lg font-bold opacity-90 mt-2">RSVPs Collected</div>
+                <svg className="absolute bottom-0 right-0 w-full opacity-30 pointer-events-none" viewBox="0 0 200 50" preserveAspectRatio="none">
+                  <path d="M0,50 Q50,0 100,50 T200,50 L200,100 L0,100 Z" fill="currentColor" />
+                </svg>
+              </motion.div>
+            </div>
+            {/* Card 2 */}
+            <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] shadow-lg h-full" style={{ marginTop: '40px' }}>
+              <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
+                </div>
+                <div>
+                  <div className="text-5xl font-black tracking-tighter">4,291</div>
+                  <div className="text-lg font-bold opacity-80 mt-1">Tickets Sold</div>
+                </div>
+              </motion.div>
+            </div>
+            {/* Card 3 */}
+            <div className="metric-card bg-[#FF00B7] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '-20px' }}>
+              <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl font-bold">$</span>
+                </div>
+                <div>
+                  <div className="text-5xl font-black tracking-tighter">68%</div>
+                  <div className="text-lg font-bold opacity-90 mt-1">Return Guests</div>
+                </div>
+              </motion.div>
+            </div>
+            {/* Card 4 */}
+            <div className="metric-card bg-[#111827] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '20px' }}>
+              <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
+                <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full">
+                  <div className="w-4 h-4 bg-[#00B7FF] rounded-full"></div>
+                  <span className="text-xs font-bold">New York, USA</span>
+                </div>
+                <div>
+                  <div className="text-5xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>3,200</div>
+                  <div className="text-lg font-bold opacity-80 mt-1">Communities</div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
         <div className="w-full lg:w-1/2 space-y-8 pl-0 lg:pl-10">
           <h2 className="gsap-heading text-5xl lg:text-7xl font-black leading-none" style={{ color: '#111827' }}>
@@ -571,142 +592,181 @@ export default function Home() {
       <section className="flex flex-col lg:flex-row min-h-[800px]">
         {/* Left Column */}
         <div className="w-full lg:w-1/2 p-12 lg:p-20 flex flex-col justify-center" style={{ backgroundColor: '#E8C8EC' }}>
-           <div className="max-w-md mx-auto w-full space-y-16">
-             
-             {/* Mini Cards Row */}
-             <div className="flex justify-center gap-4">
-                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-white rounded-2xl shadow-xl p-2 flex flex-col gap-2 transform -rotate-6 cursor-pointer">
-                  <div className="w-full h-16 bg-[#2856E8] rounded-xl"></div>
-                  <div className="h-2 w-full bg-gray-200 rounded-full"></div>
-                  <div className="h-2 w-2/3 bg-gray-200 rounded-full"></div>
-                </motion.div>
-                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#111827] rounded-2xl shadow-xl p-3 flex flex-col gap-3 transform translate-y-4 cursor-pointer">
-                  <div className="h-2 w-full bg-gray-700 rounded-full"></div>
-                  <div className="h-2 w-5/6 bg-gray-700 rounded-full"></div>
-                  <div className="h-2 w-full bg-gray-700 rounded-full"></div>
-                  <div className="h-2 w-4/6 bg-gray-700 rounded-full"></div>
-                </motion.div>
-                <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#FF00B7] rounded-2xl shadow-xl p-2 flex items-center justify-center transform rotate-6 cursor-pointer">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center pl-1">
-                    <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-[#FF00B7] border-b-4 border-b-transparent"></div>
-                  </div>
-                </motion.div>
-             </div>
+          <div className="max-w-md mx-auto w-full space-y-16">
 
-             <h3 className="gsap-heading text-4xl lg:text-5xl font-black leading-tight text-center" style={{ color: '#111827' }}>
-               Share every type of content — events, tickets, video, community updates
-             </h3>
+            {/* Mini Cards Row */}
+            <div className="flex justify-center gap-4">
+              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-white rounded-2xl shadow-xl p-2 flex flex-col gap-2 transform -rotate-6 cursor-pointer">
+                <div className="w-full h-16 bg-[#2856E8] rounded-xl"></div>
+                <div className="h-2 w-full bg-gray-200 rounded-full"></div>
+                <div className="h-2 w-2/3 bg-gray-200 rounded-full"></div>
+              </motion.div>
+              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#111827] rounded-2xl shadow-xl p-3 flex flex-col gap-3 transform translate-y-4 cursor-pointer">
+                <div className="h-2 w-full bg-gray-700 rounded-full"></div>
+                <div className="h-2 w-5/6 bg-gray-700 rounded-full"></div>
+                <div className="h-2 w-full bg-gray-700 rounded-full"></div>
+                <div className="h-2 w-4/6 bg-gray-700 rounded-full"></div>
+              </motion.div>
+              <motion.div whileHover={{ y: -8, rotate: 0, scale: 1.05 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-24 h-32 bg-[#FF00B7] rounded-2xl shadow-xl p-2 flex items-center justify-center transform rotate-6 cursor-pointer">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center pl-1">
+                  <div className="w-0 h-0 border-t-4 border-t-transparent border-l-6 border-l-[#FF00B7] border-b-4 border-b-transparent"></div>
+                </div>
+              </motion.div>
+            </div>
 
-             {/* Stacked Cards */}
-             <div className="relative h-40 flex justify-center mt-12">
-               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#00B7FF] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform -rotate-12 -translate-x-12 cursor-pointer z-10">
-                 <span>T-Shirt</span><span>$30</span>
-               </motion.div>
-               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#79001B] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform -rotate-3 -translate-y-4 cursor-pointer z-20">
-                 <span>VIP Pass</span><span>$40</span>
-               </motion.div>
-               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#D9FF00] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform rotate-6 translate-x-10 translate-y-2 cursor-pointer z-30">
-                 <span>Poster</span><span>$20</span>
-               </motion.div>
-               <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#58268C] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform rotate-12 translate-x-24 -translate-y-6 cursor-pointer z-40">
-                 <span>Sticker</span><span>$10</span>
-               </motion.div>
-             </div>
+            <h3 className="gsap-heading text-4xl lg:text-5xl font-black leading-tight text-center" style={{ color: '#111827' }}>
+              Share every type of content — events, tickets, video, community updates
+            </h3>
 
-           </div>
+            {/* Stacked Cards */}
+            <div className="relative h-40 flex justify-center mt-12 feature-stagger">
+              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#00B7FF] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform -rotate-12 -translate-x-12 cursor-pointer z-10">
+                <span>T-Shirt</span><span>$30</span>
+              </motion.div>
+              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#7A1029] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform -rotate-3 -translate-y-4 cursor-pointer z-20">
+                <span>VIP Pass</span><span>$40</span>
+              </motion.div>
+              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#D9FF3F] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-navy transform rotate-6 translate-x-10 translate-y-2 cursor-pointer z-30">
+                <span>Poster</span><span>$20</span>
+              </motion.div>
+              <motion.div whileHover={{ y: -6, scale: 1.04 }} className="absolute w-40 h-16 bg-[#7B5EA7] rounded-xl shadow-lg flex items-center justify-between px-4 font-bold text-white transform rotate-12 translate-x-24 -translate-y-6 cursor-pointer z-40">
+                <span>Sticker</span><span>$10</span>
+              </motion.div>
+            </div>
+
+          </div>
         </div>
 
         {/* Right Column */}
         <div className="w-full lg:w-1/2 p-12 lg:p-20 flex justify-center items-center relative overflow-hidden" style={{ backgroundColor: '#2856E8' }}>
-            <div className="relative w-full max-w-[320px] aspect-[9/19] bg-[#F3F0E8] rounded-[40px] border-8 shadow-2xl p-6 z-10" style={{ borderColor: '#111827' }}>
-               <div className="flex flex-col items-center mt-8 space-y-4">
-                 <div className="w-24 h-24 bg-[#FF00B7] rounded-full"></div>
-                 <h4 className="text-2xl font-black" style={{ color: '#111827' }}>@emilio</h4>
-                 <div className="flex gap-2">
-                   <div className="w-8 h-8 bg-black/10 rounded-full"></div>
-                   <div className="w-8 h-8 bg-black/10 rounded-full"></div>
-                   <div className="w-8 h-8 bg-black/10 rounded-full"></div>
-                 </div>
-                 
-                 <div className="w-full space-y-3 mt-4">
-                   <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Next Show Tickets</div>
-                   <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Listen to New EP</div>
-                   <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Merch Store</div>
-                 </div>
-               </div>
+          <div className="relative w-full max-w-[320px] aspect-[9/19] bg-[#F3F0E8] rounded-[40px] border-8 shadow-2xl p-6 z-10" style={{ borderColor: '#111827' }}>
+            <div className="flex flex-col items-center mt-8 space-y-4">
+              <div className="w-24 h-24 bg-[#FF00B7] rounded-full"></div>
+              <h4 className="text-2xl font-black" style={{ color: '#111827' }}>@emilio</h4>
+              <div className="flex gap-2">
+                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
+                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
+                <div className="w-8 h-8 bg-black/10 rounded-full"></div>
+              </div>
+
+              <div className="w-full space-y-3 mt-4">
+                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Next Show Tickets</div>
+                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Listen to New EP</div>
+                <div className="w-full h-14 bg-white rounded-xl shadow-sm flex items-center px-4 font-bold text-sm">Merch Store</div>
+              </div>
             </div>
+          </div>
 
-            <motion.div 
-              animate={{ y: [0, 15, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute left-[5%] top-[25%] bg-[#D9FF00] rounded-2xl p-4 shadow-xl z-20 hidden sm:block"
-            >
-              <div className="font-black text-xl" style={{ color: '#111827' }}>23</div>
-              <div className="text-sm font-bold opacity-80" style={{ color: '#111827' }}>Emails received</div>
-            </motion.div>
+          <motion.div
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-[5%] top-[25%] bg-[#D9FF00] rounded-2xl p-4 shadow-xl z-20 hidden sm:block"
+          >
+            <div className="font-black text-xl" style={{ color: '#111827' }}>23</div>
+            <div className="text-sm font-bold opacity-80" style={{ color: '#111827' }}>Emails received</div>
+          </motion.div>
 
-            <motion.div 
-              animate={{ y: [0, -15, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute right-[5%] bottom-[25%] bg-white rounded-2xl p-5 shadow-xl z-20 w-48 hidden sm:block"
-            >
-              <div className="text-sm font-bold mb-2" style={{ color: '#111827' }}>Add a question</div>
-              <div className="w-full h-8 bg-gray-100 rounded mb-2"></div>
-              <Button className="w-full h-8 text-xs font-bold bg-[#2856E8] text-white rounded">Save</Button>
-            </motion.div>
+          <motion.div
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute right-[5%] bottom-[25%] bg-white rounded-2xl p-5 shadow-xl z-20 w-48 hidden sm:block"
+          >
+            <div className="text-sm font-bold mb-2" style={{ color: '#111827' }}>Add a question</div>
+            <div className="w-full h-8 bg-gray-100 rounded mb-2"></div>
+            <Button className="w-full h-8 text-xs font-bold bg-[#2856E8] text-white rounded">Save</Button>
+          </motion.div>
         </div>
       </section>
 
       {/* B. Social Proof Section with Portrait Cards */}
       <section className="py-24 overflow-hidden" style={{ backgroundColor: '#F3F0E8' }}>
-         <div className="max-w-4xl mx-auto text-center px-6 mb-16">
-           <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight" style={{ color: '#111827' }}>
-             The events platform trusted by <span style={{ color: '#2856E8' }}>creators</span> worldwide.
-           </h2>
-         </div>
-         
-         <div className="w-full overflow-x-auto pb-10 hide-scrollbar flex justify-center">
-           <div className="flex px-10 gap-4 min-w-max items-center justify-center mx-auto">
-             
-             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2 cursor-pointer transition-colors" style={{ backgroundColor: '#00B7FF' }}>
-               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
-                 DJ Emilio — Artist
-               </div>
-             </motion.div>
-             
-             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4 cursor-pointer transition-colors" style={{ backgroundColor: '#111827' }}>
-               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
-                 Studio Clay — Brand
-               </div>
-             </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, staggerChildren: 0.1 }}
+          className="max-w-4xl mx-auto text-center px-6 mb-16"
+        >
+          <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight" style={{ color: '#101828' }}>
+            The events platform trusted by <span style={{ color: '#2457FF' }}>creators</span> worldwide.
+          </h2>
+        </motion.div>
 
-             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3 cursor-pointer transition-colors" style={{ backgroundColor: '#E8C8EC' }}>
-               <div className="mt-8 w-20 h-20 bg-white rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2856E8' }}>BFC</div>
-               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
-                 Brooklyn FC — Sports
-               </div>
-             </motion.div>
+        <div className="w-full overflow-x-auto pb-10 hide-scrollbar flex justify-center">
+          <div className="flex px-10 gap-4 min-w-max items-center justify-center mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2 cursor-pointer transition-colors" style={{ backgroundColor: '#2457FF' }}
+            >
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+                DJ Emilio — Artist
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4 cursor-pointer transition-colors" style={{ backgroundColor: '#101828' }}
+            >
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+                Studio Clay — Brand
+              </div>
+            </motion.div>
 
-             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2 cursor-pointer transition-colors" style={{ backgroundColor: '#D2B48C' }}>
-               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
-                 Aisha K. — Creator
-               </div>
-             </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3 cursor-pointer transition-colors" style={{ backgroundColor: '#7A1029' }}
+            >
+              <div className="mt-8 w-20 h-20 bg-white rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2457FF' }}>BFC</div>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+                Brooklyn FC — Sports
+              </div>
+            </motion.div>
 
-             <motion.div whileHover={{ scale: 1.06, rotate: 0, y: -8 }} className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF00' }}>
-               <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#111827' }}>
-                 The Archive — Club
-               </div>
-             </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
+            >
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+                Aisha K. — Creator
+              </div>
+            </motion.div>
 
-           </div>
-         </div>
-         <style dangerouslySetInnerHTML={{__html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}} />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.06, rotate: 0, y: -8 }} 
+              className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
+            >
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+                The Archive — Club
+              </div>
+            </motion.div>
+          </div>
+        </div>
+        <style dangerouslySetInnerHTML={{ __html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }` }} />
       </section>
 
       {/* D. Testimonial Section - Auto-playing Carousel */}
       <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white relative overflow-hidden">
-        
+
         <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}>
           <div className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">←</div>
         </div>
@@ -716,7 +776,7 @@ export default function Home() {
 
         <div className="max-w-4xl min-h-[400px] flex flex-col items-center justify-center relative">
           <AnimatePresence mode="wait">
-            <motion.div 
+            <motion.div
               key={testimonialStep}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -730,7 +790,7 @@ export default function Home() {
                 {/* Foreground portrait shape */}
                 <div className="absolute bottom-0 left-0 w-40 h-48 rounded-[40px] transform -rotate-12 shadow-2xl z-10" style={{ backgroundColor: TESTIMONIALS[testimonialStep].bg1 }}></div>
               </div>
-              
+
               <div className="space-y-8">
                 <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: '#111827' }}>
                   "{TESTIMONIALS[testimonialStep].quote}"
@@ -745,10 +805,10 @@ export default function Home() {
 
         <div className="flex gap-2 mt-12">
           {TESTIMONIALS.map((_, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               onClick={() => setTestimonialStep(i)}
-              className={`w-3 h-3 rounded-full cursor-pointer transition-all ${testimonialStep === i ? 'bg-[#111827]' : 'bg-gray-200 hover:bg-gray-300'}`} 
+              className={`w-3 h-3 rounded-full cursor-pointer transition-all ${testimonialStep === i ? 'bg-[#111827]' : 'bg-gray-200 hover:bg-gray-300'}`}
             />
           ))}
         </div>
@@ -756,11 +816,17 @@ export default function Home() {
 
       {/* E. FAQ Section */}
       <section className="py-32 px-6 lg:px-12" style={{ backgroundColor: '#79001B' }}>
-        <div className="max-w-3xl mx-auto space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mx-auto space-y-12"
+        >
           <h2 className="gsap-heading text-5xl md:text-6xl font-black text-center text-white">
             Common Questions
           </h2>
-          
+
           <Accordion type="single" collapsible className="space-y-4 w-full" onValueChange={setActiveFaq}>
             {[
               "How is Meow different from Eventbrite?",
@@ -769,9 +835,9 @@ export default function Home() {
               "How do communities work on Meow?",
               "Can I embed my Meow page elsewhere?"
             ].map((q, i) => (
-              <AccordionItem 
-                key={i} 
-                value={`item-${i}`} 
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
                 className={`bg-white rounded-3xl px-6 border-none transition-all duration-300 ${activeFaq === `item-${i}` ? 'border-l-4 border-l-[#D9FF00]' : 'border-l-4 border-l-transparent'}`}
               >
                 <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline" style={{ color: '#111827' }}>
@@ -783,7 +849,7 @@ export default function Home() {
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
+        </motion.div>
       </section>
 
       {/* 10. Final CTA Section */}
@@ -793,14 +859,14 @@ export default function Home() {
             Start your next gathering with Meow.
           </h2>
           <p className="text-2xl text-white/80 font-medium">Claim your link and host your first event today.</p>
-          
+
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2 max-w-xl mx-auto mt-8 bg-white p-2 rounded-full shadow-2xl transition-all focus-within:border-2 focus-within:border-[#D9FF00]">
             <div className="flex-1 flex items-center px-4 w-full sm:w-auto">
               <span className="text-xl font-bold opacity-40 mr-1" style={{ color: '#111827' }}>meow.so/</span>
-              <input 
-                type="text" 
-                placeholder="yourname" 
-                className="text-xl font-bold w-full outline-none bg-transparent" 
+              <input
+                type="text"
+                placeholder="yourname"
+                className="text-xl font-bold w-full outline-none bg-transparent"
                 style={{ color: '#111827' }}
               />
             </div>
@@ -816,12 +882,12 @@ export default function Home() {
       </section>
 
       {/* 11. Footer */}
-      <footer className="p-6" style={{ backgroundColor: '#F3F0E8' }}>
+      <footer className="py-20 px-6" style={{ backgroundColor: '#D9FF3F' }}>
         <div className="max-w-[1200px] mx-auto bg-white rounded-[40px] p-12 shadow-sm border border-gray-100">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#111827' }}>Company</h4>
-              <ul className="space-y-3 text-sm font-medium opacity-70">
+              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Company</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
                 <li>About</li>
                 <li>Careers</li>
                 <li>Blog</li>
@@ -829,8 +895,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#111827' }}>Community</h4>
-              <ul className="space-y-3 text-sm font-medium opacity-70">
+              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Community</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
                 <li>Creators</li>
                 <li>Brands</li>
                 <li>Events</li>
@@ -838,8 +904,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#111827' }}>Support</h4>
-              <ul className="space-y-3 text-sm font-medium opacity-70">
+              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Support</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
                 <li>Help Center</li>
                 <li>Trust & Safety</li>
                 <li>Guidelines</li>
@@ -847,8 +913,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#111827' }}>Legal</h4>
-              <ul className="space-y-3 text-sm font-medium opacity-70">
+              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Legal</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
                 <li>Privacy</li>
                 <li>Terms</li>
                 <li>Cookies</li>
@@ -866,14 +932,52 @@ export default function Home() {
             </div>
             <div className="flex gap-4">
               <Link href="/login">
-                <Button variant="ghost" className="rounded-full font-bold">Log in</Button>
+                <Button variant="outline" className="rounded-full font-bold border-2 border-[#101828] text-[#101828]">Log in</Button>
               </Link>
               <Link href="/signup">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                  <Button className="rounded-full font-bold px-8 border-none" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>Get Started</Button>
+                  <Button className="rounded-full font-bold px-8 border-none" style={{ backgroundColor: '#101828', color: '#D9FF3F' }}>Get Started</Button>
                 </motion.div>
               </Link>
             </div>
+          </div>
+        </div>
+        <div className="mt-20 overflow-hidden py-10">
+          <div className="flex justify-center items-end gap-1 px-4 max-w-[1400px] mx-auto">
+            {[
+              { letter: 'M', word: 'Meet' },
+              { letter: 'E', word: 'Engage' },
+              { letter: 'O', word: 'Organize', image: '/meowimage.png' },
+              { letter: 'W', word: 'Welcome' }
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ y: 200, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-center px-2 relative"
+              >
+                <div className="relative flex items-center justify-center">
+                  <span className="text-[25vw] font-black tracking-tighter leading-none text-[#101828] select-none">
+                    {item.letter}
+                  </span>
+                  {item.image && (
+                    <motion.img 
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 0.8, type: "spring" }}
+                      src={item.image} 
+                      className="absolute w-[16vw] h-[16vw] object-cover rounded-full border-4 border-[#101828] bg-[#D9FF3F]" 
+                      alt="Cat"
+                    />
+                  )}
+                </div>
+                <span className="text-[1.5vw] md:text-[1vw] font-black tracking-[0.2em] uppercase text-[#101828]/60 mt-[-2vw]">
+                  {item.word}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </footer>

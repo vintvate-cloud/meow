@@ -23,10 +23,10 @@ export default function Login() {
       toast({ title: "Welcome back!", description: "You have successfully logged in." });
       setLocation("/");
     } catch (error: any) {
-      toast({ 
-        title: "Login failed", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
@@ -38,10 +38,10 @@ export default function Login() {
       await loginWithGoogle();
       setLocation("/");
     } catch (error: any) {
-      toast({ 
-        title: "Google login failed", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Google login failed",
+        description: error.message,
+        variant: "destructive"
       });
     }
   };
@@ -65,9 +65,9 @@ export default function Login() {
             Welcome back.
           </h1>
         </div>
-        
+
         {/* Floating decorations */}
-        <motion.div 
+        <motion.div
           animate={{ y: [0, -20, 0], rotate: [0, -5, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           className="absolute right-10 top-1/4 w-48 p-4 rounded-3xl shadow-xl hidden md:block" style={{ backgroundColor: '#E8C8EC' }}
@@ -88,31 +88,31 @@ export default function Login() {
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div className="space-y-4">
-              <Input 
-                type="email" 
-                placeholder="Email address" 
+              <Input
+                type="email"
+                placeholder="Email address"
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <Input 
-                type="password" 
-                placeholder="Password" 
+              <Input
+                type="password"
+                placeholder="Password"
                 className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            
+
             <div className="flex justify-between items-center py-2">
               <span className="text-sm font-bold cursor-pointer" style={{ color: '#2856E8' }}>Forgot password?</span>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02]" 
+            <Button
+              type="submit"
+              className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02]"
               style={{ backgroundColor: '#111827', color: '#D9FF00' }}
               disabled={loading}
             >
@@ -126,8 +126,8 @@ export default function Login() {
             <div className="flex-grow border-t border-gray-200"></div>
           </div>
 
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50"
             onClick={handleGoogleLogin}
             disabled={loading}

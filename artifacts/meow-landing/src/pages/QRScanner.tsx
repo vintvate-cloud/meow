@@ -33,7 +33,7 @@ export default function QRScanner() {
         // Check in the attendee
         const rsvpRef = doc(db, "events", id, "rsvps", data.rsvpId);
         const rsvpSnap = await getDoc(rsvpRef);
-        
+
         if (!rsvpSnap.exists()) {
           setResult({ success: false, message: "RSVP not found!" });
         } else if (rsvpSnap.data().checkedIn) {
@@ -42,7 +42,7 @@ export default function QRScanner() {
           await updateDoc(rsvpRef, { checkedIn: true });
           setResult({ success: true, message: "Welcome!", email: rsvpSnap.data().email });
         }
-        
+
         setScanning(false);
         scanner.clear();
       } catch (e) {
@@ -69,7 +69,7 @@ export default function QRScanner() {
   return (
     <div className="min-h-screen bg-[#111827] text-white p-6 md:p-12 font-sans flex flex-col items-center">
       <div className="w-full max-w-md">
-        <button 
+        <button
           onClick={() => setLocation(`/manage/${id}`)}
           className="flex items-center gap-2 font-bold text-gray-400 hover:text-white mb-8 transition-colors"
         >
@@ -84,7 +84,7 @@ export default function QRScanner() {
         <div className="relative">
           <AnimatePresence mode="wait">
             {scanning ? (
-              <motion.div 
+              <motion.div
                 key="scanner"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -93,11 +93,11 @@ export default function QRScanner() {
               >
                 <div id="reader" className="w-full h-full rounded-3xl overflow-hidden"></div>
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                   <div className="w-64 h-64 border-2 border-[#D9FF00] rounded-3xl opacity-50 animate-pulse"></div>
+                  <div className="w-64 h-64 border-2 border-[#D9FF00] rounded-3xl opacity-50 animate-pulse"></div>
                 </div>
               </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
                 key="result"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -108,13 +108,13 @@ export default function QRScanner() {
                     {result?.success ? <CheckCircle className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
                   </div>
                 </div>
-                
+
                 <div>
                   <h2 className="text-4xl font-black leading-tight">{result?.message}</h2>
                   {result?.email && <p className="text-xl font-bold opacity-80 mt-2">{result.email}</p>}
                 </div>
 
-                <Button 
+                <Button
                   onClick={resetScanner}
                   className="w-full h-14 rounded-2xl font-black text-lg bg-black/10 hover:bg-black/20 border-none"
                 >

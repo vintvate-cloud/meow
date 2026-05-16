@@ -6,12 +6,12 @@ import { doc, getDoc, collection, getDocs, query, orderBy, updateDoc } from "fir
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Users, 
-  Send, 
-  QrCode, 
-  ExternalLink, 
+import {
+  ArrowLeft,
+  Users,
+  Send,
+  QrCode,
+  ExternalLink,
   MoreHorizontal,
   Mail,
   CheckCircle,
@@ -34,7 +34,7 @@ export default function ManageEvent() {
         const eventDoc = await getDoc(doc(db, "events", id));
         if (eventDoc.exists()) {
           setEvent({ id: eventDoc.id, ...eventDoc.data() });
-          
+
           const rsvpSnap = await getDocs(query(collection(db, "events", id, "rsvps"), orderBy("createdAt", "desc")));
           setAttendees(rsvpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         }
@@ -50,24 +50,24 @@ export default function ManageEvent() {
   const sendIndividualConfirmation = async (attendeeId: string) => {
     try {
       if (!id) throw new Error("Missing event ID");
-      
+
       const rsvpRef = doc(db, "events", id, "rsvps", attendeeId);
       await updateDoc(rsvpRef, {
         confirmationSent: true
       });
 
       setAttendees(prev => prev.map(a => a.id === attendeeId ? { ...a, confirmationSent: true } : a));
-      
-      toast({ 
-        title: "Approved!", 
+
+      toast({
+        title: "Approved!",
         description: "Guest has been confirmed and ticket generated.",
       });
     } catch (error: any) {
       console.error("Confirmation Error:", error);
-      toast({ 
-        title: "Action Failed", 
+      toast({
+        title: "Action Failed",
         description: error.message || "Could not approve guest. Check your Firebase Rules.",
-        variant: "destructive" 
+        variant: "destructive"
       });
     }
   };
@@ -75,7 +75,7 @@ export default function ManageEvent() {
   const sendConfirmations = async () => {
     const pending = attendees.filter(a => !a.confirmationSent);
     if (pending.length === 0) return;
-    
+
     setSending(true);
     let successCount = 0;
 
@@ -88,16 +88,16 @@ export default function ManageEvent() {
       }));
 
       setAttendees(prev => prev.map(a => ({ ...a, confirmationSent: true })));
-      
+
       toast({
         title: "Bulk Approval Complete",
         description: `Successfully approved ${successCount} guests at once.`,
       });
     } catch (error: any) {
-      toast({ 
-        title: "Bulk Action Partial Failure", 
+      toast({
+        title: "Bulk Action Partial Failure",
         description: `Approved ${successCount} guests before an error occurred.`,
-        variant: "destructive" 
+        variant: "destructive"
       });
     } finally {
       setSending(false);
@@ -112,7 +112,7 @@ export default function ManageEvent() {
   return (
     <div className="min-h-screen bg-[#F3F0E8] p-6 md:p-12 font-sans">
       <div className="max-w-6xl mx-auto">
-        <button 
+        <button
           onClick={() => setLocation("/dashboard")}
           className="flex items-center gap-2 font-bold text-gray-500 hover:text-navy mb-8 transition-colors"
         >
@@ -129,7 +129,7 @@ export default function ManageEvent() {
             </div>
             <h1 className="text-5xl font-black tracking-tight" style={{ color: '#111827' }}>{event.title}</h1>
           </div>
-          
+
           <div className="flex flex-wrap gap-3">
             <Link href={`/e/${id}`}>
               <Button variant="outline" className="rounded-full font-bold border-2 h-12 px-6">
@@ -155,22 +155,22 @@ export default function ManageEvent() {
                     {attendees.length}
                   </span>
                 </h2>
-                <Button 
+                <Button
                   onClick={sendConfirmations}
                   disabled={sending || attendees.length === 0}
-                  variant="outline" 
+                  variant="outline"
                   className="rounded-full font-bold border-2 h-10 px-4 text-sm"
                 >
-                  <Send className="w-4 h-4 mr-2" /> 
+                  <Send className="w-4 h-4 mr-2" />
                   {sending ? "Sending..." : "Send Confirmations"}
                 </Button>
               </div>
-              
+
               <div className="divide-y divide-gray-50">
                 {attendees.length === 0 ? (
                   <div className="p-20 text-center space-y-4">
                     <div className="text-gray-300 font-bold italic">No RSVPs yet. Share your event link to get started!</div>
-                    <Button 
+                    <Button
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/e/${id}`);
                         toast({ title: "Link copied!" });
@@ -208,7 +208,7 @@ export default function ManageEvent() {
                             <span className="flex items-center gap-1 text-blue-600 font-bold text-sm bg-blue-50 px-3 py-1 rounded-full">
                               <Send className="w-4 h-4" /> Confirmed
                             </span>
-                            <button 
+                            <button
                               onClick={() => {
                                 navigator.clipboard.writeText(`${window.location.origin}/ticket/${id}/${a.id}`);
                                 toast({ title: "Ticket link copied!" });
@@ -220,9 +220,9 @@ export default function ManageEvent() {
                           </div>
 
                         ) : (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => sendIndividualConfirmation(a.id)}
                             className="rounded-full font-bold border-2 text-xs"
                           >
@@ -255,7 +255,7 @@ export default function ManageEvent() {
                     <div className="h-full bg-[#D9FF00]" style={{ width: '64%' }}></div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-[#F3F0E8]/50">
                     <div className="text-xs font-bold text-gray-400 uppercase mb-1">Page Views</div>

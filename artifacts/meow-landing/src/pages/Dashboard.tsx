@@ -5,13 +5,13 @@ import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { 
-  LogOut, 
-  Plus, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  Settings, 
+import {
+  LogOut,
+  Plus,
+  Calendar,
+  Users,
+  BarChart3,
+  Settings,
   Search,
   Bell,
   ExternalLink
@@ -28,7 +28,7 @@ export default function Dashboard() {
       if (!user) return;
       try {
         const q = query(
-          collection(db, "events"), 
+          collection(db, "events"),
           where("userId", "==", user.uid)
         );
         const querySnapshot = await getDocs(q);
@@ -67,7 +67,7 @@ export default function Dashboard() {
         </nav>
 
         <div className="pt-4 border-t border-gray-100">
-          <button 
+          <button
             onClick={() => logout()}
             className="flex items-center gap-3 w-full p-3 rounded-2xl hover:bg-red-50 text-red-600 transition-colors group"
           >
@@ -88,13 +88,13 @@ export default function Dashboard() {
               {events.length === 0 ? "You haven't created any events yet." : `You have ${events.length} active events.`}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="relative flex-1 md:flex-initial">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search events..." 
+              <input
+                type="text"
+                placeholder="Search events..."
                 className="bg-white border border-gray-100 rounded-full h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF00]"
               />
             </div>
@@ -125,7 +125,7 @@ export default function Dashboard() {
               <h2 className="text-2xl font-black">Your Events</h2>
               <span className="text-sm font-bold text-gray-400 cursor-pointer hover:text-navy">View all</span>
             </div>
-            
+
             <div className="space-y-4">
               {loading ? (
                 <div className="p-12 text-center font-bold opacity-20">Loading events...</div>
@@ -138,12 +138,12 @@ export default function Dashboard() {
                 </div>
               ) : (
                 events.map(event => (
-                  <EventCard 
+                  <EventCard
                     key={event.id}
                     id={event.id}
-                    title={event.title} 
-                    date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 
-                    rsvps={event.rsvpCount || 0} 
+                    title={event.title}
+                    date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    rsvps={event.rsvpCount || 0}
                     status="Active"
                     color={event.color}
                   />
@@ -164,7 +164,7 @@ export default function Dashboard() {
               <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold justify-start">
                 <Users className="w-5 h-5 mr-3" /> Manage communities
               </Button>
-              
+
               <div className="pt-4">
                 <div className="bg-[#D9FF00]/10 p-6 rounded-2xl border border-[#D9FF00]/20">
                   <div className="font-black text-sm mb-2" style={{ color: '#111827' }}>PRO TIP</div>
@@ -210,9 +210,9 @@ function StatCard({ label, value, change, color }: any) {
 
 function EventCard({ id, title, date, rsvps, status, color, dark = false }: any) {
   const [, setLocation] = useLocation();
-  
+
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ scale: 1.01, x: 4 }}
       onClick={() => setLocation(`/manage/${id}`)}
 
@@ -230,7 +230,7 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false }: any)
           <div className="text-sm font-medium text-gray-400">{date}</div>
         </div>
       </div>
-      
+
       <div className="hidden md:flex items-center gap-8">
         <div className="text-center">
           <div className="text-sm font-black">{rsvps}</div>

@@ -98,9 +98,9 @@ export default function EventDetails() {
           <div className="absolute top-10 left-10 w-64 h-64 rounded-full border-8 border-white"></div>
           <div className="absolute bottom-20 right-20 w-96 h-96 rounded-[80px] rotate-45 border-8 border-white"></div>
         </div>
-        
+
         <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 flex flex-col justify-end">
-          <motion.div 
+          <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="max-w-4xl"
@@ -125,7 +125,7 @@ export default function EventDetails() {
                 <div className="font-bold text-lg">{new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' })}</div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-sm">
                 <MapPin className="w-6 h-6" style={{ color: event.color }} />
@@ -170,7 +170,7 @@ export default function EventDetails() {
           <div className="sticky top-32">
             <AnimatePresence mode="wait">
               {!rsvpDone ? (
-                <motion.div 
+                <motion.div
                   key="form"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -179,13 +179,13 @@ export default function EventDetails() {
                 >
                   <h3 className="text-2xl font-black">Join the list</h3>
                   <p className="text-gray-500 font-medium">RSVP now to get location details and event updates.</p>
-                  
+
                   <form onSubmit={handleRSVP} className="space-y-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">Email Address</label>
-                      <Input 
-                        placeholder="Enter your email" 
-                        className="h-14 rounded-2xl border-2 font-bold" 
+                      <Input
+                        placeholder="Enter your email"
+                        className="h-14 rounded-2xl border-2 font-bold"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -195,9 +195,9 @@ export default function EventDetails() {
                     {event.customFields?.map((field: any, idx: number) => (
                       <div key={idx} className="space-y-1">
                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 pl-1">{field.label}</label>
-                        <Input 
-                          placeholder={field.placeholder} 
-                          className="h-14 rounded-2xl border-2 font-bold" 
+                        <Input
+                          placeholder={field.placeholder}
+                          className="h-14 rounded-2xl border-2 font-bold"
                           value={customResponses[field.label] || ""}
                           onChange={(e) => setCustomResponses({ ...customResponses, [field.label]: e.target.value })}
                           required={field.required}
@@ -205,16 +205,16 @@ export default function EventDetails() {
                       </div>
                     ))}
 
-                    <Button 
+                    <Button
                       disabled={rsvpLoading}
-                      className="w-full h-14 rounded-2xl font-black text-lg shadow-xl border-none pt-1" 
+                      className="w-full h-14 rounded-2xl font-black text-lg shadow-xl border-none pt-1"
                       style={{ backgroundColor: '#111827', color: event.color }}
                     >
                       {rsvpLoading ? "Joining..." : "RSVP Now"}
                     </Button>
                   </form>
 
-                  
+
                   <div className="pt-4 flex justify-center">
                     <button className="flex items-center gap-2 text-sm font-black opacity-40 hover:opacity-100 transition-opacity">
                       <Share2 className="w-4 h-4" /> Share with friends
@@ -222,7 +222,7 @@ export default function EventDetails() {
                   </div>
                 </motion.div>
               ) : (
-                <motion.div 
+                <motion.div
                   key="done"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -234,7 +234,7 @@ export default function EventDetails() {
                     </div>
                   </div>
                   <h3 className="text-3xl font-black text-navy leading-tight">You're on the list!</h3>
-                  
+
                   <div className="bg-[#F3F0E8] p-8 rounded-3xl space-y-4">
                     <p className="text-navy font-bold opacity-70 text-lg">
                       Your request is <span className="text-[#111827]">pending approval</span> from the host.
@@ -244,9 +244,9 @@ export default function EventDetails() {
                     </p>
                   </div>
 
-                  <Button 
+                  <Button
                     onClick={() => setRsvpDone(false)}
-                    variant="outline" 
+                    variant="outline"
                     className="w-full h-12 rounded-xl border-2 border-navy text-navy font-bold bg-transparent"
                   >
                     Got it
@@ -256,7 +256,7 @@ export default function EventDetails() {
 
               )}
             </AnimatePresence>
-            
+
             <Link href="/">
               <p className="text-center mt-8 text-sm font-black opacity-30 hover:opacity-100 cursor-pointer">
                 Powered by MEOW
