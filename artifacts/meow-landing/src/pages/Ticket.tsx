@@ -61,7 +61,7 @@ export default function Ticket() {
         {/* Header Color Strip */}
         <div className="h-32 w-full relative" style={{ backgroundColor: data.event.color }}>
           <div className="absolute -bottom-10 left-10 w-20 h-20 rounded-3xl bg-white flex items-center justify-center shadow-lg">
-            <img src="/meow logo.png" alt="MEOW" className="h-12 w-auto" />
+            <img src="/meowlogo2.png" alt="MEOW" className="h-12 w-auto" />
           </div>
         </div>
 

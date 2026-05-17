@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TopNavbar, BottomNavbar } from "@/components/Navigation";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, User, Bell, Shield, Paintbrush } from "lucide-react";
 import { motion } from "framer-motion";
@@ -34,6 +34,22 @@ export default function Settings() {
       toast({ title: "Update Failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      try {
+        await deleteUser(user);
+        toast({ title: "Account Deleted", description: "Your account has been permanently deleted." });
+      } catch (error: any) {
+        toast({ 
+          title: "Deletion Failed", 
+          description: error.message + " (You may need to log in again to perform this action.)", 
+          variant: "destructive" 
+        });
+      }
     }
   };
 
@@ -121,13 +137,21 @@ export default function Settings() {
               <h2 className="text-xl font-black text-red-600 mb-2">Danger Zone</h2>
               <p className="text-gray-500 font-medium text-sm mb-6">These actions cannot be undone.</p>
               
-              <Button 
-                onClick={() => logout()}
-                variant="outline"
-                className="h-12 rounded-xl px-6 font-bold text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 transition-all flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" /> Log out everywhere
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  onClick={() => logout()}
+                  variant="outline"
+                  className="h-12 rounded-xl px-6 font-bold text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" /> Log out everywhere
+                </Button>
+                <Button 
+                  onClick={handleDeleteAccount}
+                  className="h-12 rounded-xl px-6 font-bold text-white bg-red-600 hover:bg-red-700 border-none transition-all flex items-center justify-center gap-2"
+                >
+                  Delete Account
+                </Button>
+              </div>
             </motion.div>
           </div>
         </div>

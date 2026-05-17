@@ -150,7 +150,7 @@ export default function Home() {
       <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-full max-w-[1200px] z-50 px-4">
         <div className="nav-inner bg-white text-navy flex items-center justify-between px-6 h-16 md:h-20 rounded-full shadow-lg border border-gray-100 transition-all">
           <Link href="/" className="relative flex items-center h-full w-32 md:w-48">
-            <img src="/meow logo.png" alt="MEOW" className="absolute left-0 h-24 md:h-32 w-auto object-contain transition-transform hover:scale-110" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }} />
+            <img src="/meowlogo2.png" alt="MEOW" className="absolute left-0 h-24 md:h-32 w-auto object-contain transition-transform hover:scale-110" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }} />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -988,7 +988,7 @@ export default function Home() {
           <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-2">
               <Link href="/" className="flex items-center">
-                <img src="/meow logo.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
+                <img src="/meowlogo2.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
               </Link>
               <div className="text-[10px] font-black tracking-[0.3em] opacity-40 uppercase pl-1">
                 Meet • Engage • Organize • Welcome

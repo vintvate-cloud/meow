@@ -18,9 +18,17 @@ import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
 import { useEffect } from "react";
 
-
-
 const queryClient = new QueryClient();
+
+// Apply global theme from local storage
+if (typeof window !== 'undefined') {
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
 
 function ProtectedRoute({ component: Component, path }: { component: any, path: string }) {
   const { user, loading } = useAuth();

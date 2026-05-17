@@ -53,35 +53,21 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">
+    <div className="h-screen w-full flex flex-col md:flex-row font-sans overflow-hidden bg-white">
       {/* Navbar overlay */}
-      <div className="absolute top-6 left-6 z-50 flex items-center gap-6">
+      <div className="absolute top-8 left-8 z-50 flex items-center gap-6">
         <Link href="/" className="flex items-center">
-          <img src="/meow logo.png" alt="MEOW" className="h-12 md:h-16 w-auto object-contain" />
-        </Link>
-        <Link href="/" className="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity" style={{ color: '#111827' }}>
-          Back to home
+          <img src="/meowlogo2.png" alt="MEOW" className="h-16 md:h-24 w-auto object-contain" />
         </Link>
       </div>
 
       {/* Left side */}
-      <div className="w-full md:w-1/2 relative overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen" style={{ backgroundColor: '#D9FF00' }}>
-        <div className="relative z-10 w-full max-w-md text-center md:text-left pt-16">
-          <h1 className="text-[clamp(3rem,6vw,6rem)] font-black leading-none italic tracking-tighter" style={{ color: '#111827' }}>
+      <div className="hidden md:flex w-full md:w-1/2 relative overflow-hidden flex-col items-center justify-center p-12 h-full" style={{ backgroundColor: '#D9FF00' }}>
+        <div className="relative z-10 w-full max-w-md text-left">
+          <h1 className="text-[clamp(3.5rem,6vw,5.5rem)] font-black leading-none tracking-tighter" style={{ color: '#111827' }}>
             Welcome back.
           </h1>
         </div>
-
-        {/* Floating decorations */}
-        <motion.div
-          animate={{ y: [0, -20, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-10 top-1/4 w-48 p-4 rounded-3xl shadow-xl hidden md:block" style={{ backgroundColor: '#E8C8EC' }}
-        >
-          <div className="h-4 w-1/2 bg-black/20 rounded-full mb-3"></div>
-          <div className="h-3 w-3/4 bg-black/10 rounded-full mb-2"></div>
-          <div className="h-3 w-2/3 bg-black/10 rounded-full"></div>
-        </motion.div>
       </div>
 
       {/* Right side */}

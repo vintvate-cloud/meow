@@ -39,7 +39,7 @@ export function TopNavbar() {
     <nav className="hidden md:flex w-full bg-white border-b border-gray-100 items-center justify-between px-8 py-4 z-50 sticky top-0 shadow-sm">
       <div className="flex items-center gap-8">
         <Link href="/" className="flex items-center">
-          <img src="/meow logo.png" alt="MEOW Logo" className="h-10 w-auto object-contain hover:scale-105 transition-transform" />
+          <img src="/meowlogo2.png" alt="MEOW Logo" className="h-10 w-auto object-contain hover:scale-105 transition-transform" />
         </Link>
 
         <div className="flex items-center space-x-1">
