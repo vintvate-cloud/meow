@@ -62,7 +62,7 @@ export default function Signup() {
           <img src="/meow logo.png" alt="MEOW" className="h-12 md:h-16 w-auto object-contain" />
         </Link>
         <Link href="/" className="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity text-white md:text-navy">
-          <span className="hidden md:inline" style={{ color: '#111827' }}>Back to home</span>
+          <span className="hidden md:inline" style={{ color: "var(--foreground)" }}>Back to home</span>
           <span className="md:hidden text-white">Back to home</span>
         </Link>
       </div>
@@ -79,7 +79,7 @@ export default function Signup() {
         <motion.div
           animate={{ y: [0, -15, 0], rotate: [0, 4, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-10 top-1/3 w-56 p-4 rounded-3xl shadow-2xl hidden md:block" style={{ backgroundColor: '#F3F0E8' }}
+          className="absolute right-10 top-1/3 w-56 p-4 rounded-3xl shadow-2xl hidden md:block" style={{ backgroundColor: "var(--background)" }}
         >
           <div className="flex gap-2 mb-4">
             <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#79001B' }}></div>
@@ -92,10 +92,10 @@ export default function Signup() {
       </div>
 
       {/* Right side */}
-      <div className="w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-6 sm:p-12">
+      <div className="w-full md:w-1/2 bg-white dark:bg-card dark:text-card-foreground flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center md:text-left">
-            <h2 className="text-4xl font-black tracking-tight" style={{ color: '#111827' }}>Create your account</h2>
+            <h2 className="text-4xl font-black tracking-tight" style={{ color: "var(--foreground)" }}>Create your account</h2>
             <p className="text-gray-500 font-medium">Join thousands of creators hosting events on Meow.</p>
           </div>
 
@@ -104,7 +104,7 @@ export default function Signup() {
               <Input
                 type="text"
                 placeholder="Full name"
-                className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
+                className="rounded-xl h-14 px-4 text-base bg-gray-50 dark:bg-muted border-gray-200 dark:border-border"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -112,7 +112,7 @@ export default function Signup() {
               <Input
                 type="email"
                 placeholder="Email address"
-                className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
+                className="rounded-xl h-14 px-4 text-base bg-gray-50 dark:bg-muted border-gray-200 dark:border-border"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -120,7 +120,7 @@ export default function Signup() {
               <Input
                 type="password"
                 placeholder="Create password"
-                className="rounded-xl h-14 px-4 text-base bg-gray-50 border-gray-200"
+                className="rounded-xl h-14 px-4 text-base bg-gray-50 dark:bg-muted border-gray-200 dark:border-border"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -130,7 +130,7 @@ export default function Signup() {
             <Button
               type="submit"
               className="w-full rounded-full h-14 text-lg font-bold shadow-xl border-none transition-transform hover:scale-[1.02] mt-4"
-              style={{ backgroundColor: '#D9FF00', color: '#111827' }}
+              style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}
               disabled={loading}
             >
               {loading ? "Creating account..." : "Create account"}
@@ -138,14 +138,14 @@ export default function Signup() {
           </form>
 
           <div className="relative flex items-center py-2">
-            <div className="flex-grow border-t border-gray-200"></div>
+            <div className="flex-grow border-t border-gray-200 dark:border-border"></div>
             <span className="flex-shrink-0 mx-4 text-gray-400 font-medium text-sm">or</span>
-            <div className="flex-grow border-t border-gray-200"></div>
+            <div className="flex-grow border-t border-gray-200 dark:border-border"></div>
           </div>
 
           <Button
             variant="outline"
-            className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 hover:bg-gray-50"
+            className="w-full rounded-full h-14 text-base font-bold border-2 border-gray-200 dark:border-border hover:bg-gray-50 dark:bg-muted"
             onClick={handleGoogleLogin}
             disabled={loading}
           >

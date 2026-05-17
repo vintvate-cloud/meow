@@ -129,7 +129,7 @@ export default function ManageEvent() {
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] p-6 md:p-12 font-sans">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background p-6 md:p-12 font-sans">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={() => setLocation("/dashboard")}
@@ -146,7 +146,7 @@ export default function ManageEvent() {
               </span>
               <span className="text-sm font-bold text-gray-400">Created {event.createdAt?.toDate().toLocaleDateString()}</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight" style={{ color: '#101828' }}>{event.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight" style={{ color: "var(--foreground)" }}>{event.title}</h1>
           </div>
 
           <div className="flex flex-wrap gap-3 w-full md:w-auto">
@@ -166,7 +166,7 @@ export default function ManageEvent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Column: Attendees */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-[40px] shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[40px] shadow-sm border border-gray-100 dark:border-border overflow-hidden">
               <div className="p-8 border-b border-gray-50 flex justify-between items-center">
                 <h2 className="text-2xl font-black flex items-center gap-3">
                   <Users className="w-6 h-6" /> Attendees
@@ -201,9 +201,9 @@ export default function ManageEvent() {
                   </div>
                 ) : (
                   attendees.map((a) => (
-                    <div key={a.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:bg-gray-50 transition-colors">
+                    <div key={a.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:bg-gray-50 dark:bg-muted transition-colors">
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className="w-12 h-12 rounded-full bg-[#F3F0E8] flex-shrink-0 flex items-center justify-center font-black text-gray-400">
+                        <div className="w-12 h-12 rounded-full bg-[#F3F0E8] dark:bg-background flex-shrink-0 flex items-center justify-center font-black text-gray-400">
                           {a.email[0].toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -232,7 +232,7 @@ export default function ManageEvent() {
                                 navigator.clipboard.writeText(`${window.location.origin}/ticket/${id}/${a.id}`);
                                 toast({ title: "Ticket link copied!" });
                               }}
-                              className="text-[10px] font-black text-gray-300 hover:text-[#101828] uppercase tracking-widest"
+                              className="text-[10px] font-black text-gray-300 hover:text-[#101828] dark:text-foreground uppercase tracking-widest"
                             >
                               Copy Ticket Link
                             </button>
@@ -260,7 +260,7 @@ export default function ManageEvent() {
 
           {/* Right Column: Stats & Settings */}
           <div className="space-y-6">
-            <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100">
+            <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border">
               <h3 className="text-xl font-black mb-6">Event Performance</h3>
               <div className="space-y-6">
                 <div>
@@ -274,11 +274,11 @@ export default function ManageEvent() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#F3F0E8]/50">
+                  <div className="p-4 rounded-2xl bg-[#F3F0E8] dark:bg-background/50">
                     <div className="text-xs font-bold text-gray-400 uppercase mb-1">Page Views</div>
                     <div className="text-2xl font-black">412</div>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#F3F0E8]/50">
+                  <div className="p-4 rounded-2xl bg-[#F3F0E8] dark:bg-background/50">
                     <div className="text-xs font-bold text-gray-400 uppercase mb-1">Unique Users</div>
                     <div className="text-2xl font-black">128</div>
                   </div>
@@ -291,12 +291,12 @@ export default function ManageEvent() {
                 <Mail className="w-5 h-5" style={{ color: '#D9FF00' }} /> Communication
               </h3>
               <p className="text-sm opacity-60 mb-6 font-medium">Send updates, location pin, or last-minute changes to all your attendees at once.</p>
-              <Button className="w-full rounded-2xl h-12 font-bold" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
+              <Button className="w-full rounded-2xl h-12 font-bold" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>
                 Broadcast Message
               </Button>
             </div>
 
-            <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="font-black flex items-center gap-2">

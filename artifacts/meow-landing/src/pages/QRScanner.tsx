@@ -101,7 +101,7 @@ export default function QRScanner() {
                 key="result"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className={`p-10 rounded-[40px] text-center space-y-6 ${result?.success ? 'bg-[#D9FF00] text-[#111827]' : 'bg-red-500 text-white'}`}
+                className={`p-10 rounded-[40px] text-center space-y-6 ${result?.success ? 'bg-[#D9FF00] text-[#111827] dark:text-foreground' : 'bg-red-500 text-white'}`}
               >
                 <div className="flex justify-center">
                   <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">

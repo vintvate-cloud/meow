@@ -54,13 +54,13 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] font-sans flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background font-sans flex flex-col pb-20 md:pb-0">
       <TopNavbar />
       <BottomNavbar />
 
       <main className="flex-1 p-6 md:p-12 w-full max-w-4xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#101828]">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#101828] dark:text-foreground">
             Settings
           </h1>
           <p className="text-gray-500 font-medium mt-1">
@@ -71,16 +71,16 @@ export default function Settings() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Settings Navigation Sidebar */}
           <div className="space-y-2">
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white shadow-sm border border-gray-100 text-[#101828] font-bold transition-all">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-card dark:text-card-foreground shadow-sm border border-gray-100 dark:border-border text-[#101828] dark:text-foreground font-bold transition-all">
               <User className="w-5 h-5" /> Account
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 text-gray-400 hover:text-[#101828] font-bold transition-all">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 dark:bg-muted text-gray-400 hover:text-[#101828] dark:text-foreground font-bold transition-all">
               <Bell className="w-5 h-5" /> Notifications
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 text-gray-400 hover:text-[#101828] font-bold transition-all">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 dark:bg-muted text-gray-400 hover:text-[#101828] dark:text-foreground font-bold transition-all">
               <Shield className="w-5 h-5" /> Privacy & Security
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 text-gray-400 hover:text-[#101828] font-bold transition-all">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 dark:bg-muted text-gray-400 hover:text-[#101828] dark:text-foreground font-bold transition-all">
               <Paintbrush className="w-5 h-5" /> Appearance
             </button>
           </div>
@@ -90,17 +90,17 @@ export default function Settings() {
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm"
+              className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-8 border border-gray-100 dark:border-border shadow-sm"
             >
-              <h2 className="text-xl font-black text-[#101828] mb-6">Profile Information</h2>
+              <h2 className="text-xl font-black text-[#101828] dark:text-foreground mb-6">Profile Information</h2>
               
               <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-50">
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#D9FF3F] to-[#2457FF] flex items-center justify-center shadow-lg border-4 border-white">
-                  <span className="text-2xl font-black text-[#101828]">{displayName?.[0]?.toUpperCase() || 'U'}</span>
+                  <span className="text-2xl font-black text-[#101828] dark:text-foreground">{displayName?.[0]?.toUpperCase() || 'U'}</span>
                 </div>
                 <div>
                   <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</div>
-                  <div className="text-[#101828] font-bold bg-gray-50 px-4 py-2 rounded-xl inline-block">{user?.email}</div>
+                  <div className="text-[#101828] dark:text-foreground font-bold bg-gray-50 dark:bg-muted px-4 py-2 rounded-xl inline-block">{user?.email}</div>
                 </div>
               </div>
 
@@ -111,7 +111,7 @@ export default function Settings() {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Your Name"
-                    className="h-14 rounded-2xl border-gray-200 bg-gray-50 font-bold px-4"
+                    className="h-14 rounded-2xl border-gray-200 dark:border-border bg-gray-50 dark:bg-muted font-bold px-4"
                   />
                 </div>
 
@@ -132,7 +132,7 @@ export default function Settings() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[32px] p-8 border border-red-100 shadow-sm"
+              className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-8 border border-red-100 shadow-sm"
             >
               <h2 className="text-xl font-black text-red-600 mb-2">Danger Zone</h2>
               <p className="text-gray-500 font-medium text-sm mb-6">These actions cannot be undone.</p>

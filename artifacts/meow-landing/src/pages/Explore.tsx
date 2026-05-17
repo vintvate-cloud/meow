@@ -121,7 +121,7 @@ export default function Explore() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] font-sans flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background font-sans flex flex-col pb-20 md:pb-0">
       <TopNavbar />
       <BottomNavbar />
 
@@ -129,7 +129,7 @@ export default function Explore() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#101828]">
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#101828] dark:text-foreground">
                 Explore
               </h1>
               <p className="text-gray-500 font-medium mt-1 text-sm md:text-base">
@@ -143,7 +143,7 @@ export default function Explore() {
                 <input
                   type="text"
                   placeholder={activeTab === 'events' ? "Search events..." : "Search communities..."}
-                  className="bg-white border border-gray-100 rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all font-medium text-[#101828]"
+                  className="bg-white dark:bg-card dark:text-card-foreground border border-gray-100 dark:border-border rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all font-medium text-[#101828] dark:text-foreground"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -161,10 +161,10 @@ export default function Explore() {
         </header>
 
         {/* Minimal Toggle Tabs */}
-        <div className="flex gap-6 border-b border-gray-200 mb-8 pb-1">
+        <div className="flex gap-6 border-b border-gray-200 dark:border-border mb-8 pb-1">
           <button 
             onClick={() => setActiveTab('events')}
-            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'events' ? 'text-[#101828]' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'events' ? 'text-[#101828] dark:text-foreground' : 'text-gray-400 hover:text-gray-600'}`}
           >
             Events
             {activeTab === 'events' && (
@@ -173,7 +173,7 @@ export default function Explore() {
           </button>
           <button 
             onClick={() => setActiveTab('communities')}
-            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'communities' ? 'text-[#101828]' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'communities' ? 'text-[#101828] dark:text-foreground' : 'text-gray-400 hover:text-gray-600'}`}
           >
             Communities
             {activeTab === 'communities' && (
@@ -196,18 +196,18 @@ export default function Explore() {
               loadingEvents ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="h-[380px] bg-white rounded-[32px] p-4 shadow-sm border border-gray-100">
-                      <div className="w-full h-40 bg-gray-50 rounded-[24px] animate-pulse mb-6"></div>
+                    <div key={i} className="h-[380px] bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-4 shadow-sm border border-gray-100 dark:border-border">
+                      <div className="w-full h-40 bg-gray-50 dark:bg-muted rounded-[24px] animate-pulse mb-6"></div>
                       <div className="px-4 space-y-4">
-                        <div className="h-6 bg-gray-50 rounded-lg w-3/4 animate-pulse"></div>
-                        <div className="h-4 bg-gray-50 rounded-md w-1/2 animate-pulse"></div>
+                        <div className="h-6 bg-gray-50 dark:bg-muted rounded-lg w-3/4 animate-pulse"></div>
+                        <div className="h-4 bg-gray-50 dark:bg-muted rounded-md w-1/2 animate-pulse"></div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : filteredEvents.length === 0 ? (
-                <div className="bg-white rounded-[32px] p-20 text-center shadow-sm border border-gray-100">
-                  <div className="text-[#101828] font-black text-2xl mb-2">No events found.</div>
+                <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-20 text-center shadow-sm border border-gray-100 dark:border-border">
+                  <div className="text-[#101828] dark:text-foreground font-black text-2xl mb-2">No events found.</div>
                   <p className="text-gray-500 font-medium">Try adjusting your search query.</p>
                 </div>
               ) : (
@@ -222,12 +222,12 @@ export default function Explore() {
               loadingCommunities ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="h-[280px] bg-white rounded-[32px] p-4 shadow-sm border border-gray-100 animate-pulse"></div>
+                    <div key={i} className="h-[280px] bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-4 shadow-sm border border-gray-100 dark:border-border animate-pulse"></div>
                   ))}
                 </div>
               ) : filteredCommunities.length === 0 ? (
-                <div className="bg-white rounded-[32px] p-20 text-center shadow-sm border border-gray-100">
-                  <div className="text-[#101828] font-black text-2xl mb-2">No communities found.</div>
+                <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-20 text-center shadow-sm border border-gray-100 dark:border-border">
+                  <div className="text-[#101828] dark:text-foreground font-black text-2xl mb-2">No communities found.</div>
                   <p className="text-gray-500 font-medium">Be the first to start a tribe!</p>
                 </div>
               ) : (
@@ -243,21 +243,21 @@ export default function Explore() {
                         transition={{ delay: idx * 0.05, duration: 0.4, ease: "easeOut" }}
                         className="group h-full"
                       >
-                        <div className="bg-white rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 h-full flex flex-col relative overflow-hidden">
+                        <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-border h-full flex flex-col relative overflow-hidden">
                           <div className="absolute top-0 left-0 right-0 h-2" style={{ backgroundColor: comm.color || '#101828' }}></div>
                           
                           <div className="flex items-start justify-between mt-2">
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-sm" style={{ backgroundColor: comm.color || '#101828' }}>
                               {comm.title?.[0]?.toUpperCase() || 'C'}
                             </div>
-                            <div className="flex items-center gap-1 bg-gray-50 px-3 py-1 rounded-full">
+                            <div className="flex items-center gap-1 bg-gray-50 dark:bg-muted px-3 py-1 rounded-full">
                               <Users className="w-3 h-3 text-gray-400" />
                               <span className="text-xs font-bold text-gray-500">{(comm.members || []).length}</span>
                             </div>
                           </div>
 
                           <div className="mt-5 flex-1">
-                            <h3 className="text-xl font-black tracking-tight text-[#101828] mb-1 leading-tight">
+                            <h3 className="text-xl font-black tracking-tight text-[#101828] dark:text-foreground mb-1 leading-tight">
                               {comm.title || 'Untitled Community'}
                             </h3>
                             <p className="text-gray-500 font-medium line-clamp-2 text-sm leading-relaxed">
@@ -313,10 +313,10 @@ export default function Explore() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 px-4"
             >
-              <div className="bg-white rounded-[32px] shadow-2xl p-8 border border-gray-100">
+              <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] shadow-2xl p-8 border border-gray-100 dark:border-border">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-black tracking-tight text-[#101828]">Create a Tribe</h2>
-                  <button onClick={() => setIsCreateModalOpen(false)} className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                  <h2 className="text-2xl font-black tracking-tight text-[#101828] dark:text-foreground">Create a Tribe</h2>
+                  <button onClick={() => setIsCreateModalOpen(false)} className="w-8 h-8 rounded-full bg-gray-50 dark:bg-muted flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:text-foreground transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -328,7 +328,7 @@ export default function Explore() {
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="e.g. Midnight Cyber Hackers"
-                      className="h-12 rounded-xl border-gray-200 bg-gray-50 font-bold px-4"
+                      className="h-12 rounded-xl border-gray-200 dark:border-border bg-gray-50 dark:bg-muted font-bold px-4"
                       required
                     />
                   </div>
@@ -339,7 +339,7 @@ export default function Explore() {
                       value={newDesc}
                       onChange={(e) => setNewDesc(e.target.value)}
                       placeholder="What is this collective about?"
-                      className="w-full h-24 rounded-xl border border-gray-200 bg-gray-50 font-medium text-sm p-4 outline-none focus:border-[#101828] focus:ring-1 focus:ring-[#101828] transition-all resize-none"
+                      className="w-full h-24 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted font-medium text-sm p-4 outline-none focus:border-[#101828] focus:ring-1 focus:ring-[#101828] transition-all resize-none"
                     />
                   </div>
 
@@ -389,7 +389,7 @@ function ExploreCard({ event, index }: { event: any, index: number }) {
       className="group h-full"
     >
       <Link href={`/e/${event.id}`}>
-        <div className="bg-white rounded-[32px] p-3 shadow-sm hover:shadow-md transition-shadow border border-gray-100 h-full flex flex-col relative overflow-hidden cursor-pointer">
+        <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-3 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-border h-full flex flex-col relative overflow-hidden cursor-pointer">
           <div 
             className="h-44 rounded-[24px] relative overflow-hidden mb-3" 
             style={gradientStyle}
@@ -401,21 +401,21 @@ function ExploreCard({ event, index }: { event: any, index: number }) {
           </div>
 
           <div className="px-4 pb-4 flex-1 flex flex-col">
-            <h3 className="text-lg font-black tracking-tight text-[#101828] mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+            <h3 className="text-lg font-black tracking-tight text-[#101828] dark:text-foreground mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
               {event.title || 'Untitled Event'}
             </h3>
             
             <div className="space-y-2 mt-auto">
-              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 p-2 rounded-xl">
-                <div className="w-6 h-6 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0">
-                  <MapPin className="w-3 h-3 text-[#101828]" />
+              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 dark:bg-muted p-2 rounded-xl">
+                <div className="w-6 h-6 rounded-lg bg-white dark:bg-card dark:text-card-foreground shadow-sm flex items-center justify-center shrink-0">
+                  <MapPin className="w-3 h-3 text-[#101828] dark:text-foreground" />
                 </div>
                 <span className="text-xs font-bold truncate">{event.location}</span>
               </div>
               
-              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 p-2 rounded-xl">
-                <div className="w-6 h-6 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0">
-                  <Users className="w-3 h-3 text-[#101828]" />
+              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 dark:bg-muted p-2 rounded-xl">
+                <div className="w-6 h-6 rounded-lg bg-white dark:bg-card dark:text-card-foreground shadow-sm flex items-center justify-center shrink-0">
+                  <Users className="w-3 h-3 text-[#101828] dark:text-foreground" />
                 </div>
                 <span className="text-xs font-bold">{event.rsvpCount || 0} RSVPs</span>
               </div>
@@ -427,7 +427,7 @@ function ExploreCard({ event, index }: { event: any, index: number }) {
                   </div>
                   <div>
                     <div className="text-[8px] font-bold uppercase tracking-wider text-gray-400">Host</div>
-                    <div className="text-xs font-bold text-[#101828] truncate max-w-[100px]">{event.userName || 'Anonymous'}</div>
+                    <div className="text-xs font-bold text-[#101828] dark:text-foreground truncate max-w-[100px]">{event.userName || 'Anonymous'}</div>
                   </div>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-[#101828] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

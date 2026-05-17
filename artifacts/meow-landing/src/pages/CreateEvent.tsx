@@ -79,7 +79,7 @@ export default function CreateEvent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] p-6 md:p-12 font-sans">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background p-6 md:p-12 font-sans">
       <div className="max-w-3xl mx-auto">
         <button
           onClick={() => setLocation("/dashboard")}
@@ -89,13 +89,13 @@ export default function CreateEvent() {
         </button>
 
         <header className="mb-12">
-          <h1 className="text-5xl font-black tracking-tight" style={{ color: '#111827' }}>Create an Event</h1>
+          <h1 className="text-5xl font-black tracking-tight" style={{ color: "var(--foreground)" }}>Create an Event</h1>
           <p className="text-xl font-medium text-gray-500 mt-2">Fill in the details to launch your event page.</p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Vibe Selection */}
-          <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border">
             <h2 className="text-xl font-black mb-6 flex items-center gap-2">
               <ImageIcon className="w-5 h-5" /> Choose a vibe
             </h2>
@@ -113,7 +113,7 @@ export default function CreateEvent() {
           </div>
 
           {/* Details */}
-          <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-6">
+          <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border space-y-6">
             <div className="space-y-2">
               <label className="font-black text-sm uppercase tracking-widest text-gray-400 flex items-center gap-2">
                 <Type className="w-4 h-4" /> Event Title
@@ -164,7 +164,7 @@ export default function CreateEvent() {
               />
             </div>
 
-            <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+            <div className="pt-6 border-t border-gray-100 dark:border-border flex items-center justify-between">
               <div className="space-y-1">
                 <Label className="text-lg font-black flex items-center gap-2">
                   {formData.isPublic ? <Globe className="w-5 h-5 text-blue-500" /> : <Lock className="w-5 h-5 text-gray-400" />}
@@ -184,7 +184,7 @@ export default function CreateEvent() {
           </div>
 
           {/* RSVP Form Builder */}
-          <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-6">
+          <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border space-y-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-black flex items-center gap-2">
                 <Users className="w-5 h-5" /> RSVP Form Questions
@@ -198,7 +198,7 @@ export default function CreateEvent() {
 
             <div className="space-y-4">
               {customFields.map((field, index) => (
-                <div key={index} className="p-6 rounded-3xl border-2 border-gray-100 space-y-4 relative group">
+                <div key={index} className="p-6 rounded-3xl border-2 border-gray-100 dark:border-border space-y-4 relative group">
                   <button
                     type="button"
                     onClick={() => removeField(index)}

@@ -3,7 +3,7 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -156,6 +156,7 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* Force Tailwind Rebuild */
 .dark {
   --button-outline: rgba(255, 255, 255, .10);
   --badge-outline: rgba(255, 255, 255, .05);
@@ -165,38 +166,44 @@
   --elevate-1: rgba(255, 255, 255, .04);
   --elevate-2: rgba(255, 255, 255, .09);
 
-  --background: 221 39% 11%;
-  --foreground: 44 26% 93%;
-  --border: 44 26% 93%;
-  --card: 221 39% 11%;
-  --card-foreground: 44 26% 93%;
-  --card-border: 44 26% 93%;
+  /* DEEP BLACK THEME */
+  --background: 0 0% 0%; 
+  /* Pitch Black */
+  --foreground: 0 0% 98%; 
+  /* Almost White text */
+  --border: 0 0% 12%; 
+  /* Dark gray borders */
+  
+  --card: 0 0% 4%; 
+  /* Slightly off-black for cards */
+  --card-foreground: 0 0% 98%;
+  --card-border: 0 0% 12%;
 
-  --sidebar: 221 39% 11%;
-  --sidebar-foreground: 44 26% 93%;
-  --sidebar-border: 44 26% 93%;
+  --sidebar: 0 0% 4%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 12%;
   --sidebar-primary: 69 100% 50%;
-  --sidebar-primary-foreground: 221 39% 11%;
-  --sidebar-accent: 293 47% 85%;
-  --sidebar-accent-foreground: 221 39% 11%;
+  --sidebar-primary-foreground: 0 0% 0%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-ring: 226 80% 53%;
 
-  --popover: 221 39% 11%;
-  --popover-foreground: 44 26% 93%;
-  --popover-border: 44 26% 93%;
+  --popover: 0 0% 4%;
+  --popover-foreground: 0 0% 98%;
+  --popover-border: 0 0% 12%;
 
   --primary: 69 100% 50%;
-  --primary-foreground: 221 39% 11%;
+  --primary-foreground: 0 0% 0%;
   --secondary: 226 80% 53%;
   --secondary-foreground: 0 0% 100%;
-  --muted: 293 47% 85%;
-  --muted-foreground: 221 39% 11%;
+  --muted: 0 0% 10%;
+  --muted-foreground: 0 0% 60%;
   --accent: 269 57% 35%;
   --accent-foreground: 0 0% 100%;
   --destructive: 347 100% 24%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 44 26% 93%;
+  --input: 0 0% 12%;
   --ring: 226 80% 53%;
   --chart-1: 69 100% 50%;
   --chart-2: 226 80% 53%;

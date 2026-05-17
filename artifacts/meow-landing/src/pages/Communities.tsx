@@ -93,7 +93,7 @@ export default function Communities() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] font-sans pb-20">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background font-sans pb-20">
       {/* Hero Header */}
       <div className="bg-[#101828] relative overflow-hidden">
         {/* Navigation / Back Button */}
@@ -161,15 +161,15 @@ export default function Communities() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-[300px] bg-white rounded-[40px] p-4 shadow-sm border border-white/60 animate-pulse"></div>
+              <div key={i} className="h-[300px] bg-white dark:bg-card dark:text-card-foreground rounded-[40px] p-4 shadow-sm border border-white/60 animate-pulse"></div>
             ))}
           </div>
         ) : filteredCommunities.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-xl rounded-[40px] p-24 text-center shadow-sm border border-white">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-gray-50 dark:bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
               <Users className="w-8 h-8 text-gray-300" />
             </div>
-            <div className="text-[#101828] font-black text-3xl mb-3 tracking-tight">No tribes found.</div>
+            <div className="text-[#101828] dark:text-foreground font-black text-3xl mb-3 tracking-tight">No tribes found.</div>
             <p className="text-gray-500 font-medium text-lg">Be the first to start a community for this topic!</p>
           </div>
         ) : (
@@ -193,14 +193,14 @@ export default function Communities() {
                       <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-md transform group-hover:scale-105 transition-transform" style={{ backgroundColor: comm.color || '#101828' }}>
                         {comm.title[0]?.toUpperCase()}
                       </div>
-                      <div className="flex items-center gap-1 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                      <div className="flex items-center gap-1 bg-gray-50 dark:bg-muted px-3 py-1.5 rounded-full border border-gray-100 dark:border-border">
                         <Users className="w-3 h-3 text-gray-400" />
                         <span className="text-xs font-black text-gray-500">{(comm.members || []).length} Members</span>
                       </div>
                     </div>
 
                     <div className="mt-6 flex-1">
-                      <h3 className="text-2xl font-black tracking-tight text-[#101828] mb-2 leading-tight">
+                      <h3 className="text-2xl font-black tracking-tight text-[#101828] dark:text-foreground mb-2 leading-tight">
                         {comm.title}
                       </h3>
                       <p className="text-gray-500 font-medium line-clamp-3 text-sm leading-relaxed">
@@ -208,7 +208,7 @@ export default function Communities() {
                       </p>
                     </div>
 
-                    <div className="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <div className="mt-8 pt-4 border-t border-gray-100 dark:border-border flex items-center justify-between">
                       <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                         By {comm.ownerName || 'Unknown'}
                       </div>
@@ -252,10 +252,10 @@ export default function Communities() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed top-[10%] left-0 right-0 max-w-xl mx-auto z-50 px-4"
             >
-              <div className="bg-white rounded-[40px] shadow-2xl p-8 md:p-12 border border-gray-100">
+              <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[40px] shadow-2xl p-8 md:p-12 border border-gray-100 dark:border-border">
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-black tracking-tight text-[#101828]">Create a Tribe</h2>
-                  <button onClick={() => setIsCreateModalOpen(false)} className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                  <h2 className="text-3xl font-black tracking-tight text-[#101828] dark:text-foreground">Create a Tribe</h2>
+                  <button onClick={() => setIsCreateModalOpen(false)} className="w-10 h-10 rounded-full bg-gray-50 dark:bg-muted flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:text-foreground transition-colors">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -278,7 +278,7 @@ export default function Communities() {
                       value={newDesc}
                       onChange={(e) => setNewDesc(e.target.value)}
                       placeholder="What is this collective about?"
-                      className="w-full h-32 rounded-2xl border-2 border-gray-200 bg-gray-50/50 font-medium text-base p-6 outline-none focus:border-[#FF3F80] focus:ring-1 focus:ring-[#FF3F80] transition-all resize-none"
+                      className="w-full h-32 rounded-2xl border-2 border-gray-200 dark:border-border bg-gray-50/50 font-medium text-base p-6 outline-none focus:border-[#FF3F80] focus:ring-1 focus:ring-[#FF3F80] transition-all resize-none"
                     />
                   </div>
 

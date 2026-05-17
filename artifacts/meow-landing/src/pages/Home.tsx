@@ -148,18 +148,18 @@ export default function Home() {
     <div ref={containerRef} className="min-h-screen w-full font-sans bg-background text-foreground overflow-x-hidden">
 
       <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-full max-w-[1200px] z-50 px-4">
-        <div className="nav-inner bg-white text-navy flex items-center justify-between px-6 h-16 md:h-20 rounded-full shadow-lg border border-gray-100 transition-all">
+        <div className="nav-inner bg-white dark:bg-card dark:text-card-foreground text-navy flex items-center justify-between px-6 h-16 md:h-20 rounded-full shadow-lg border border-gray-100 dark:border-border transition-all">
           <Link href="/" className="relative flex items-center h-full w-32 md:w-48">
             <img src="/meowlogo2.png" alt="MEOW" className="absolute left-0 h-24 md:h-32 w-auto object-contain transition-transform hover:scale-110" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))' }} />
           </Link>
 
           <div className="flex items-center gap-2">
             <Link href="/login">
-              <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: '#111827' }}>Log in</Button>
+              <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: "var(--foreground)" }}>Log in</Button>
             </Link>
             <Link href="/signup">
               <motion.div whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }}>
-                <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>Get Started</Button>
+                <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>Get Started</Button>
               </motion.div>
             </Link>
           </div>
@@ -180,13 +180,13 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 border border-black/10 mb-6"
           >
-            <span className="text-xs font-black tracking-[0.2em] text-[#101828]">MEET • ENGAGE • ORGANIZE • WELCOME</span>
+            <span className="text-xs font-black tracking-[0.2em] text-[#101828] dark:text-foreground">MEET • ENGAGE • ORGANIZE • WELCOME</span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[clamp(3.5rem,7vw,7rem)] leading-[0.9] font-black tracking-tighter" style={{ color: '#101828' }}
+            className="text-[clamp(3.5rem,7vw,7rem)] leading-[0.9] font-black tracking-tighter" style={{ color: "var(--foreground)" }}
           >
             The internet was made for communities. So was MEOW.
           </motion.h1>
@@ -194,7 +194,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xl md:text-2xl max-w-lg font-medium opacity-90" style={{ color: '#101828' }}
+            className="text-xl md:text-2xl max-w-lg font-medium opacity-90" style={{ color: "var(--foreground)" }}
           >
             Host events, collect RSVPs, spark conversations, and turn moments into movements.
           </motion.p>
@@ -212,7 +212,7 @@ export default function Home() {
               </motion.div>
             </Link>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="rounded-full h-16 px-8 text-lg font-bold border-2 bg-transparent hover:bg-[#111827]/10 w-full sm:w-auto" style={{ borderColor: '#111827', color: '#111827' }}>
+              <Button size="lg" variant="outline" className="rounded-full h-16 px-8 text-lg font-bold border-2 bg-transparent hover:bg-[#111827]/10 w-full sm:w-auto" style={{ borderColor: '#111827', color: "var(--foreground)" }}>
                 See Pricing
               </Button>
             </motion.div>
@@ -229,7 +229,7 @@ export default function Home() {
                 <div key={i} className="w-10 h-10 rounded-full border-2 border-[#101828] bg-gray-300 overflow-hidden" style={{ backgroundColor: i % 2 === 0 ? '#2457FF' : '#F8F4EC' }} />
               ))}
             </div>
-            <span className="font-bold text-sm" style={{ color: '#101828' }}>10,000+ events hosted this week</span>
+            <span className="font-bold text-sm" style={{ color: "var(--foreground)" }}>10,000+ events hosted this week</span>
           </motion.div>
         </motion.div>
 
@@ -242,7 +242,7 @@ export default function Home() {
             <div className="text-sm font-bold mb-2 opacity-80">TONIGHT</div>
             <div className="text-2xl font-black mb-4 leading-tight">Design Drink & Draw</div>
             <div className="flex gap-2">
-              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>RSVP</div>
+              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>RSVP</div>
               <div className="px-3 py-1 rounded-full text-xs font-bold bg-white/20">34 Attending</div>
             </div>
           </motion.div>
@@ -251,7 +251,7 @@ export default function Home() {
             animate={{ y: [0, -20, 0], rotate: [2, 1, 2] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-40 right-10 w-72 p-6 rounded-3xl shadow-2xl z-10 gsap-parallax cursor-pointer" style={{ backgroundColor: '#E8C8EC', color: '#111827' }}
+            className="absolute top-40 right-10 w-72 p-6 rounded-3xl shadow-2xl z-10 gsap-parallax cursor-pointer" style={{ backgroundColor: '#E8C8EC', color: "var(--foreground)" }}
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full" style={{ backgroundColor: '#79001B' }}></div>
@@ -267,7 +267,7 @@ export default function Home() {
             animate={{ y: [0, -12, 0], rotate: [-4, -2, -4] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-20 left-20 w-56 p-5 rounded-3xl shadow-2xl z-30 gsap-parallax cursor-pointer" style={{ backgroundColor: '#F3F0E8', color: '#111827' }}
+            className="absolute bottom-20 left-20 w-56 p-5 rounded-3xl shadow-2xl z-30 gsap-parallax cursor-pointer" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl" style={{ backgroundColor: '#D9FF00' }}></div>
@@ -306,10 +306,10 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-10 right-0 lg:right-10 bg-white rounded-2xl p-4 shadow-xl z-20 hidden sm:flex items-center gap-3"
+            className="absolute top-10 right-0 lg:right-10 bg-white dark:bg-card dark:text-card-foreground rounded-2xl p-4 shadow-xl z-20 hidden sm:flex items-center gap-3"
           >
             <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-            <div className="text-sm font-bold text-gray-900">New RSVP — Priya just joined</div>
+            <div className="text-sm font-bold text-gray-900 dark:text-foreground">New RSVP — Priya just joined</div>
           </motion.div>
 
           <motion.div
@@ -317,14 +317,14 @@ export default function Home() {
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute bottom-10 left-0 lg:left-10 bg-[#D9FF00] rounded-full px-5 py-2 shadow-xl z-20 hidden sm:flex items-center gap-2"
           >
-            <div className="text-sm font-bold text-gray-900">5 min setup</div>
+            <div className="text-sm font-bold text-gray-900 dark:text-foreground">5 min setup</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
-            className="w-[300px] h-[600px] rounded-[40px] border-8 shadow-2xl bg-white relative overflow-hidden flex flex-col"
+            className="w-[300px] h-[600px] rounded-[40px] border-8 shadow-2xl bg-white dark:bg-card dark:text-card-foreground relative overflow-hidden flex flex-col"
             style={{ borderColor: '#111827' }}
           >
             <div className="absolute top-0 w-full h-6 flex justify-center pt-2 z-50">
@@ -343,18 +343,18 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">←</div>
-                      <div className="font-bold text-gray-900">New Event</div>
+                      <div className="font-bold text-gray-900 dark:text-foreground">New Event</div>
                     </div>
-                    <div className="h-32 rounded-2xl w-full flex items-center justify-center font-bold text-sm text-[#111827]" style={{ backgroundColor: '#D9FF00' }}>
+                    <div className="h-32 rounded-2xl w-full flex items-center justify-center font-bold text-sm text-[#111827] dark:text-foreground" style={{ backgroundColor: '#D9FF00' }}>
                       Event Cover
                     </div>
                     <div className="mt-4 space-y-3">
-                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm font-bold text-gray-800">Design Drink & Draw</div>
+                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm font-bold text-gray-800 dark:text-foreground">Design Drink & Draw</div>
                       <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Thu, June 12 · 7PM</div>
                       <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Brooklyn, NY</div>
                     </div>
                     <div className="mt-auto">
-                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]" style={{ backgroundColor: '#D9FF00' }}>Next →</div>
+                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827] dark:text-foreground" style={{ backgroundColor: '#D9FF00' }}>Next →</div>
                     </div>
                   </motion.div>
                 )}
@@ -366,22 +366,22 @@ export default function Home() {
                     exit={{ opacity: 0, x: -20 }}
                     className="absolute inset-0 flex flex-col px-4 pt-4 pb-16"
                   >
-                    <div className="font-bold text-gray-900 text-lg mb-6 mt-2">Ticket Setup</div>
+                    <div className="font-bold text-gray-900 dark:text-foreground text-lg mb-6 mt-2">Ticket Setup</div>
                     <div className="flex gap-3 mb-6">
                       <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent relative">
                         <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
-                        <div className="font-bold text-sm text-gray-800">Free</div>
+                        <div className="font-bold text-sm text-gray-800 dark:text-foreground">Free</div>
                       </div>
                       <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent opacity-50">
-                        <div className="font-bold text-sm text-gray-800">Paid</div>
-                        <div className="text-xs font-bold mt-1 bg-white px-2 rounded-md">$25</div>
+                        <div className="font-bold text-sm text-gray-800 dark:text-foreground">Paid</div>
+                        <div className="text-xs font-bold mt-1 bg-white dark:bg-card dark:text-card-foreground px-2 rounded-md">$25</div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between bg-gray-100 p-3 rounded-xl mb-auto">
-                      <div className="text-sm font-bold text-gray-800">Guest Limit</div>
+                      <div className="text-sm font-bold text-gray-800 dark:text-foreground">Guest Limit</div>
                       <div className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">-</div>
-                        <div className="font-bold text-gray-900">50</div>
+                        <div className="font-bold text-gray-900 dark:text-foreground">50</div>
                         <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">+</div>
                       </div>
                     </div>
@@ -389,7 +389,7 @@ export default function Home() {
                       <motion.div
                         animate={{ scale: [1, 1.02, 1] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827]"
+                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827] dark:text-foreground"
                         style={{ backgroundColor: '#D9FF00' }}
                       >
                         Publish Event
@@ -414,12 +414,12 @@ export default function Home() {
                     >
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </motion.div>
-                    <div className="font-black text-2xl text-gray-900 mb-1">Your event is live!</div>
+                    <div className="font-black text-2xl text-gray-900 dark:text-foreground mb-1">Your event is live!</div>
                     <div className="text-sm font-medium text-gray-500 mb-8">34 people notified</div>
 
                     <div className="grid grid-cols-5 gap-1 p-2 bg-gray-100 rounded-xl mb-auto">
                       {Array.from({ length: 25 }).map((_, i) => (
-                        <div key={i} className={`w-4 h-4 rounded-sm ${i % 2 === 0 ? 'bg-[#111827]' : 'bg-white'}`}></div>
+                        <div key={i} className={`w-4 h-4 rounded-sm ${i % 2 === 0 ? 'bg-[#111827]' : 'bg-white dark:bg-card dark:text-card-foreground'}`}></div>
                       ))}
                     </div>
 
@@ -450,7 +450,7 @@ export default function Home() {
           </p>
           <Link href="/signup">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="inline-block mt-4">
-              <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold border-none" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
+              <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold border-none" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>
                 Build your page
               </Button>
             </motion.div>
@@ -475,7 +475,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="absolute top-0 left-[10%] w-64 p-4 rounded-2xl shadow-xl z-20 gsap-parallax" style={{ backgroundColor: '#F3F0E8', color: '#111827' }}
+            className="absolute top-0 left-[10%] w-64 p-4 rounded-2xl shadow-xl z-20 gsap-parallax" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
           >
             <div className="flex gap-3 items-start">
               <div className="w-10 h-10 rounded-full" style={{ backgroundColor: '#00B7FF' }}></div>
@@ -505,7 +505,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="absolute bottom-10 left-[30%] w-[400px] p-6 rounded-3xl shadow-2xl z-30 gsap-parallax" style={{ backgroundColor: '#D9FF00', color: '#111827' }}
+            className="absolute bottom-10 left-[30%] w-[400px] p-6 rounded-3xl shadow-2xl z-30 gsap-parallax" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}
           >
             <div className="flex justify-between items-center mb-4">
               <div className="font-black text-2xl">Member Gallery</div>
@@ -521,7 +521,7 @@ export default function Home() {
       </section>
 
       {/* A. Analytics Section */}
-      <section className="py-32 px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16" style={{ backgroundColor: '#F3F0E8' }}>
+      <section className="py-32 px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16" style={{ backgroundColor: "var(--background)" }}>
         <div className="w-full lg:w-1/2 relative h-[600px] md:h-[500px]">
           <div className="absolute inset-0 grid grid-cols-2 gap-4 p-4">
             {/* Card 1 */}
@@ -535,9 +535,9 @@ export default function Home() {
               </motion.div>
             </div>
             {/* Card 2 */}
-            <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] shadow-lg h-full" style={{ marginTop: '40px' }}>
+            <div className="metric-card bg-[#E8C8EC] rounded-3xl p-6 text-[#111827] dark:text-foreground shadow-lg h-full" style={{ marginTop: '40px' }}>
               <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-white dark:bg-card dark:text-card-foreground rounded-full flex items-center justify-center mb-4">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
                 </div>
                 <div>
@@ -574,7 +574,7 @@ export default function Home() {
           </div>
         </div>
         <div className="w-full lg:w-1/2 space-y-8 pl-0 lg:pl-10">
-          <h2 className="gsap-heading text-5xl lg:text-7xl font-black leading-none" style={{ color: '#111827' }}>
+          <h2 className="gsap-heading text-5xl lg:text-7xl font-black leading-none" style={{ color: "var(--foreground)" }}>
             Analyze your community and grow it.
           </h2>
           <p className="text-xl lg:text-2xl text-gray-600 font-medium max-w-lg">
@@ -596,7 +596,7 @@ export default function Home() {
 
             {/* Mini Cards Row - Upgraded to Premium Post Previews */}
             <div className="flex justify-center gap-6 mb-10">
-              <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-white rounded-3xl shadow-2xl p-3 flex flex-col gap-2 transform -rotate-6 cursor-pointer border border-gray-100 relative overflow-hidden">
+              <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-white dark:bg-card dark:text-card-foreground rounded-3xl shadow-2xl p-3 flex flex-col gap-2 transform -rotate-6 cursor-pointer border border-gray-100 dark:border-border relative overflow-hidden">
                 <div className="w-full h-24 bg-gradient-to-br from-[#2457FF] to-[#00B7FF] rounded-2xl flex items-center justify-center text-white/40">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                 </div>
@@ -629,20 +629,20 @@ export default function Home() {
               </motion.div>
 
               <motion.div whileHover={{ y: -12, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="w-32 h-44 bg-[#FF00B7] rounded-3xl shadow-2xl p-3 flex flex-col items-center justify-center transform rotate-6 cursor-pointer relative">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg group">
+                <div className="w-12 h-12 bg-white dark:bg-card dark:text-card-foreground rounded-full flex items-center justify-center shadow-lg group">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF00B7" strokeWidth="3" className="ml-1"><path d="M5 3l14 9-14 9V3z"></path></svg>
                 </div>
                 <div className="absolute bottom-4 text-[10px] font-black text-white uppercase tracking-widest">Tutorial</div>
               </motion.div>
             </div>
 
-            <h3 className="gsap-heading text-4xl lg:text-5xl font-black leading-tight text-center" style={{ color: '#111827' }}>
+            <h3 className="gsap-heading text-4xl lg:text-5xl font-black leading-tight text-center" style={{ color: "var(--foreground)" }}>
               Share every type of content — events, tickets, video, community updates
             </h3>
 
             {/* Stacked Product Cards - Upgraded with Icons and Depth */}
             <div className="relative h-48 flex justify-center mt-12 feature-stagger">
-              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#00B7FF] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] transform -rotate-12 -translate-x-16 cursor-pointer z-10 border-2 border-black/5">
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#00B7FF] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] dark:text-foreground transform -rotate-12 -translate-x-16 cursor-pointer z-10 border-2 border-black/5">
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase opacity-40">Merch</span>
                   <span className="text-lg">T-Shirt</span>
@@ -656,7 +656,7 @@ export default function Home() {
                 </div>
                 <span className="text-xl">$40</span>
               </motion.div>
-              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#D9FF3F] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] transform rotate-6 translate-x-12 translate-y-2 cursor-pointer z-30 border-2 border-black/5">
+              <motion.div whileHover={{ y: -10, scale: 1.04 }} className="absolute w-44 h-20 bg-[#D9FF3F] rounded-2xl shadow-2xl flex items-center justify-between px-5 font-black text-[#101828] dark:text-foreground transform rotate-6 translate-x-12 translate-y-2 cursor-pointer z-30 border-2 border-black/5">
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase opacity-40">Digital</span>
                   <span className="text-lg">Poster</span>
@@ -680,7 +680,7 @@ export default function Home() {
           <div className="relative w-full max-w-[320px] aspect-[9/19] bg-[#F8F4EC] rounded-[50px] border-[12px] shadow-2xl p-6 z-10 overflow-hidden" style={{ borderColor: '#101828' }}>
             {/* Status Bar */}
             <div className="absolute top-0 left-0 right-0 h-10 px-8 flex justify-between items-center z-20">
-              <span className="text-[10px] font-black text-[#101828]">9:41</span>
+              <span className="text-[10px] font-black text-[#101828] dark:text-foreground">9:41</span>
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 bg-[#101828] rounded-sm opacity-20"></div>
                 <div className="w-3 h-3 bg-[#101828] rounded-sm opacity-20"></div>
@@ -692,11 +692,11 @@ export default function Home() {
             <div className="flex flex-col items-center mt-12 space-y-4">
               <div className="w-24 h-24 bg-gradient-to-tr from-[#FF00B7] to-[#7B5EA7] rounded-full shadow-lg border-4 border-white"></div>
               <div className="text-center">
-                <h4 className="text-2xl font-black flex items-center gap-1 justify-center" style={{ color: '#101828' }}>
+                <h4 className="text-2xl font-black flex items-center gap-1 justify-center" style={{ color: "var(--foreground)" }}>
                   @emilio
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#2457FF"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM10 17l-5-5 1.4-1.4 3.6 3.6 7.6-7.6L19 8l-9 9z"></path></svg>
                 </h4>
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#101828]/40 mt-1">Creator & Artist</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#101828] dark:text-foreground/40 mt-1">Creator & Artist</div>
               </div>
               <div className="flex gap-2 py-2">
                 <div className="w-10 h-10 bg-[#101828]/5 rounded-2xl flex items-center justify-center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101828" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></div>
@@ -705,15 +705,15 @@ export default function Home() {
               </div>
 
               <div className="w-full space-y-3 mt-4">
-                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white dark:bg-card dark:text-card-foreground rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] dark:text-foreground cursor-pointer">
                   <span>Next Show Tickets</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
                 </motion.div>
-                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white dark:bg-card dark:text-card-foreground rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] dark:text-foreground cursor-pointer">
                   <span>Listen to New EP</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
                 </motion.div>
-                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] cursor-pointer">
+                <motion.div whileHover={{ x: 4 }} className="w-full h-14 bg-white dark:bg-card dark:text-card-foreground rounded-2xl shadow-sm border border-black/5 flex items-center justify-between px-6 font-black text-sm text-[#101828] dark:text-foreground cursor-pointer">
                   <span>Merch Store</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
                 </motion.div>
@@ -726,24 +726,24 @@ export default function Home() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="absolute left-[5%] top-[25%] bg-[#D9FF3F] rounded-2xl p-5 shadow-2xl z-20 hidden sm:block border-2 border-[#101828]/10"
           >
-            <div className="font-black text-2xl text-[#101828]">23</div>
-            <div className="text-xs font-black uppercase tracking-widest text-[#101828]/60">Emails received</div>
+            <div className="font-black text-2xl text-[#101828] dark:text-foreground">23</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#101828] dark:text-foreground/60">Emails received</div>
           </motion.div>
 
           <motion.div
             animate={{ y: [0, -15, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute right-[5%] bottom-[25%] bg-white rounded-3xl p-6 shadow-2xl z-20 w-56 hidden sm:block border border-gray-100"
+            className="absolute right-[5%] bottom-[25%] bg-white dark:bg-card dark:text-card-foreground rounded-3xl p-6 shadow-2xl z-20 w-56 hidden sm:block border border-gray-100 dark:border-border"
           >
-            <div className="text-xs font-black uppercase tracking-widest text-[#101828]/40 mb-3">RSVP Questions</div>
-            <div className="w-full h-10 bg-gray-50 rounded-xl mb-3 flex items-center px-3 text-[10px] font-bold text-gray-400">Your favorite artist?</div>
+            <div className="text-xs font-black uppercase tracking-widest text-[#101828] dark:text-foreground/40 mb-3">RSVP Questions</div>
+            <div className="w-full h-10 bg-gray-50 dark:bg-muted rounded-xl mb-3 flex items-center px-3 text-[10px] font-bold text-gray-400">Your favorite artist?</div>
             <Button className="w-full h-10 text-xs font-black bg-[#2457FF] text-white rounded-xl shadow-lg shadow-blue-500/20">Save Questions</Button>
           </motion.div>
         </div>
       </section>
 
       {/* B. Social Proof Section with Portrait Cards */}
-      <section className="py-24 overflow-hidden" style={{ backgroundColor: '#F3F0E8' }}>
+      <section className="py-24 overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -751,7 +751,7 @@ export default function Home() {
           transition={{ duration: 0.8, staggerChildren: 0.1 }}
           className="max-w-4xl mx-auto text-center px-6 mb-16"
         >
-          <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight" style={{ color: '#101828' }}>
+          <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight" style={{ color: "var(--foreground)" }}>
             The events platform trusted by <span style={{ color: '#2457FF' }}>creators</span> worldwide.
           </h2>
         </motion.div>
@@ -766,7 +766,7 @@ export default function Home() {
               whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-2 cursor-pointer transition-colors" style={{ backgroundColor: '#2457FF' }}
             >
-              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: "var(--foreground)" }}>
                 DJ Emilio — Artist
               </div>
             </motion.div>
@@ -779,7 +779,7 @@ export default function Home() {
               whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-1 -translate-y-4 cursor-pointer transition-colors" style={{ backgroundColor: '#101828' }}
             >
-              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: "var(--foreground)" }}>
                 Studio Clay — Brand
               </div>
             </motion.div>
@@ -792,8 +792,8 @@ export default function Home() {
               whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex flex-col justify-between items-center shadow-xl transform rotate-3 cursor-pointer transition-colors" style={{ backgroundColor: '#7A1029' }}
             >
-              <div className="mt-8 w-20 h-20 bg-white rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2457FF' }}>BFC</div>
-              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+              <div className="mt-8 w-20 h-20 bg-white dark:bg-card dark:text-card-foreground rounded-full flex items-center justify-center font-black text-xl" style={{ color: '#2457FF' }}>BFC</div>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: "var(--foreground)" }}>
                 Brooklyn FC — Sports
               </div>
             </motion.div>
@@ -806,7 +806,7 @@ export default function Home() {
               whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform -rotate-2 -translate-y-2 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
             >
-              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: "var(--foreground)" }}>
                 Aisha K. — Creator
               </div>
             </motion.div>
@@ -819,7 +819,7 @@ export default function Home() {
               whileHover={{ scale: 1.06, rotate: 0, y: -8 }}
               className="w-48 h-64 rounded-[2rem] p-4 flex items-end shadow-xl transform rotate-1 cursor-pointer transition-colors" style={{ backgroundColor: '#D9FF3F' }}
             >
-              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: '#101828' }}>
+              <div className="bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-sm font-bold w-full text-center truncate" style={{ color: "var(--foreground)" }}>
                 The Archive — Club
               </div>
             </motion.div>
@@ -829,13 +829,13 @@ export default function Home() {
       </section>
 
       {/* D. Testimonial Section - Auto-playing Carousel */}
-      <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white relative overflow-hidden">
+      <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white dark:bg-card dark:text-card-foreground relative overflow-hidden">
 
         <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}>
-          <div className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">←</div>
+          <div className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:bg-muted transition-colors">←</div>
         </div>
         <div className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev + 1) % TESTIMONIALS.length)}>
-          <div className="w-12 h-12 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">→</div>
+          <div className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:bg-muted transition-colors">→</div>
         </div>
 
         <div className="max-w-4xl min-h-[400px] flex flex-col items-center justify-center relative">
@@ -856,10 +856,10 @@ export default function Home() {
               </div>
 
               <div className="space-y-8">
-                <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: '#111827' }}>
+                <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: "var(--foreground)" }}>
                   "{TESTIMONIALS[testimonialStep].quote}"
                 </h2>
-                <p className="text-xl font-bold opacity-60" style={{ color: '#111827' }}>
+                <p className="text-xl font-bold opacity-60" style={{ color: "var(--foreground)" }}>
                   — {TESTIMONIALS[testimonialStep].author}
                 </p>
               </div>
@@ -902,12 +902,12 @@ export default function Home() {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className={`bg-white rounded-3xl px-6 border-none transition-all duration-300 ${activeFaq === `item-${i}` ? 'border-l-4 border-l-[#D9FF00]' : 'border-l-4 border-l-transparent'}`}
+                className={`bg-white dark:bg-card dark:text-card-foreground rounded-3xl px-6 border-none transition-all duration-300 ${activeFaq === `item-${i}` ? 'border-l-4 border-l-[#D9FF00]' : 'border-l-4 border-l-transparent'}`}
               >
-                <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline" style={{ color: '#111827' }}>
+                <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline" style={{ color: "var(--foreground)" }}>
                   {q}
                 </AccordionTrigger>
-                <AccordionContent className="text-lg font-medium opacity-80 pb-6" style={{ color: '#111827' }}>
+                <AccordionContent className="text-lg font-medium opacity-80 pb-6" style={{ color: "var(--foreground)" }}>
                   We built Meow for creators who want to own their audience. It's beautiful, fast, and gives you full control over your community data. Sign up to see the difference.
                 </AccordionContent>
               </AccordionItem>
@@ -924,19 +924,19 @@ export default function Home() {
           </h2>
           <p className="text-2xl text-white/80 font-medium">Claim your link and host your first event today.</p>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 max-w-xl mx-auto mt-8 bg-white p-2 rounded-full shadow-2xl transition-all focus-within:border-2 focus-within:border-[#D9FF00]">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 max-w-xl mx-auto mt-8 bg-white dark:bg-card dark:text-card-foreground p-2 rounded-full shadow-2xl transition-all focus-within:border-2 focus-within:border-[#D9FF00]">
             <div className="flex-1 flex items-center px-4 w-full sm:w-auto">
-              <span className="text-xl font-bold opacity-40 mr-1" style={{ color: '#111827' }}>meow.so/</span>
+              <span className="text-xl font-bold opacity-40 mr-1" style={{ color: "var(--foreground)" }}>meow.so/</span>
               <input
                 type="text"
                 placeholder="yourname"
                 className="text-xl font-bold w-full outline-none bg-transparent"
-                style={{ color: '#111827' }}
+                style={{ color: "var(--foreground)" }}
               />
             </div>
             <Link href="/signup">
               <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
-                <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold w-full sm:w-auto" style={{ backgroundColor: '#D9FF00', color: '#111827' }}>
+                <Button size="lg" className="rounded-full h-14 px-8 text-lg font-bold w-full sm:w-auto" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>
                   Claim Link
                 </Button>
               </motion.div>
@@ -947,11 +947,11 @@ export default function Home() {
 
       {/* 11. Footer */}
       <footer className="py-20 px-6" style={{ backgroundColor: '#D9FF3F' }}>
-        <div className="max-w-[1200px] mx-auto bg-white rounded-[40px] p-12 shadow-sm border border-gray-100">
+        <div className="max-w-[1200px] mx-auto bg-white dark:bg-card dark:text-card-foreground rounded-[40px] p-12 shadow-sm border border-gray-100 dark:border-border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Company</h4>
-              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
+              <h4 className="font-bold mb-4" style={{ color: "var(--foreground)" }}>Company</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: "var(--foreground)" }}>
                 <li>About</li>
                 <li>Careers</li>
                 <li>Blog</li>
@@ -959,8 +959,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Community</h4>
-              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
+              <h4 className="font-bold mb-4" style={{ color: "var(--foreground)" }}>Community</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: "var(--foreground)" }}>
                 <li>Creators</li>
                 <li>Brands</li>
                 <li>Events</li>
@@ -968,8 +968,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Support</h4>
-              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
+              <h4 className="font-bold mb-4" style={{ color: "var(--foreground)" }}>Support</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: "var(--foreground)" }}>
                 <li>Help Center</li>
                 <li>Trust & Safety</li>
                 <li>Guidelines</li>
@@ -977,15 +977,15 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4" style={{ color: '#101828' }}>Legal</h4>
-              <ul className="space-y-3 text-sm font-bold" style={{ color: '#101828' }}>
+              <h4 className="font-bold mb-4" style={{ color: "var(--foreground)" }}>Legal</h4>
+              <ul className="space-y-3 text-sm font-bold" style={{ color: "var(--foreground)" }}>
                 <li>Privacy</li>
                 <li>Terms</li>
                 <li>Cookies</li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="pt-8 border-t border-gray-100 dark:border-border flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-2">
               <Link href="/" className="flex items-center">
                 <img src="/meowlogo2.png" alt="MEOW" className="h-16 md:h-20 w-auto object-contain" />
@@ -996,7 +996,7 @@ export default function Home() {
             </div>
             <div className="flex gap-4">
               <Link href="/login">
-                <Button variant="outline" className="rounded-full font-bold border-2 border-[#101828] text-[#101828]">Log in</Button>
+                <Button variant="outline" className="rounded-full font-bold border-2 border-[#101828] text-[#101828] dark:text-foreground">Log in</Button>
               </Link>
               <Link href="/signup">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
@@ -1023,7 +1023,7 @@ export default function Home() {
                 className="flex flex-col items-center px-0.5 sm:px-2 relative"
               >
                 <div className="relative flex items-center justify-center">
-                  <span className="text-[24vw] sm:text-[25vw] font-black tracking-tighter leading-none text-[#101828] select-none">
+                  <span className="text-[24vw] sm:text-[25vw] font-black tracking-tighter leading-none text-[#101828] dark:text-foreground select-none">
                     {item.letter}
                   </span>
                   {item.image && (
@@ -1037,7 +1037,7 @@ export default function Home() {
                     />
                   )}
                 </div>
-                <span className="text-[2.2vw] sm:text-[1vw] font-black tracking-tighter sm:tracking-[0.2em] uppercase text-[#101828]/60 mt-[-1vw] sm:mt-[-2vw]">
+                <span className="text-[2.2vw] sm:text-[1vw] font-black tracking-tighter sm:tracking-[0.2em] uppercase text-[#101828] dark:text-foreground/60 mt-[-1vw] sm:mt-[-2vw]">
                   {item.word}
                 </span>
               </motion.div>

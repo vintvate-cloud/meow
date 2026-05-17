@@ -81,7 +81,7 @@ export default function Dashboard() {
   const totalRsvps = hostingEvents.reduce((acc, event) => acc + (event.rsvpCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background flex flex-col font-sans">
       <TopNavbar />
       <BottomNavbar />
 
@@ -90,7 +90,7 @@ export default function Dashboard() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div className="w-full flex justify-between items-center md:block">
             <div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight" style={{ color: '#101828' }}>
+              <h1 className="text-3xl md:text-4xl font-black tracking-tight" style={{ color: "var(--foreground)" }}>
                 Hey, {user?.displayName?.split(' ')[0] || 'Creator'}!
               </h1>
               <p className="text-gray-500 font-medium mt-1 text-sm md:text-base">
@@ -110,10 +110,10 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="Search..."
-                className="bg-white border border-gray-100 rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all"
+                className="bg-white dark:bg-card dark:text-card-foreground border border-gray-100 dark:border-border rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all"
               />
             </div>
-            <Button className="w-12 h-12 rounded-2xl p-0 bg-white border border-gray-100 text-gray-400 hover:text-[#101828]">
+            <Button className="w-12 h-12 rounded-2xl p-0 bg-white dark:bg-card dark:text-card-foreground border border-gray-100 dark:border-border text-gray-400 hover:text-[#101828] dark:text-foreground">
               <Bell className="w-5 h-5" />
             </Button>
           </div>
@@ -130,23 +130,23 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Events */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
+            <div className="flex justify-between items-end border-b border-gray-100 dark:border-border pb-4">
               <div className="flex gap-6">
                 <button 
                   onClick={() => setActiveTab('attending')} 
-                  className={`text-2xl font-black transition-colors ${activeTab === 'attending' ? 'text-[#101828]' : 'text-gray-300 hover:text-gray-500'}`}
+                  className={`text-2xl font-black transition-colors ${activeTab === 'attending' ? 'text-[#101828] dark:text-foreground' : 'text-gray-300 hover:text-gray-500'}`}
                 >
                   Attending
                 </button>
                 <button 
                   onClick={() => setActiveTab('hosting')} 
-                  className={`text-2xl font-black transition-colors ${activeTab === 'hosting' ? 'text-[#101828]' : 'text-gray-300 hover:text-gray-500'}`}
+                  className={`text-2xl font-black transition-colors ${activeTab === 'hosting' ? 'text-[#101828] dark:text-foreground' : 'text-gray-300 hover:text-gray-500'}`}
                 >
                   Hosting
                 </button>
               </div>
               <Link href="/explore">
-                <span className="text-sm font-bold text-gray-400 cursor-pointer hover:text-[#101828]">Explore Events</span>
+                <span className="text-sm font-bold text-gray-400 cursor-pointer hover:text-[#101828] dark:text-foreground">Explore Events</span>
               </Link>
             </div>
 
@@ -155,7 +155,7 @@ export default function Dashboard() {
                 <div className="p-12 text-center font-bold opacity-20">Loading events...</div>
               ) : activeTab === 'attending' ? (
                 attendingEvents.length === 0 ? (
-                  <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
+                  <div className="p-12 bg-white dark:bg-card dark:text-card-foreground rounded-[40px] border-2 border-dashed border-gray-200 dark:border-border text-center space-y-4">
                     <p className="text-gray-400 font-bold">You aren't attending any events yet.</p>
                     <Link href="/explore">
                       <Button variant="outline" className="rounded-full font-bold">Discover Events</Button>
@@ -177,7 +177,7 @@ export default function Dashboard() {
                 )
               ) : (
                 hostingEvents.length === 0 ? (
-                  <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
+                  <div className="p-12 bg-white dark:bg-card dark:text-card-foreground rounded-[40px] border-2 border-dashed border-gray-200 dark:border-border text-center space-y-4">
                     <p className="text-gray-400 font-bold">You haven't hosted any events yet.</p>
                     <Link href="/create-event">
                       <Button variant="outline" className="rounded-full font-bold">Start your first one</Button>
@@ -203,7 +203,7 @@ export default function Dashboard() {
           {/* Quick Actions / Tips */}
           <div className="space-y-6">
             <h2 className="text-2xl font-black">Quick Actions</h2>
-            <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-6 shadow-sm border border-gray-100 dark:border-border space-y-4">
               <Link href="/create-event">
                 <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold justify-start">
                   <Plus className="w-5 h-5 mr-3" /> Create new event
@@ -215,7 +215,7 @@ export default function Dashboard() {
 
               <div className="pt-4">
                 <div className="bg-[#D9FF00]/10 p-6 rounded-2xl border border-[#D9FF00]/20">
-                  <div className="font-black text-sm mb-2" style={{ color: '#111827' }}>PRO TIP</div>
+                  <div className="font-black text-sm mb-2" style={{ color: "var(--foreground)" }}>PRO TIP</div>
                   <p className="text-sm font-medium opacity-70 mb-4">Sharing your link on Twitter increases visibility by 2x.</p>
                   <Button size="sm" className="rounded-full font-bold bg-[#111827] text-[#D9FF00]">Share Profile</Button>
                 </div>
@@ -232,7 +232,7 @@ export default function Dashboard() {
 
 function StatCard({ label, value, change, color }: any) {
   return (
-    <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border relative overflow-hidden group hover:shadow-md transition-shadow">
       <div className="absolute top-0 right-0 w-24 h-24 rounded-full -mr-8 -mt-8 opacity-5" style={{ backgroundColor: color }}></div>
       <div className="text-sm font-bold text-gray-400 mb-1">{label}</div>
       <div className="flex items-end gap-3">
@@ -251,7 +251,7 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false, isAtte
       whileHover={{ scale: 1.01, x: 4 }}
       onClick={() => isAttending ? setLocation(`/e/${id}`) : setLocation(`/manage/${id}`)}
 
-      className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group cursor-pointer"
+      className="bg-white dark:bg-card dark:text-card-foreground p-6 rounded-[32px] shadow-sm border border-gray-100 dark:border-border flex items-center justify-between group cursor-pointer"
     >
       <div className="flex items-center gap-6">
         <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-black" style={{ backgroundColor: color, color: dark ? 'white' : '#111827' }}>
@@ -259,7 +259,7 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false, isAtte
           <div className="text-xl">{date.split(' ')[1]}</div>
         </div>
         <div>
-          <h4 className="text-xl font-black group-hover:text-[#101828] transition-colors flex items-center gap-2">
+          <h4 className="text-xl font-black group-hover:text-[#101828] dark:text-foreground transition-colors flex items-center gap-2">
             {title} <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-40" />
           </h4>
           <div className="text-sm font-medium text-gray-400">{date}</div>
@@ -276,7 +276,7 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false, isAtte
         <div className={`px-4 py-2 rounded-full text-xs font-black ${
           status === 'Pending Approval' ? 'bg-orange-50 text-orange-600' : 
           status === 'Approved' ? 'bg-green-50 text-green-600' : 
-          'bg-[#D9FF00]/20 text-[#101828]'
+          'bg-[#D9FF00]/20 text-[#101828] dark:text-foreground'
         }`}>
           {status}
         </div>
