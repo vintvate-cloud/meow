@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { SiGoogle } from "react-icons/si";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { getAdditionalUserInfo } from "firebase/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -35,8 +36,13 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle();
-      setLocation("/");
+      const result = await loginWithGoogle();
+      const details = getAdditionalUserInfo(result);
+      if (details?.isNewUser) {
+        setLocation("/onboarding");
+      } else {
+        setLocation("/");
+      }
     } catch (error: any) {
       toast({
         title: "Google login failed",

@@ -15,7 +15,7 @@ interface AuthContextType {
   loading: boolean;
   login: typeof signInWithEmailAndPassword;
   signup: typeof createUserWithEmailAndPassword;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: () => Promise<any>;
   logout: () => Promise<void>;
 }
 
@@ -37,7 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);
   const loginWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      return result;
     } catch (error) {
       console.error("Google login failed", error);
       throw error;

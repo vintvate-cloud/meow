@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -71,9 +71,10 @@ export default function EventDetails() {
       setRsvpId(rsvpDoc.id);
 
 
-      // 2. Increment count on event doc
+      // 2. Increment count and add to attendeeEmails on event doc
       await updateDoc(doc(db, "events", id), {
-        rsvpCount: increment(1)
+        rsvpCount: increment(1),
+        attendeeEmails: arrayUnion(email)
       });
 
       setRsvpDone(true);

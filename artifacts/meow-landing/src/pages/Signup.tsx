@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { SiGoogle } from "react-icons/si";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { updateProfile } from "firebase/auth";
+import { updateProfile, getAdditionalUserInfo } from "firebase/auth";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -24,7 +24,7 @@ export default function Signup() {
       const userCredential = await signup(email, password);
       await updateProfile(userCredential.user, { displayName: name });
       toast({ title: "Account created!", description: "Welcome to Meow." });
-      setLocation("/");
+      setLocation("/onboarding");
     } catch (error: any) {
       toast({
         title: "Signup failed",
@@ -38,8 +38,13 @@ export default function Signup() {
 
   const handleGoogleLogin = async () => {
     try {
-      await loginWithGoogle();
-      setLocation("/");
+      const result = await loginWithGoogle();
+      const details = getAdditionalUserInfo(result);
+      if (details?.isNewUser) {
+        setLocation("/onboarding");
+      } else {
+        setLocation("/");
+      }
     } catch (error: any) {
       toast({
         title: "Google login failed",

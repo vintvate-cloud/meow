@@ -14,6 +14,8 @@ import ManageEvent from "@/pages/ManageEvent";
 import Explore from "@/pages/Explore";
 import QRScanner from "@/pages/QRScanner";
 import Ticket from "@/pages/Ticket";
+import Settings from "@/pages/Settings";
+import Onboarding from "@/pages/Onboarding";
 import { useEffect } from "react";
 
 
@@ -46,8 +48,10 @@ function Router() {
       </Route>
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <ProtectedRoute path="/onboarding" component={Onboarding} />
       <Route path="/explore" component={Explore} />
       <ProtectedRoute path="/dashboard" component={Dashboard} />
+      <ProtectedRoute path="/settings" component={Settings} />
       <ProtectedRoute path="/create-event" component={CreateEvent} />
       <ProtectedRoute path="/manage/:id" component={ManageEvent} />
       <ProtectedRoute path="/scan/:id" component={QRScanner} />

@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { TopNavbar, BottomNavbar } from "@/components/Navigation";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
@@ -21,83 +22,71 @@ import {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
-  const [events, setEvents] = useState<any[]>([]);
+  const [hostingEvents, setHostingEvents] = useState<any[]>([]);
+  const [attendingEvents, setAttendingEvents] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'attending' | 'hosting'>('attending');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchDashboardData = async () => {
       if (!user) return;
       try {
-        const q = query(
+        // Fetch Hosting Events
+        const hostingQ = query(
           collection(db, "events"),
           where("userId", "==", user.uid)
         );
-        const querySnapshot = await getDocs(q);
-        const eventData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Sort in memory to avoid needing a Firestore composite index
-        eventData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        setEvents(eventData);
+        const hostingSnap = await getDocs(hostingQ);
+        const hostingData = hostingSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        hostingData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setHostingEvents(hostingData);
+
+        // Fetch Attending Events
+        if (user.email) {
+          const attendingQ = query(
+            collection(db, "events"),
+            where("attendeeEmails", "array-contains", user.email)
+          );
+          const attendingSnap = await getDocs(attendingQ);
+          const attendingData = [];
+          
+          for (const docSnap of attendingSnap.docs) {
+            const eventData = { id: docSnap.id, ...docSnap.data() } as any;
+            const rsvpQ = query(
+              collection(db, "events", docSnap.id, "rsvps"),
+              where("email", "==", user.email)
+            );
+            const rsvpSnap = await getDocs(rsvpQ);
+            if (!rsvpSnap.empty) {
+              const rsvpData = rsvpSnap.docs[0].data();
+              eventData.rsvpStatus = rsvpData.confirmationSent ? "Approved" : "Pending Approval";
+            } else {
+              eventData.rsvpStatus = "Pending Approval";
+            }
+            attendingData.push(eventData);
+          }
+          attendingData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+          setAttendingEvents(attendingData);
+        }
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
+    fetchDashboardData();
   }, [user]);
 
-  const totalRsvps = events.reduce((acc, event) => acc + (event.rsvpCount || 0), 0);
+  const totalRsvps = hostingEvents.reduce((acc, event) => acc + (event.rsvpCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] flex font-sans">
-      {/* Sidebar (Desktop only) */}
-      <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col p-6 z-20 sticky top-0 h-screen">
-        <div className="flex items-center gap-3 px-2 mb-12">
-          <Link href="/" className="flex items-center">
-            <img src="/meow logo.png" alt="MEOW" className="h-10 w-auto object-contain" />
-          </Link>
-          <span className="font-black text-2xl tracking-tighter" style={{ color: '#101828' }}>MEOW</span>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <NavItem icon={<Calendar className="w-5 h-5" />} label="Events" active />
-          <Link href="/explore">
-            <NavItem icon={<Globe className="w-5 h-5" />} label="Explore" />
-          </Link>
-          <NavItem icon={<Users className="w-5 h-5" />} label="Communities" />
-          <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Analytics" />
-          <NavItem icon={<Settings className="w-5 h-5" />} label="Settings" />
-        </nav>
-
-        <div className="pt-4 border-t border-gray-100">
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-3 w-full p-3 rounded-2xl hover:bg-red-50 text-red-600 transition-colors group"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-bold">Log out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Bottom Nav (Mobile only) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <NavItem icon={<Calendar className="w-6 h-6" />} label="Events" active isMobile />
-        <Link href="/explore">
-          <NavItem icon={<Globe className="w-6 h-6" />} label="Explore" isMobile />
-        </Link>
-        <Link href="/create-event">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center -translate-y-6 shadow-2xl border-4 border-[#F3F0E8] transition-transform active:scale-90" style={{ backgroundColor: '#101828' }}>
-            <Plus className="w-8 h-8 text-[#D9FF3F]" />
-          </div>
-        </Link>
-        <NavItem icon={<Users className="w-6 h-6" />} label="Groups" isMobile />
-        <NavItem icon={<Settings className="w-6 h-6" />} label="Settings" isMobile />
-      </nav>
+    <div className="min-h-screen bg-[#F3F0E8] flex flex-col font-sans">
+      <TopNavbar />
+      <BottomNavbar />
 
       {/* Main Content */}
-      <main className="flex-1 p-6 md:p-12 pb-32 md:pb-12 overflow-y-auto">
+      <main className="flex-1 p-6 md:p-12 pb-32 md:pb-12 overflow-y-auto w-full max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div className="w-full flex justify-between items-center md:block">
             <div>
@@ -105,7 +94,7 @@ export default function Dashboard() {
                 Hey, {user?.displayName?.split(' ')[0] || 'Creator'}!
               </h1>
               <p className="text-gray-500 font-medium mt-1 text-sm md:text-base">
-                {events.length === 0 ? "Let's build something." : `${events.length} active events`}
+                {hostingEvents.length === 0 ? "Let's build something." : `${hostingEvents.length} active events`}
               </p>
             </div>
             <div className="md:hidden">
@@ -127,19 +116,13 @@ export default function Dashboard() {
             <Button className="w-12 h-12 rounded-2xl p-0 bg-white border border-gray-100 text-gray-400 hover:text-[#101828]">
               <Bell className="w-5 h-5" />
             </Button>
-            <Link href="/create-event">
-              <Button className="rounded-2xl h-12 px-6 font-black shadow-xl border-none hidden md:flex" style={{ backgroundColor: '#101828', color: '#D9FF3F' }}>
-                <Plus className="w-5 h-5 mr-2" />
-                Create Event
-              </Button>
-            </Link>
           </div>
         </header>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <StatCard label="Total RSVPs" value={totalRsvps.toLocaleString()} change="+0%" color="#2856E8" />
-          <StatCard label="Active Events" value={events.length.toString()} change="+0%" color="#79001B" />
+          <StatCard label="Active Events" value={hostingEvents.length.toString()} change="+0%" color="#79001B" />
           <StatCard label="Member Growth" value="0" change="+0%" color="#00B7FF" />
         </div>
 
@@ -147,33 +130,72 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Events */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex justify-between items-end">
-              <h2 className="text-2xl font-black">Your Events</h2>
-              <span className="text-sm font-bold text-gray-400 cursor-pointer hover:text-navy">View all</span>
+            <div className="flex justify-between items-end border-b border-gray-100 pb-4">
+              <div className="flex gap-6">
+                <button 
+                  onClick={() => setActiveTab('attending')} 
+                  className={`text-2xl font-black transition-colors ${activeTab === 'attending' ? 'text-[#101828]' : 'text-gray-300 hover:text-gray-500'}`}
+                >
+                  Attending
+                </button>
+                <button 
+                  onClick={() => setActiveTab('hosting')} 
+                  className={`text-2xl font-black transition-colors ${activeTab === 'hosting' ? 'text-[#101828]' : 'text-gray-300 hover:text-gray-500'}`}
+                >
+                  Hosting
+                </button>
+              </div>
+              <Link href="/explore">
+                <span className="text-sm font-bold text-gray-400 cursor-pointer hover:text-[#101828]">Explore Events</span>
+              </Link>
             </div>
 
             <div className="space-y-4">
               {loading ? (
                 <div className="p-12 text-center font-bold opacity-20">Loading events...</div>
-              ) : events.length === 0 ? (
-                <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
-                  <p className="text-gray-400 font-bold">You don't have any events yet.</p>
-                  <Link href="/create-event">
-                    <Button variant="outline" className="rounded-full font-bold">Start your first one</Button>
-                  </Link>
-                </div>
+              ) : activeTab === 'attending' ? (
+                attendingEvents.length === 0 ? (
+                  <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
+                    <p className="text-gray-400 font-bold">You aren't attending any events yet.</p>
+                    <Link href="/explore">
+                      <Button variant="outline" className="rounded-full font-bold">Discover Events</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  attendingEvents.map(event => (
+                    <EventCard
+                      key={event.id}
+                      id={event.id}
+                      title={event.title}
+                      date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      rsvps={event.rsvpCount || 0}
+                      status={event.rsvpStatus}
+                      color={event.color}
+                      isAttending
+                    />
+                  ))
+                )
               ) : (
-                events.map(event => (
-                  <EventCard
-                    key={event.id}
-                    id={event.id}
-                    title={event.title}
-                    date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    rsvps={event.rsvpCount || 0}
-                    status="Active"
-                    color={event.color}
-                  />
-                ))
+                hostingEvents.length === 0 ? (
+                  <div className="p-12 bg-white rounded-[40px] border-2 border-dashed border-gray-200 text-center space-y-4">
+                    <p className="text-gray-400 font-bold">You haven't hosted any events yet.</p>
+                    <Link href="/create-event">
+                      <Button variant="outline" className="rounded-full font-bold">Start your first one</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  hostingEvents.map(event => (
+                    <EventCard
+                      key={event.id}
+                      id={event.id}
+                      title={event.title}
+                      date={new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      rsvps={event.rsvpCount || 0}
+                      status="Active"
+                      color={event.color}
+                    />
+                  ))
+                )
               )}
             </div>
           </div>
@@ -206,23 +228,7 @@ export default function Dashboard() {
   );
 }
 
-function NavItem({ icon, label, active = false, isMobile = false }: { icon: any, label: string, active?: boolean, isMobile?: boolean }) {
-  if (isMobile) {
-    return (
-      <button className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-[#101828]' : 'text-gray-300'}`}>
-        <div className={active ? 'scale-110' : ''}>{icon}</div>
-        <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
-      </button>
-    );
-  }
 
-  return (
-    <button className={`flex items-center gap-3 w-full p-3 rounded-2xl transition-all group ${active ? 'bg-[#D9FF3F] text-[#101828]' : 'hover:bg-gray-50 text-gray-400 hover:text-[#101828]'}`}>
-      <div className={active ? '' : 'group-hover:scale-110 transition-transform'}>{icon}</div>
-      <span className="font-bold">{label}</span>
-    </button>
-  );
-}
 
 function StatCard({ label, value, change, color }: any) {
   return (
@@ -237,13 +243,13 @@ function StatCard({ label, value, change, color }: any) {
   );
 }
 
-function EventCard({ id, title, date, rsvps, status, color, dark = false }: any) {
+function EventCard({ id, title, date, rsvps, status, color, dark = false, isAttending = false }: any) {
   const [, setLocation] = useLocation();
 
   return (
     <motion.div
       whileHover={{ scale: 1.01, x: 4 }}
-      onClick={() => setLocation(`/manage/${id}`)}
+      onClick={() => isAttending ? setLocation(`/e/${id}`) : setLocation(`/manage/${id}`)}
 
       className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 flex items-center justify-between group cursor-pointer"
     >
@@ -253,7 +259,7 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false }: any)
           <div className="text-xl">{date.split(' ')[1]}</div>
         </div>
         <div>
-          <h4 className="text-xl font-black group-hover:text-navy transition-colors flex items-center gap-2">
+          <h4 className="text-xl font-black group-hover:text-[#101828] transition-colors flex items-center gap-2">
             {title} <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-40" />
           </h4>
           <div className="text-sm font-medium text-gray-400">{date}</div>
@@ -261,11 +267,17 @@ function EventCard({ id, title, date, rsvps, status, color, dark = false }: any)
       </div>
 
       <div className="hidden md:flex items-center gap-8">
-        <div className="text-center">
-          <div className="text-sm font-black">{rsvps}</div>
-          <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">RSVPs</div>
-        </div>
-        <div className={`px-4 py-2 rounded-full text-xs font-black ${status === 'Sold Out' ? 'bg-red-50 text-red-600' : 'bg-[#D9FF00]/20 text-navy'}`}>
+        {!isAttending && (
+          <div className="text-center">
+            <div className="text-sm font-black">{rsvps}</div>
+            <div className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">RSVPs</div>
+          </div>
+        )}
+        <div className={`px-4 py-2 rounded-full text-xs font-black ${
+          status === 'Pending Approval' ? 'bg-orange-50 text-orange-600' : 
+          status === 'Approved' ? 'bg-green-50 text-green-600' : 
+          'bg-[#D9FF00]/20 text-[#101828]'
+        }`}>
           {status}
         </div>
       </div>
