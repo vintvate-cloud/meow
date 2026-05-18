@@ -31,15 +31,15 @@ export default function Signup() {
       
       try {
         await emailjs.send(
-          'service_uiexjuf',
-          'template_u0obxjz',
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
           {
             to_email: email,
             otp: generatedOtp,
             passcode: generatedOtp,
             time: new Date(Date.now() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           },
-          '0-k1gYx2ypwKRghzk'
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
         );
         toast({ title: "OTP Sent!", description: "Please check your email for the verification code." });
         setStep("otp");
