@@ -4,6 +4,9 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Check, Moon, Sun, Camera, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AVATAR_IMAGES, formatAvatarUrlForStorage } from "@/lib/avatars";
+import { updateProfile } from "firebase/auth";
 
 export default function Onboarding() {
   const { user } = useAuth();
@@ -15,7 +18,10 @@ export default function Onboarding() {
   const [bio, setBio] = useState("");
   const [dob, setDob] = useState("");
   const [profession, setProfession] = useState("");
-  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(user?.photoURL || null);
+  const [profilePicUrl, setProfilePicUrl] = useState<string>(() => {
+    return AVATAR_IMAGES[Math.floor(Math.random() * AVATAR_IMAGES.length)];
+  });
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -47,7 +53,18 @@ export default function Onboarding() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (user) {
+      try {
+        await updateProfile(user, {
+          displayName: displayName,
+          photoURL: formatAvatarUrlForStorage(profilePicUrl)
+        });
+      } catch (error) {
+        console.error("Failed to update profile during onboarding", error);
+      }
+    }
+
     localStorage.setItem('theme', theme);
     // In a real app, you would save this preference and create the event to Firestore here
     setLocation("/");
@@ -194,29 +211,51 @@ export default function Onboarding() {
             
             <div className="space-y-6">
               <div className="flex flex-col items-center justify-center mb-6">
-                <div className="relative w-28 h-28 rounded-full bg-muted/50 flex items-center justify-center overflow-hidden group cursor-pointer transition-all hover:bg-muted shadow-sm">
-                  {profilePicUrl ? (
-                    <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-10 h-10 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Camera className="w-8 h-8 text-white" />
-                  </div>
-                  <input 
-                    type="file" 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                    accept="image/*" 
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        // In a real app, upload to Firebase Storage here
-                        // For now, create a local object URL to preview
-                        setProfilePicUrl(URL.createObjectURL(e.target.files[0]));
-                      }
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-4 font-bold uppercase tracking-widest">Profile picture (optional)</p>
+                <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+                  <DialogTrigger asChild>
+                    <div className="relative w-28 h-28 rounded-full bg-muted/50 flex items-center justify-center overflow-hidden group cursor-pointer transition-all hover:bg-muted shadow-sm">
+                      <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-3xl bg-background/95 backdrop-blur-3xl border-border/50 rounded-[2rem] p-6 sm:p-12 shadow-[0_0_80px_rgba(0,0,0,0.15)] dark:shadow-[0_0_80px_rgba(0,0,0,0.6)]">
+                    <DialogHeader className="mb-6 sm:mb-8">
+                      <DialogTitle className="text-center font-serif text-3xl sm:text-5xl tracking-tight text-foreground">Select Your Avatar</DialogTitle>
+                      <p className="text-center text-sm sm:text-base text-muted-foreground mt-3 font-medium">Choose a profile picture that represents you.</p>
+                    </DialogHeader>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 max-h-[55vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+                      {AVATAR_IMAGES.map((avatar, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setProfilePicUrl(avatar);
+                            setIsAvatarModalOpen(false);
+                          }}
+                          className={`group relative w-full aspect-square rounded-full overflow-hidden transition-all duration-300 ease-out focus:outline-none ${
+                            profilePicUrl === avatar 
+                              ? 'ring-4 ring-foreground ring-offset-4 ring-offset-background scale-110 shadow-2xl z-10' 
+                              : 'ring-1 ring-border/50 hover:ring-2 hover:ring-foreground/50 hover:scale-105 hover:shadow-xl bg-muted/20'
+                          }`}
+                        >
+                          <img 
+                            src={avatar} 
+                            alt={`Avatar ${i}`} 
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                          />
+                          {profilePicUrl === avatar && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20 transition-all duration-300">
+                              <Check className="w-8 h-8 text-white drop-shadow-md" strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <p className="text-xs text-muted-foreground mt-4 font-bold uppercase tracking-widest">Profile picture</p>
               </div>
 
               <div className="space-y-6">

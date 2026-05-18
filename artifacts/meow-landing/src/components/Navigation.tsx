@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Calendar, Globe, Users, BarChart3, Settings, LogOut, Plus, Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
+import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
 export function NavItem({ icon, label, active = false, isMobile = false, isNavbar = false, href }: { icon: any, label: string, active?: boolean, isMobile?: boolean, isNavbar?: boolean, href?: string }) {
   const content = (
@@ -33,9 +34,10 @@ export function NavItem({ icon, label, active = false, isMobile = false, isNavba
 }
 
 export function TopNavbar() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [location] = useLocation();
   const [isDark, setIsDark] = useState(false);
+  const avatarUrl = parseAvatarUrlFromStorage(user?.photoURL || null);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
@@ -75,13 +77,17 @@ export function TopNavbar() {
         </Link>
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors"
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors mr-2"
           title="Toggle Theme"
         >
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
-        <NavItem icon={<Settings className="w-4 h-4" />} label="Settings" active={location === '/settings'} isNavbar href="/settings" />
-        <div className="h-6 w-px bg-gray-200 mx-1"></div>
+        <Link href="/settings">
+          <button className={`relative rounded-full overflow-hidden transition-all border-2 ${location === '/settings' ? 'border-primary shadow-sm scale-105' : 'border-transparent hover:border-primary/50 hover:scale-105'}`}>
+            <img src={avatarUrl} alt="Profile" className="w-8 h-8 object-cover" />
+          </button>
+        </Link>
+        <div className="h-6 w-px bg-gray-200 dark:bg-border mx-2"></div>
         <button
           onClick={() => logout()}
           className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-red-50 text-red-600 transition-colors group"
@@ -96,6 +102,8 @@ export function TopNavbar() {
 
 export function BottomNavbar() {
   const [location] = useLocation();
+  const { user } = useAuth();
+  const avatarUrl = parseAvatarUrlFromStorage(user?.photoURL || null);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-card dark:text-card-foreground border-t border-gray-100 dark:border-border px-6 py-3 flex justify-between items-center z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
@@ -106,7 +114,14 @@ export function BottomNavbar() {
           <Plus className="w-8 h-8 text-[#D9FF3F]" />
         </div>
       </Link>
-      <NavItem icon={<Settings className="w-6 h-6" />} label="Settings" active={location === '/settings'} isMobile href="/settings" />
+      <Link href="/settings">
+        <div className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${location === '/settings' ? 'text-[#101828] dark:text-foreground' : 'text-gray-300'}`}>
+          <div className={`w-6 h-6 rounded-full overflow-hidden transition-transform ${location === '/settings' ? 'scale-110 ring-2 ring-primary ring-offset-1 dark:ring-offset-card' : ''}`}>
+            <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Profile</span>
+        </div>
+      </Link>
     </nav>
   );
 }

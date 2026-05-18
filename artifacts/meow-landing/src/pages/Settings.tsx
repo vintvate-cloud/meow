@@ -5,18 +5,25 @@ import { Input } from "@/components/ui/input";
 import { TopNavbar, BottomNavbar } from "@/components/Navigation";
 import { updateProfile, deleteUser } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, User, Bell, Shield, Paintbrush } from "lucide-react";
+import { LogOut, User, Bell, Shield, Paintbrush, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AVATAR_IMAGES, formatAvatarUrlForStorage, parseAvatarUrlFromStorage } from "@/lib/avatars";
 import { motion } from "framer-motion";
 
 export default function Settings() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [profilePicUrl, setProfilePicUrl] = useState<string>(parseAvatarUrlFromStorage(user?.photoURL || null));
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       setDisplayName(user.displayName || "");
+      if (user.photoURL) {
+        setProfilePicUrl(parseAvatarUrlFromStorage(user.photoURL));
+      }
     }
   }, [user]);
 
@@ -27,7 +34,8 @@ export default function Settings() {
 
     try {
       await updateProfile(user, {
-        displayName: displayName
+        displayName: displayName,
+        photoURL: formatAvatarUrlForStorage(profilePicUrl)
       });
       toast({ title: "Profile Updated", description: "Your display name has been saved successfully." });
     } catch (error: any) {
@@ -94,13 +102,57 @@ export default function Settings() {
             >
               <h2 className="text-xl font-black text-[#101828] dark:text-foreground mb-6">Profile Information</h2>
               
-              <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-50">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#D9FF3F] to-[#2457FF] flex items-center justify-center shadow-lg border-4 border-white">
-                  <span className="text-2xl font-black text-[#101828] dark:text-foreground">{displayName?.[0]?.toUpperCase() || 'U'}</span>
-                </div>
+              <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-50 dark:border-border">
+                <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+                  <DialogTrigger asChild>
+                    <div className="w-24 h-24 rounded-full bg-muted/50 flex items-center justify-center shadow-md overflow-hidden group cursor-pointer transition-all hover:bg-muted relative shrink-0">
+                      <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Paintbrush className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-3xl bg-background/95 backdrop-blur-3xl border-border/50 rounded-[2rem] p-6 sm:p-12 shadow-[0_0_80px_rgba(0,0,0,0.15)] dark:shadow-[0_0_80px_rgba(0,0,0,0.6)]">
+                    <DialogHeader className="mb-6 sm:mb-8">
+                      <DialogTitle className="text-center font-serif text-3xl sm:text-5xl tracking-tight text-foreground">Select Your Avatar</DialogTitle>
+                      <p className="text-center text-sm sm:text-base text-muted-foreground mt-3 font-medium">Choose a profile picture that represents you.</p>
+                    </DialogHeader>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-6 sm:gap-8 p-4 sm:p-6 max-h-[55vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+                      {AVATAR_IMAGES.map((avatar, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setProfilePicUrl(avatar);
+                            setIsAvatarModalOpen(false);
+                          }}
+                          className={`group relative w-full aspect-square rounded-full overflow-hidden transition-all duration-300 ease-out focus:outline-none ${
+                            profilePicUrl === avatar 
+                              ? 'ring-4 ring-foreground ring-offset-4 ring-offset-background scale-110 shadow-2xl z-10' 
+                              : 'ring-1 ring-border/50 hover:ring-2 hover:ring-foreground/50 hover:scale-105 hover:shadow-xl bg-muted/20'
+                          }`}
+                        >
+                          <img 
+                            src={avatar} 
+                            alt={`Avatar ${i}`} 
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                          />
+                          {profilePicUrl === avatar && (
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20 transition-all duration-300">
+                              <Check className="w-8 h-8 text-white drop-shadow-md" strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <div>
                   <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</div>
                   <div className="text-[#101828] dark:text-foreground font-bold bg-gray-50 dark:bg-muted px-4 py-2 rounded-xl inline-block">{user?.email}</div>
+                  <div className="mt-4">
+                    <Button type="button" variant="outline" className="h-8 text-xs font-bold rounded-full border-border hover:bg-muted" onClick={() => setIsAvatarModalOpen(true)}>Choose Avatar</Button>
+                  </div>
                 </div>
               </div>
 
