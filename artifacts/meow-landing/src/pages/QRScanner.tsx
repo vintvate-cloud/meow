@@ -31,6 +31,10 @@ export default function QRScanner() {
         }
 
         // Check in the attendee
+        if (!id) {
+          setResult({ success: false, message: "Event ID is missing!" });
+          return;
+        }
         const rsvpRef = doc(db, "events", id, "rsvps", data.rsvpId);
         const rsvpSnap = await getDoc(rsvpRef);
 

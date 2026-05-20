@@ -6,10 +6,19 @@ import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp,
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2, Download } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Lock } from "lucide-react";
+
+const THEMES_MAP: Record<string, { bg: string, text: string, accent: string, starburst: string }> = {
+  "cream-cozy": { bg: "#FAF8F5", text: "#101828", accent: "#8129D9", starburst: "#8129D9" },
+  "sleek-midnight": { bg: "#0A0A0A", text: "#FFFFFF", accent: "#D9FF00", starburst: "#D9FF00" },
+  "retro-mint": { bg: "#E6F0EA", text: "#1E3B27", accent: "#1E3B27", starburst: "#1E3B27" },
+  "burgundy-velvet": { bg: "#1C0A0E", text: "#FAF8F5", accent: "#D4AF37", starburst: "#79001B" },
+  "cyberpunk-neon": { bg: "#030F12", text: "#00F0FF", accent: "#FF007F", starburst: "#00F0FF" },
+  "royal-lavender": { bg: "#F0EBF7", text: "#2A1B4E", accent: "#58268C", starburst: "#8B5CF6" }
+};
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -113,41 +122,53 @@ export default function EventDetails() {
     }
   }, [user, email]);
 
+  const themeColors = (() => {
+    if (event?.theme && THEMES_MAP[event.theme]) {
+      return THEMES_MAP[event.theme];
+    }
+    const color = event?.color || '#D9FF00';
+    return {
+      bg: isDark ? "#0A0A0A" : "#F3F0E8",
+      text: isDark ? "#FFFFFF" : "#111827",
+      accent: color,
+      starburst: color
+    };
+  })();
+
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] dark:bg-[#0A0A0A] font-sans text-[#111827] dark:text-white relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300">
+    <div 
+      className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300"
+      style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
+    >
       {/* Dynamic Starburst/Ray Background Effect */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40">
         <div className="absolute w-[150vw] h-[150vw] md:w-[100vw] md:h-[100vw]" style={{
-          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${event.color || '#D9FF00'}22 10deg, transparent 11deg)`
+          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${themeColors.starburst}22 10deg, transparent 11deg)`
         }} />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,#F3F0E8_70%)] dark:bg-[radial-gradient(circle_at_center,transparent_20%,#0A0A0A_70%)]" />
+        <div className="absolute inset-0" style={{
+          background: `radial-gradient(circle_at_center, transparent 20%, ${themeColors.bg} 70%)`
+        }} />
       </div>
 
-      {/* Minimal Header */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/5">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 text-[#111827] dark:text-white font-bold opacity-80 hover:opacity-100 transition-opacity">
-             <img src="/meowlogo2.png" alt="MEOW" className="h-6 w-auto dark:brightness-0 dark:invert transition-all" />
-          </Link>
-          <div className="hidden md:flex gap-8 text-sm font-medium text-gray-500 dark:text-gray-400 ml-4">
-            <Link href="/" className="text-[#111827] dark:text-white">Events</Link>
-            <span className="hover:text-[#111827] dark:hover:text-white cursor-pointer transition-colors">Calendars</span>
-            <span className="hover:text-[#111827] dark:hover:text-white cursor-pointer transition-colors">Discover</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-6 text-sm font-bold text-gray-500 dark:text-gray-300">
-          <Link href="/create-event" className="hidden md:block hover:text-[#111827] dark:hover:text-white transition-colors">Create Event</Link>
-          <button onClick={toggleTheme} className="hover:text-[#111827] dark:hover:text-white transition-colors" title="Toggle Theme">
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-gray-200 dark:border-white/20 flex items-center justify-center text-[#111827] dark:text-white shadow-sm">
-            {user?.displayName?.[0] || "U"}
-          </div>
-        </div>
-      </nav>
+      {/* Back Button Only (No Navbar) */}
+      <div className="relative z-10 px-6 py-6 md:px-12 md:py-8 max-w-[1100px] mx-auto">
+        <button
+          onClick={() => {
+            // Safe fallback if history is empty
+            if (window.history.state && window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "/dashboard";
+            }
+          }}
+          className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back
+        </button>
+      </div>
 
       <div className="max-w-[1100px] mx-auto px-6 pt-10 md:pt-16 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 lg:gap-16">
@@ -155,70 +176,76 @@ export default function EventDetails() {
           {/* LEFT COLUMN */}
           <div className="space-y-6">
             {/* Event Poster Placeholder */}
-            <div className="w-full aspect-square rounded-[24px] border border-gray-200 dark:border-white/10 shadow-xl relative overflow-hidden flex items-center justify-center" style={{ backgroundColor: event.color || '#2457FF' }}>
-               <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-               <span className="text-[140px] font-black text-white mix-blend-overlay drop-shadow-md">{event.title?.[0]?.toUpperCase()}</span>
+            <div className="w-full aspect-square rounded-[24px] border border-gray-200 dark:border-white/10 shadow-xl relative overflow-hidden flex items-center justify-center transition-all duration-500" style={{ backgroundColor: themeColors.accent }}>
+               {event.creativeUrl ? (
+                 <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+               ) : (
+                 <>
+                   <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+                   <span className="text-[140px] font-black text-white mix-blend-overlay drop-shadow-md">{event.title?.[0]?.toUpperCase()}</span>
+                 </>
+               )}
             </div>
 
             {/* Presented By */}
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D9FF00] to-[#2457FF] flex items-center justify-center font-bold text-[#111827] dark:text-[#0A0A0A] text-sm shadow-inner">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D9FF00] to-[#2457FF] flex items-center justify-center font-bold text-white text-sm shadow-inner" style={{ background: `linear-gradient(to top right, ${themeColors.accent}, #2457FF)` }}>
                   {(event.userName || "H")?.[0]?.toUpperCase()}
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold">Presented by</div>
-                  <div className="font-bold text-[#111827] dark:text-white text-sm">{event.userName || "Community"}</div>
+                  <div className="text-[10px] uppercase tracking-widest opacity-60 font-bold">Presented by</div>
+                  <div className="font-bold text-sm" style={{ color: themeColors.text }}>{event.userName || "Community"}</div>
                 </div>
               </div>
-              <button className="px-5 py-2 rounded-full bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 text-[#111827] dark:text-white text-xs font-bold transition-all border border-gray-200 dark:border-white/5 shadow-sm">
+              <button className="px-5 py-2 rounded-full bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 text-xs font-bold transition-all border border-gray-200 dark:border-white/5 shadow-sm" style={{ color: themeColors.text }}>
                 Subscribe
               </button>
             </div>
 
             {/* Tagline */}
-            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed pt-2">
+            <p className="text-sm font-medium leading-relaxed pt-2 opacity-80" style={{ color: themeColors.text }}>
               {event.description?.slice(0, 120) || "Join us for an amazing experience."}...
             </p>
 
             {/* Hosted By section */}
             <div className="pt-6">
-               <h3 className="text-xs font-bold text-[#111827] dark:text-white mb-4 uppercase tracking-widest opacity-80">Hosted By</h3>
+               <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-80" style={{ color: themeColors.text }}>Hosted By</h3>
                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold text-[#111827] dark:text-white border border-gray-200 dark:border-white/20 shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm" style={{ color: themeColors.text }}>
                     {(event.userName || "A")?.[0]?.toUpperCase()}
                   </div>
-                  <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{event.userName || "A Community Member"}</span>
+                  <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{event.userName || "A Community Member"}</span>
                </div>
             </div>
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="space-y-10 pt-2 lg:pl-6">
-            <h1 className="text-4xl md:text-[3.5rem] font-bold tracking-tight text-[#111827] dark:text-white leading-[1.05]" style={{ fontFamily: "Inter, sans-serif" }}>
+            <h1 className="text-4xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]" style={{ fontFamily: "Inter, sans-serif", color: themeColors.text }}>
               {event.title}
             </h1>
 
             {/* Info rows */}
             <div className="space-y-6">
               <div className="flex items-start gap-5">
-                <div className="w-12 h-14 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex flex-col items-center justify-center overflow-hidden shadow-sm">
-                   <div className="text-[9px] uppercase tracking-wider font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/10 w-full text-center py-1 border-b border-gray-100 dark:border-transparent">{new Date(event.date).toLocaleString('en-US', { month: 'short' })}</div>
-                   <div className="text-lg font-bold text-[#111827] dark:text-white leading-none pt-1 pb-1">{new Date(event.date).getDate()}</div>
+                <div className="w-12 h-14 rounded-xl bg-white/10 dark:bg-white/5 border border-black/5 dark:border-white/10 flex flex-col items-center justify-center overflow-hidden shadow-sm">
+                   <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-black/5 dark:border-white/5">{new Date(event.date).toLocaleString('en-US', { month: 'short' })}</div>
+                   <div className="text-lg font-bold leading-none pt-1 pb-1" style={{ color: themeColors.text }}>{new Date(event.date).getDate()}</div>
                 </div>
                 <div className="pt-1">
-                  <div className="font-bold text-lg text-[#111827] dark:text-white">{new Date(event.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-                  <div className="text-gray-500 dark:text-gray-400 font-medium text-sm mt-1">{new Date(event.date).toLocaleTimeString([], { timeStyle: 'short' })}</div>
+                  <div className="font-bold text-lg" style={{ color: themeColors.text }}>{new Date(event.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+                  <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>{new Date(event.date).toLocaleTimeString([], { timeStyle: 'short' })}</div>
                 </div>
               </div>
 
               <div className="flex items-start gap-5">
-                <div className="w-12 h-12 rounded-xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center shadow-sm">
-                   <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <div className="w-12 h-12 rounded-xl bg-white/10 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center shadow-sm">
+                   <MapPin className="w-5 h-5 opacity-60" style={{ color: themeColors.text }} />
                 </div>
                 <div className="pt-1">
-                  <div className="font-bold text-lg text-[#111827] dark:text-white">{event.location}</div>
-                  <div className="text-gray-500 dark:text-gray-400 font-medium text-sm mt-1">Check map for details</div>
+                  <div className="font-bold text-lg" style={{ color: themeColors.text }}>{event.location}</div>
+                  <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>Check map for details</div>
                 </div>
               </div>
             </div>
@@ -226,71 +253,118 @@ export default function EventDetails() {
             {/* Registration Card */}
             <div className="pt-4">
                <AnimatePresence mode="wait">
-                 {!rsvpDone ? (
+                 {!user ? (
+                   <motion.div
+                     key="auth-required"
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     exit={{ opacity: 0, scale: 0.95 }}
+                     className="bg-white/10 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-black/5 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl"
+                   >
+                      <div className="px-6 py-4 border-b border-black/5 dark:border-white/10 bg-white/10 dark:bg-white/[0.02]">
+                        <h3 className="text-sm font-bold opacity-60" style={{ color: themeColors.text }}>Registration</h3>
+                      </div>
+                      
+                      <div className="p-6 space-y-6 text-center">
+                         <div className="flex flex-col items-center gap-3 bg-amber-500/10 dark:bg-amber-500/20 p-5 rounded-2xl border border-amber-500/25 max-w-sm mx-auto shadow-sm">
+                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                               <Lock className="w-5 h-5" />
+                            </div>
+                            <div className="space-y-1">
+                               <div className="text-sm font-bold text-amber-800 dark:text-amber-300">Login Required to RSVP</div>
+                               <div className="text-xs font-semibold opacity-80 leading-relaxed" style={{ color: themeColors.text }}>
+                                  You must be signed in to request to join this event and receive your ticket.
+                               </div>
+                            </div>
+                         </div>
+
+                         <div className="pt-2">
+                           <Link href={`/login?redirect=${encodeURIComponent(`/e/${event.id}`)}`}>
+                             <Button
+                               className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] shadow-md border-none text-white"
+                               style={{ backgroundColor: themeColors.accent }}
+                             >
+                               Login to RSVP
+                             </Button>
+                           </Link>
+                         </div>
+                      </div>
+                   </motion.div>
+                 ) : !rsvpDone ? (
                    <motion.div
                      key="form"
                      initial={{ opacity: 0, y: 10 }}
                      animate={{ opacity: 1, y: 0 }}
                      exit={{ opacity: 0, scale: 0.95 }}
-                     className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-gray-200 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl"
+                     className="bg-white/10 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-black/5 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl"
                    >
-                      <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 bg-white/50 dark:bg-white/[0.02]">
-                        <h3 className="text-sm font-bold text-gray-500 dark:text-gray-300">Registration</h3>
+                      <div className="px-6 py-4 border-b border-black/5 dark:border-white/10 bg-white/10 dark:bg-white/[0.02]">
+                        <h3 className="text-sm font-bold opacity-60" style={{ color: themeColors.text }}>Registration</h3>
                       </div>
                       
                       <div className="p-6 space-y-6">
-                         <div className="flex items-start gap-3 bg-gray-50 dark:bg-white/[0.03] p-4 rounded-xl border border-gray-100 dark:border-white/5">
-                            <div className="p-1.5 bg-white dark:bg-white/10 rounded-lg mt-0.5 border border-gray-100 dark:border-transparent shadow-sm">
-                               <Users className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                         <div className="flex items-start gap-3 bg-white/10 dark:bg-white/[0.03] p-4 rounded-xl border border-black/5 dark:border-white/5">
+                            <div className="p-1.5 bg-white/20 dark:bg-white/10 rounded-lg mt-0.5 border border-black/5 dark:border-transparent shadow-sm">
+                               <Users className="w-4 h-4 opacity-60" style={{ color: themeColors.text }} />
                             </div>
                             <div>
-                               <div className="text-sm font-bold text-[#111827] dark:text-white">Approval Required</div>
-                               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Your registration is subject to host approval.</div>
+                               <div className="text-sm font-bold" style={{ color: themeColors.text }}>Approval Required</div>
+                               <div className="text-xs opacity-60 mt-1" style={{ color: themeColors.text }}>Your registration is subject to host approval.</div>
                             </div>
                          </div>
 
-                         <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                         <div className="text-sm font-medium opacity-85" style={{ color: themeColors.text }}>
                             Welcome, {user?.displayName?.split(" ")[0] || "Guest"}! To join the event, please register below.
                          </div>
 
                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold text-[#111827] dark:text-white border border-gray-200 dark:border-white/20 shadow-sm">
+                            <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-black/5 dark:border-white/20 shadow-sm" style={{ color: themeColors.text }}>
                                {user?.displayName?.[0] || email?.[0]?.toUpperCase() || "?"}
                             </div>
                             <div className="text-sm">
-                               <span className="font-bold text-[#111827] dark:text-white mr-2">{user?.displayName || "Guest"}</span>
-                               <span className="text-gray-500 dark:text-gray-400">{user?.email || email}</span>
+                               <span className="font-bold mr-2" style={{ color: themeColors.text }}>{user?.displayName || "Guest"}</span>
+                               <span className="opacity-60" style={{ color: themeColors.text }}>{user?.email || email}</span>
                             </div>
                          </div>
 
                          <form onSubmit={handleRSVP} className="space-y-4 pt-2">
                            {(!user || !user.email) && (
-                             <Input
-                               placeholder="Enter your email"
-                               className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
-                               value={email}
-                               onChange={(e) => setEmail(e.target.value)}
-                               required
-                             />
+                             <div className="space-y-1.5 text-left">
+                               <label className="text-xs font-bold opacity-80 pl-1" style={{ color: themeColors.text }}>
+                                 Email Address <span className="text-red-500">*</span>
+                               </label>
+                               <Input
+                                 placeholder="Enter your email"
+                                 className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
+                                 value={email}
+                                 onChange={(e) => setEmail(e.target.value)}
+                                 required
+                               />
+                             </div>
                            )}
                            
                            {event.customFields?.map((field: any, idx: number) => (
-                              <Input
-                                key={idx}
-                                placeholder={field.placeholder}
-                                className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
-                                value={customResponses[field.label] || ""}
-                                onChange={(e) => setCustomResponses({ ...customResponses, [field.label]: e.target.value })}
-                                required={field.required}
-                              />
+                              <div key={idx} className="space-y-1.5 text-left">
+                                <label className="text-xs font-bold opacity-80 pl-1" style={{ color: themeColors.text }}>
+                                  {field.label} {field.required && <span className="text-red-500">*</span>}
+                                </label>
+                                <Input
+                                  placeholder={field.placeholder || "Your answer"}
+                                  className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
+                                  value={customResponses[field.label] || ""}
+                                  onChange={(e) => setCustomResponses({ ...customResponses, [field.label]: e.target.value })}
+                                  required={field.required}
+                                />
+                              </div>
                            ))}
 
-                           <Button
-                             disabled={rsvpLoading}
-                             className="w-full h-12 rounded-xl font-bold text-white dark:text-black transition-transform hover:scale-[1.02] bg-[#111827] dark:bg-white hover:bg-black dark:hover:bg-gray-200 mt-2 shadow-md"
-                           >
-                             {rsvpLoading ? "Processing..." : "Request to Join"}
-                           </Button>
+                            <Button
+                              disabled={rsvpLoading}
+                              className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] mt-2 shadow-md border-none text-white"
+                              style={{ backgroundColor: themeColors.accent }}
+                            >
+                              {rsvpLoading ? "Processing..." : "Request to Join"}
+                            </Button>
                          </form>
                       </div>
                    </motion.div>

@@ -22,7 +22,9 @@ export default function Login() {
     try {
       await login(email, password);
       toast({ title: "Welcome back!", description: "You have successfully logged in." });
-      setLocation("/");
+      const queryParams = new URLSearchParams(window.location.search);
+      const redirect = queryParams.get("redirect");
+      setLocation(redirect || "/");
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -38,10 +40,12 @@ export default function Login() {
     try {
       const result = await loginWithGoogle();
       const details = getAdditionalUserInfo(result);
+      const queryParams = new URLSearchParams(window.location.search);
+      const redirect = queryParams.get("redirect");
       if (details?.isNewUser) {
-        setLocation("/onboarding");
+        setLocation(redirect ? `/onboarding?redirect=${encodeURIComponent(redirect)}` : "/onboarding");
       } else {
-        setLocation("/");
+        setLocation(redirect || "/");
       }
     } catch (error: any) {
       toast({

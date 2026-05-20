@@ -16,6 +16,7 @@ import QRScanner from "@/pages/QRScanner";
 import Ticket from "@/pages/Ticket";
 import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
+import HostProfile from "@/pages/HostProfile";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ function Router() {
       <ProtectedRoute path="/scan/:id" component={QRScanner} />
       <Route path="/e/:id" component={EventDetails} />
       <Route path="/ticket/:eventId/:rsvpId" component={Ticket} />
+      <Route path="/p/:username" component={HostProfile} />
 
 
       <Route component={NotFound} />

@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Check, Moon, Sun, Camera, User } from "lucide-react";
+import { Check, Moon, Sun, Camera, User, Calendar as CalendarIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AVATAR_IMAGES, formatAvatarUrlForStorage } from "@/lib/avatars";
 import { updateProfile } from "firebase/auth";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 export default function Onboarding() {
   const { user } = useAuth();
@@ -22,6 +27,48 @@ export default function Onboarding() {
     return AVATAR_IMAGES[Math.floor(Math.random() * AVATAR_IMAGES.length)];
   });
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [loadingPercentage, setLoadingPercentage] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState("Calibrating event engines...");
+
+  useEffect(() => {
+    if (step !== 4) return;
+
+    const messages = [
+      "Calibrating event engines...",
+      "Gathering community kittens...",
+      "Unleashing the MEOW power...",
+      "Welcome aboard, Creator!"
+    ];
+
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+      if (messageIndex < messages.length - 1) {
+        messageIndex++;
+        setLoadingMessage(messages[messageIndex]);
+      }
+    }, 600);
+
+    const progressInterval = setInterval(() => {
+      setLoadingPercentage((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          clearInterval(messageInterval);
+          setTimeout(() => {
+            const queryParams = new URLSearchParams(window.location.search);
+            const redirect = queryParams.get("redirect");
+            setLocation(redirect || "/");
+          }, 800);
+          return 100;
+        }
+        return prev + 2;
+      });
+    }, 40);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearInterval(messageInterval);
+    };
+  }, [step, setLocation]);
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -60,14 +107,57 @@ export default function Onboarding() {
           displayName: displayName,
           photoURL: formatAvatarUrlForStorage(profilePicUrl)
         });
+
+        // Create an initial profile in Firestore
+        const defaultUsername = user.email ? user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") : `user-${user.uid.substring(0, 5)}`;
+        const profileRef = doc(db, "profiles", defaultUsername);
+        
+        const docSnap = await getDoc(profileRef);
+        if (!docSnap.exists()) {
+          await setDoc(profileRef, {
+            userId: user.uid,
+            displayName: displayName,
+            photoURL: formatAvatarUrlForStorage(profilePicUrl),
+            bio: bio,
+            username: defaultUsername,
+            dob: dob,
+            profession: profession,
+            theme: "light",
+            accentColor: "#8129D9",
+            borderStyle: "rounded-xl",
+            createdAt: serverTimestamp()
+          });
+          localStorage.setItem("user-username", defaultUsername);
+        }
+
+        // Save bio/profession/dob locally
+        if (bio) localStorage.setItem("user-bio", bio);
+        if (profession) localStorage.setItem("user-profession", profession);
+        if (dob) localStorage.setItem("user-dob", dob);
+
+        // Create initial event if provided
+        if (eventName.trim()) {
+          await addDoc(collection(db, "events"), {
+            title: eventName,
+            description: "Welcome to my first event!",
+            date: new Date(Date.now() + 86400000 * 7).toISOString().substring(0, 16), // 7 days from now
+            location: "Online",
+            color: "#D9FF00",
+            isPublic: true,
+            userId: user.uid,
+            userName: displayName,
+            createdAt: serverTimestamp(),
+            rsvpCount: 0
+          });
+        }
       } catch (error) {
-        console.error("Failed to update profile during onboarding", error);
+        console.error("Failed to update profile or create event during onboarding", error);
       }
     }
 
     localStorage.setItem('theme', theme);
-    // In a real app, you would save this preference and create the event to Firestore here
-    setLocation("/");
+    // Trigger animated loading step before entering dashboard
+    setStep(4);
   };
 
   return (
@@ -267,22 +357,47 @@ export default function Onboarding() {
                   className="w-full bg-transparent border-b-2 border-border focus:border-foreground text-center text-xl pb-3 outline-none transition-colors text-foreground placeholder-muted-foreground"
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <input 
-                    type="text" 
-                    placeholder="Date of Birth" 
-                    onFocus={(e) => e.target.type = 'date'}
-                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text' }}
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full bg-transparent border-b-2 border-border focus:border-foreground text-center text-base pb-3 pt-2 outline-none transition-colors text-foreground placeholder-muted-foreground"
-                  />
+                <div className="grid grid-cols-2 gap-6 items-center">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-full bg-transparent border-b-2 border-border focus:border-foreground text-center text-base pb-3 pt-2 outline-none transition-colors text-foreground flex items-center justify-center gap-2 hover:border-foreground/50"
+                      >
+                        <CalendarIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className={dob ? "text-foreground font-medium" : "text-muted-foreground font-medium"}>
+                          {dob ? format(new Date(dob + "T12:00:00"), "PPP") : "Date of Birth"}
+                        </span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white dark:bg-[#0A0A0A] border border-gray-150 dark:border-border rounded-3xl shadow-2xl" align="center">
+                      <Calendar
+                        mode="single"
+                        selected={dob ? new Date(dob + "T12:00:00") : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            const yyyy = date.getFullYear();
+                            const mm = String(date.getMonth() + 1).padStart(2, '0');
+                            const dd = String(date.getDate()).padStart(2, '0');
+                            setDob(`${yyyy}-${mm}-${dd}`);
+                          } else {
+                            setDob("");
+                          }
+                        }}
+                        captionLayout="dropdown"
+                        startMonth={new Date(1940, 0)}
+                        endMonth={new Date()}
+                        className="bg-white dark:bg-[#0A0A0A]"
+                      />
+                    </PopoverContent>
+                  </Popover>
+
                   <input 
                     type="text" 
                     placeholder="Profession" 
                     value={profession}
                     onChange={(e) => setProfession(e.target.value)}
-                    className="w-full bg-transparent border-b-2 border-border focus:border-foreground text-center text-base pb-3 pt-2 outline-none transition-colors text-foreground placeholder-muted-foreground"
+                    className="w-full bg-transparent border-b-2 border-border focus:border-foreground text-center text-base pb-3 pt-2 outline-none transition-colors text-foreground placeholder-muted-foreground font-medium"
                   />
                 </div>
                 
@@ -303,6 +418,90 @@ export default function Onboarding() {
                   Finish Onboarding
                 </Button>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {step === 4 && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md text-center flex flex-col items-center justify-center space-y-8"
+          >
+            {/* Animated Mascot/Logo container with thick brutalist borders */}
+            <motion.div 
+              animate={{ 
+                rotate: [0, -5, 5, -5, 0],
+                scale: [1, 1.05, 0.95, 1.05, 1]
+              }}
+              transition={{ 
+                repeat: Infinity,
+                duration: 2,
+                ease: "easeInOut"
+              }}
+              className="relative w-32 h-32 rounded-full border-4 border-foreground bg-primary flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] dark:shadow-[6px_6px_0px_0px_rgba(255,255,255,1)]"
+            >
+              <img src={profilePicUrl} alt="Mascot" className="w-24 h-24 object-cover rounded-full" />
+              
+              {/* Spinning badges */}
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                className="absolute -inset-3 border-2 border-dashed border-foreground rounded-full pointer-events-none"
+              />
+            </motion.div>
+
+            {/* Title / Status message */}
+            <div className="space-y-3">
+              <h2 className="text-3xl font-black tracking-tight text-foreground uppercase">
+                Setting Up Shop
+              </h2>
+              
+              <div className="h-8 flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={loadingMessage}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.25 }}
+                    className="text-lg font-bold text-muted-foreground"
+                  >
+                    {loadingMessage}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Brutalist Progress Bar */}
+            <div className="w-full space-y-2">
+              <div className="w-full h-8 border-4 border-foreground bg-white dark:bg-card rounded-full overflow-hidden relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]">
+                <motion.div 
+                  className="h-full bg-secondary border-r-4 border-foreground"
+                  style={{ width: `${loadingPercentage}%` }}
+                  transition={{ ease: "easeOut" }}
+                />
+                
+                {/* Center text overlay */}
+                <div className="absolute inset-0 flex items-center justify-center font-black text-sm text-foreground mix-blend-difference">
+                  {loadingPercentage}%
+                </div>
+              </div>
+              
+              <div className="flex justify-between text-xs font-black uppercase tracking-widest text-muted-foreground px-2">
+                <span>Init</span>
+                <span>Ready</span>
+              </div>
+            </div>
+
+            {/* Extra floating status tags for that tech/brutalist look */}
+            <div className="flex gap-2 flex-wrap justify-center">
+              <span className="px-3 py-1 border-2 border-foreground bg-[#D9FF00] text-black font-black text-xs uppercase rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                Firebase Connected
+              </span>
+              <span className="px-3 py-1 border-2 border-foreground bg-[#2856E8] text-white font-black text-xs uppercase rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                Theme Applied
+              </span>
             </div>
           </motion.div>
         )}

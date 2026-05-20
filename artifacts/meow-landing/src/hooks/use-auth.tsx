@@ -13,8 +13,8 @@ import { auth, googleProvider } from "@/lib/firebase";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: typeof signInWithEmailAndPassword;
-  signup: typeof createUserWithEmailAndPassword;
+  login: (email: string, pass: string) => Promise<any>;
+  signup: (email: string, pass: string) => Promise<any>;
   loginWithGoogle: () => Promise<any>;
   logout: () => Promise<void>;
 }

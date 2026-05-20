@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, updateDoc } from "firebase/firestore";
+import emailjs from '@emailjs/browser';
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -17,10 +18,14 @@ import {
   CheckCircle,
   Clock,
   Globe,
-  Lock
+  Lock,
+  ChevronRight,
+  TrendingUp,
+  Sparkles
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { AppLayout } from "@/components/Navigation";
 
 export default function ManageEvent() {
   const { id } = useParams();
@@ -55,16 +60,44 @@ export default function ManageEvent() {
     try {
       if (!id) throw new Error("Missing event ID");
 
+      const attendee = attendees.find(a => a.id === attendeeId);
+      if (!attendee) throw new Error("Attendee not found");
+
       const rsvpRef = doc(db, "events", id, "rsvps", attendeeId);
       await updateDoc(rsvpRef, {
         confirmationSent: true
       });
 
+      const ticketUrl = `${window.location.origin}/ticket/${id}/${attendeeId}`;
+      
+      try {
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TICKET_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          {
+            to_email: attendee.email,
+            event_name: event.title,
+            ticket_url: ticketUrl,
+            otp: ticketUrl,
+            passcode: event.title,
+            time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        );
+      } catch (emailError: any) {
+        console.error("Failed to send ticket email:", emailError);
+        toast({
+          title: "Approved, but email failed",
+          description: "Attendee approved, but there was an error sending the ticket email.",
+          variant: "destructive"
+        });
+      }
+
       setAttendees(prev => prev.map(a => a.id === attendeeId ? { ...a, confirmationSent: true } : a));
 
       toast({
         title: "Approved!",
-        description: "Guest has been confirmed and ticket generated.",
+        description: "Guest has been confirmed and ticket has been emailed.",
       });
     } catch (error: any) {
       console.error("Confirmation Error:", error);
@@ -84,10 +117,29 @@ export default function ManageEvent() {
     let successCount = 0;
 
     try {
-      // Process all pending confirmations in parallel (Batch simulation)
       await Promise.all(pending.map(async (a) => {
         const rsvpRef = doc(db, "events", id!, "rsvps", a.id);
         await updateDoc(rsvpRef, { confirmationSent: true });
+
+        const ticketUrl = `${window.location.origin}/ticket/${id}/${a.id}`;
+        try {
+          await emailjs.send(
+            import.meta.env.VITE_EMAILJS_SERVICE_ID,
+            import.meta.env.VITE_EMAILJS_TICKET_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+            {
+              to_email: a.email,
+              event_name: event.title,
+              ticket_url: ticketUrl,
+              otp: ticketUrl,
+              passcode: event.title,
+              time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
+            },
+            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+          );
+        } catch (err) {
+          console.error(`Failed to send email to ${a.email}:`, err);
+        }
+
         successCount++;
       }));
 
@@ -95,7 +147,7 @@ export default function ManageEvent() {
 
       toast({
         title: "Bulk Approval Complete",
-        description: `Successfully approved ${successCount} guests at once.`,
+        description: `Successfully approved and emailed ${successCount} guests at once.`,
       });
     } catch (error: any) {
       toast({
@@ -107,8 +159,6 @@ export default function ManageEvent() {
       setSending(false);
     }
   };
-
-
 
   const toggleVisibility = async (checked: boolean) => {
     if (!id) return;
@@ -124,117 +174,147 @@ export default function ManageEvent() {
     }
   };
 
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-4xl animate-bounce">🐾</span>
+            <p className="text-sm font-semibold text-gray-400">Loading details...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
-  if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
+  if (!event) {
+    return (
+      <AppLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <p className="text-sm font-bold text-gray-500">Event not found</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background p-6 md:p-12 font-sans">
-      <div className="max-w-6xl mx-auto">
+    <AppLayout>
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 pb-24 md:pb-12">
+        {/* Back Link */}
         <button
           onClick={() => setLocation("/dashboard")}
-          className="flex items-center gap-2 font-bold text-gray-500 hover:text-navy mb-8 transition-colors"
+          className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-6 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" /> Back to Dashboard
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
         </button>
 
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div className="w-full">
-            <div className="flex items-center gap-3 mb-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shrink-0" style={{ backgroundColor: event.color }}>
-                Active Event
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-8 border-b border-black/[0.04] dark:border-white/[0.04]">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-white uppercase" style={{ backgroundColor: event.color || "#2856E8" }}>
+                Active
               </span>
-              <span className="text-sm font-bold text-gray-400">Created {event.createdAt?.toDate().toLocaleDateString()}</span>
+              <span className="text-xs text-gray-400 font-medium">Created {event.createdAt?.toDate().toLocaleDateString()}</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight" style={{ color: "var(--foreground)" }}>{event.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-gray-900 dark:text-gray-100">{event.title}</h1>
           </div>
 
-          <div className="flex flex-wrap gap-3 w-full md:w-auto">
+          <div className="flex gap-2.5 w-full md:w-auto">
             <Link href={`/e/${id}`} className="flex-1 md:flex-none">
-              <Button variant="outline" className="w-full rounded-2xl font-bold border-2 h-12 px-6">
-                <ExternalLink className="w-4 h-4 mr-2" /> View Page
+              <Button variant="outline" className="w-full rounded-xl text-xs font-semibold border-black/5 dark:border-white/10 h-10 px-4 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#222]">
+                <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> View page
               </Button>
             </Link>
             <Link href={`/scan/${id}`} className="flex-1 md:flex-none">
-              <Button className="w-full rounded-2xl font-bold h-12 px-6 shadow-lg border-none" style={{ backgroundColor: '#101828', color: '#D9FF3F' }}>
-                <QrCode className="w-4 h-4 mr-2" /> Scan
+              <Button className="w-full rounded-xl text-xs font-semibold h-10 px-4 shadow-sm bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90">
+                <QrCode className="w-3.5 h-3.5 mr-1.5" /> Scan tickets
               </Button>
             </Link>
           </div>
         </header>
 
+        {/* Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column: Attendees */}
+          
+          {/* Main Column - Attendees */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[40px] shadow-sm border border-gray-100 dark:border-border overflow-hidden">
-              <div className="p-8 border-b border-gray-50 flex justify-between items-center">
-                <h2 className="text-2xl font-black flex items-center gap-3">
-                  <Users className="w-6 h-6" /> Attendees
-                  <span className="text-sm font-bold bg-gray-100 px-3 py-1 rounded-full text-gray-500 ml-2">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-black/5 dark:border-white/5 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-black/[0.04] dark:border-white/[0.04] flex justify-between items-center">
+                <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                  <Users className="w-4 h-4 text-gray-400" /> Guests
+                  <span className="text-[10px] font-bold bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full text-gray-500 dark:text-gray-400">
                     {attendees.length}
                   </span>
                 </h2>
-                <Button
-                  onClick={sendConfirmations}
-                  disabled={sending || attendees.length === 0}
-                  variant="outline"
-                  className="rounded-full font-bold border-2 h-10 px-4 text-sm"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  {sending ? "Sending..." : "Send Confirmations"}
-                </Button>
+                {attendees.filter(a => !a.confirmationSent).length > 0 && (
+                  <Button
+                    onClick={sendConfirmations}
+                    disabled={sending}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3"
+                  >
+                    <Send className="w-3 h-3 mr-1.5" />
+                    {sending ? "Approving..." : "Approve all pending"}
+                  </Button>
+                )}
               </div>
 
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
                 {attendees.length === 0 ? (
-                  <div className="p-20 text-center space-y-4">
-                    <div className="text-gray-300 font-bold italic">No RSVPs yet. Share your event link to get started!</div>
+                  <div className="py-16 px-6 text-center space-y-4">
+                    <p className="text-xs text-gray-400 italic">No RSVPs yet. Share your event link to get started!</p>
                     <Button
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/e/${id}`);
                         toast({ title: "Link copied!" });
                       }}
-                      className="rounded-full font-bold"
+                      size="sm"
+                      className="rounded-xl font-semibold bg-black dark:bg-white text-white dark:text-black"
                     >
-                      Copy Event Link
+                      Copy event URL
                     </Button>
                   </div>
                 ) : (
                   attendees.map((a) => (
-                    <div key={a.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group hover:bg-gray-50 dark:bg-muted transition-colors">
-                      <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className="w-12 h-12 rounded-full bg-[#F3F0E8] dark:bg-background flex-shrink-0 flex items-center justify-center font-black text-gray-400">
+                    <div key={a.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-[#222]/50 transition-colors">
+                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex-shrink-0 flex items-center justify-center font-bold text-xs text-gray-500 dark:text-gray-400">
                           {a.email[0].toUpperCase()}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-bold text-lg truncate">{a.email}</div>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {Object.entries(a.customResponses || {}).map(([label, value]: any) => (
-                              <span key={label} className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
-                                {label}: {value}
-                              </span>
-                            ))}
-                          </div>
+                          <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{a.email}</div>
+                          {Object.keys(a.customResponses || {}).length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                              {Object.entries(a.customResponses || {}).map(([label, value]: any) => (
+                                <span key={label} className="text-[9px] font-medium bg-black/[0.03] dark:bg-white/5 border border-black/[0.02] dark:border-white/5 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-lg">
+                                  {label}: {value}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-none pt-4 sm:pt-0">
+
+                      <div className="flex items-center justify-between sm:justify-end gap-3.5 w-full sm:w-auto border-t sm:border-none pt-3 sm:pt-0">
                         {a.checkedIn ? (
-                          <span className="flex items-center gap-1 text-green-600 font-bold text-sm bg-green-50 px-3 py-1 rounded-full">
-                            <CheckCircle className="w-4 h-4" /> Checked In
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                            <CheckCircle className="w-3 h-3" /> Checked In
                           </span>
                         ) : a.confirmationSent ? (
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="flex items-center gap-1 text-blue-600 font-bold text-sm bg-blue-50 px-3 py-1 rounded-full">
-                              <Send className="w-4 h-4" /> Confirmed
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/20 px-2.5 py-0.5 rounded-full">
+                              <Send className="w-3 h-3" /> Approved
                             </span>
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(`${window.location.origin}/ticket/${id}/${a.id}`);
                                 toast({ title: "Ticket link copied!" });
                               }}
-                              className="text-[10px] font-black text-gray-300 hover:text-[#101828] dark:text-foreground uppercase tracking-widest"
+                              className="text-[9px] font-bold text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors uppercase tracking-wider"
                             >
-                              Copy Ticket Link
+                              Copy ticket link
                             </button>
                           </div>
                         ) : (
@@ -242,13 +322,13 @@ export default function ManageEvent() {
                             size="sm"
                             variant="outline"
                             onClick={() => sendIndividualConfirmation(a.id)}
-                            className="rounded-2xl font-black border-2 text-xs h-10 px-4"
+                            className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50"
                           >
-                            Approve Guest
+                            Approve
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className="rounded-full sm:opacity-0 group-hover:opacity-100">
-                          <MoreHorizontal className="w-5 h-5" />
+                        <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full">
+                          <MoreHorizontal className="w-4 h-4 text-gray-400" />
                         </Button>
                       </div>
                     </div>
@@ -258,53 +338,60 @@ export default function ManageEvent() {
             </div>
           </div>
 
-          {/* Right Column: Stats & Settings */}
+          {/* Sidebar Column - Settings & Performance */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border">
-              <h3 className="text-xl font-black mb-6">Event Performance</h3>
-              <div className="space-y-6">
+            
+            {/* Conversion */}
+            <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5" /> Performance
+              </h3>
+              <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">RSVP Conversion</span>
-                    <span className="text-sm font-black">64%</span>
+                  <div className="flex justify-between text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
+                    <span>RSVP Conversion</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">64%</span>
                   </div>
-                  <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#D9FF00]" style={{ width: '64%' }}></div>
+                  <div className="h-2 w-full bg-black/[0.04] dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#D9FF00] dark:bg-[#D9FF00]" style={{ width: '64%' }}></div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#F3F0E8] dark:bg-background/50">
-                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">Page Views</div>
-                    <div className="text-2xl font-black">412</div>
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="p-3.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.02] dark:border-white/5">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Page Views</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">412</div>
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#F3F0E8] dark:bg-background/50">
-                    <div className="text-xs font-bold text-gray-400 uppercase mb-1">Unique Users</div>
-                    <div className="text-2xl font-black">128</div>
+                  <div className="p-3.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.02] dark:border-white/5">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Unique Users</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">128</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-[#111827] p-8 rounded-[40px] shadow-xl text-white">
-              <h3 className="text-xl font-black mb-4 flex items-center gap-2">
-                <Mail className="w-5 h-5" style={{ color: '#D9FF00' }} /> Communication
+            {/* Broadcast */}
+            <div className="bg-[#101828] text-white p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9FF00]/5 rounded-full blur-2xl pointer-events-none" />
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#D9FF00]" /> Broadcast
               </h3>
-              <p className="text-sm opacity-60 mb-6 font-medium">Send updates, location pin, or last-minute changes to all your attendees at once.</p>
-              <Button className="w-full rounded-2xl h-12 font-bold" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>
-                Broadcast Message
+              <p className="text-xs text-gray-400 leading-relaxed font-medium">Send announcements, location pins, or last-minute updates to all approved guests.</p>
+              <Button className="w-full rounded-xl h-10 text-xs font-semibold bg-[#D9FF00] text-black hover:bg-[#D9FF00]/90 border-none shadow-sm">
+                Write message
               </Button>
             </div>
 
-            <div className="bg-white dark:bg-card dark:text-card-foreground p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-border space-y-4">
+            {/* Visibility Settings Card */}
+            <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="font-black flex items-center gap-2">
-                    {event.isPublic ? <Globe className="w-4 h-4 text-blue-500" /> : <Lock className="w-4 h-4 text-gray-400" />}
-                    Visibility
+                <div className="space-y-1 pr-4">
+                  <Label className="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                    {event.isPublic ? <Globe className="w-3.5 h-3.5 text-blue-500" /> : <Lock className="w-3.5 h-3.5 text-gray-400" />}
+                    Discoverability
                   </Label>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    {event.isPublic ? "Public" : "Private"}
+                  <p className="text-[10px] text-gray-400 font-medium leading-normal">
+                    {event.isPublic ? "Public events appear on the explore page." : "Only people with the link can see this event."}
                   </p>
                 </div>
                 <Switch 
@@ -313,9 +400,10 @@ export default function ManageEvent() {
                 />
               </div>
             </div>
+
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

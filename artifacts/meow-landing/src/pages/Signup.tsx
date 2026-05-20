@@ -75,7 +75,9 @@ export default function Signup() {
         const userCredential = await signup(email, password);
         await updateProfile(userCredential.user, { displayName: name });
         toast({ title: "Account created!", description: "Welcome to Meow." });
-        setLocation("/onboarding");
+        const queryParams = new URLSearchParams(window.location.search);
+        const redirect = queryParams.get("redirect");
+        setLocation(redirect ? `/onboarding?redirect=${encodeURIComponent(redirect)}` : "/onboarding");
       } catch (error: any) {
         toast({
           title: "Signup failed",
@@ -92,10 +94,12 @@ export default function Signup() {
     try {
       const result = await loginWithGoogle();
       const details = getAdditionalUserInfo(result);
+      const queryParams = new URLSearchParams(window.location.search);
+      const redirect = queryParams.get("redirect");
       if (details?.isNewUser) {
-        setLocation("/onboarding");
+        setLocation(redirect ? `/onboarding?redirect=${encodeURIComponent(redirect)}` : "/onboarding");
       } else {
-        setLocation("/");
+        setLocation(redirect || "/");
       }
     } catch (error: any) {
       toast({
@@ -113,10 +117,6 @@ export default function Signup() {
         <Link href="/" className="flex items-center">
           <img src="/meow logo.png" alt="MEOW" className="h-12 md:h-16 w-auto object-contain" />
         </Link>
-        <Link href="/" className="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity text-white md:text-navy">
-          <span className="hidden md:inline" style={{ color: "var(--foreground)" }}>Back to home</span>
-          <span className="md:hidden text-white">Back to home</span>
-        </Link>
       </div>
 
       {/* Left side */}
@@ -127,20 +127,7 @@ export default function Signup() {
           </h1>
         </div>
 
-        {/* Floating decorations */}
-        <motion.div
-          animate={{ y: [0, -15, 0], rotate: [0, 4, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-10 top-1/3 w-56 p-4 rounded-3xl shadow-2xl hidden md:block" style={{ backgroundColor: "var(--background)" }}
-        >
-          <div className="flex gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#79001B' }}></div>
-            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#E8C8EC' }}></div>
-            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#00B7FF' }}></div>
-          </div>
-          <div className="h-4 w-full bg-black/10 rounded-full mb-2"></div>
-          <div className="h-4 w-2/3 bg-black/10 rounded-full"></div>
-        </motion.div>
+
       </div>
 
       {/* Right side */}

@@ -6,9 +6,29 @@ import { collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, 
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Users, ArrowRight, Plus, X, CheckCircle2 } from "lucide-react";
-import { TopNavbar, BottomNavbar } from "@/components/Navigation";
+import { Search, MapPin, Users, ArrowUpRight, Plus, X, CheckCircle2, Calendar, Sparkles, Compass } from "lucide-react";
+import { AppLayout } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
+
+function formatEventDate(dateStr: string) {
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+    }
+  } catch (_) {}
+  return dateStr;
+}
+
+function formatEventTime(dateStr: string) {
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+  } catch (_) {}
+  return "";
+}
 
 export default function Explore() {
   const { user } = useAuth();
@@ -18,15 +38,11 @@ export default function Explore() {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
   const [search, setSearch] = useState("");
-  
-  // Tab State
-  const [activeTab, setActiveTab] = useState<'events' | 'communities'>('events');
-
-  // New Community Form State
+  const [activeTab, setActiveTab] = useState<"events" | "communities">("events");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
-  const [newColor, setNewColor] = useState("#D9FF3F");
+  const [newColor, setNewColor] = useState("#2856E8");
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -110,261 +126,241 @@ export default function Explore() {
     }
   };
 
-  const filteredEvents = events.filter(e => 
-    (e.title || "").toLowerCase().includes(search.toLowerCase()) || 
+  const filteredEvents = events.filter(e =>
+    (e.title || "").toLowerCase().includes(search.toLowerCase()) ||
     (e.location || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const filteredCommunities = communities.filter(c => 
-    (c.title || "").toLowerCase().includes(search.toLowerCase()) || 
+  const filteredCommunities = communities.filter(c =>
+    (c.title || "").toLowerCase().includes(search.toLowerCase()) ||
     (c.description || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F0E8] dark:bg-background font-sans flex flex-col pb-20 md:pb-0">
-      <TopNavbar />
-      <BottomNavbar />
+    <AppLayout>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="relative min-h-full"
+      >
+        {/* Ambient Gradient Glow backgrounds */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[350px] rounded-full bg-gradient-to-b from-[#2856E8]/10 via-[#8B5CF6]/5 to-transparent blur-3xl dark:from-[#2856E8]/5" />
+          <div className="absolute top-[40%] right-[-100px] w-80 h-80 rounded-full bg-[#D9FF00]/5 blur-3xl pointer-events-none" />
+        </div>
 
-      <main className="flex-1 p-6 md:p-12 w-full max-w-7xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[#101828] dark:text-foreground">
-                Explore
+        {/* Content wrapper */}
+        <div className="relative px-4 sm:px-8 md:px-12 pt-8 md:pt-12 pb-24 md:pb-12 max-w-6xl mx-auto w-full">
+          
+          {/* Header */}
+          <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                <Compass className="w-4 h-4 text-primary" /> Explore
+              </div>
+              <h1 className="text-3xl md:text-4xl font-serif font-black tracking-tight text-gray-900 dark:text-gray-100">
+                Discover MEOW
               </h1>
-              <p className="text-gray-500 font-medium mt-1 text-sm md:text-base">
-                Discover new events and communities around you.
+              <p className="text-xs font-semibold text-gray-400">
+                Browse public events and join creator communities.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="relative flex-1 md:w-72">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={activeTab === 'events' ? "Search events..." : "Search communities..."}
-                  className="bg-white dark:bg-card dark:text-card-foreground border border-gray-100 dark:border-border rounded-2xl h-12 pl-12 pr-6 w-full outline-none focus:ring-2 focus:ring-[#D9FF3F] transition-all font-medium text-[#101828] dark:text-foreground"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+            {/* Switch Tabs & Action */}
+            <div className="flex items-center gap-3">
+              <div className="inline-flex p-1 rounded-xl bg-black/[0.03] dark:bg-white/5 border border-black/5 dark:border-white/5">
+                {(["events", "communities"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                      activeTab === tab
+                        ? "text-gray-900 dark:text-gray-100"
+                        : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    }`}
+                  >
+                    {activeTab === tab && (
+                      <motion.div
+                        layoutId="explore-tab-pill"
+                        className="absolute inset-0 bg-white dark:bg-[#222] rounded-lg shadow-sm border border-black/5"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 capitalize">{tab}</span>
+                  </button>
+                ))}
               </div>
-              {activeTab === 'communities' && user && (
-                <Button 
+
+              {activeTab === "communities" && user && (
+                <Button
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="h-12 rounded-2xl px-6 font-bold border-none text-white bg-[#101828] hover:bg-black transition-all flex items-center shrink-0"
+                  className="rounded-xl text-xs font-semibold h-9 px-4 bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
                 >
-                  <Plus className="w-4 h-4 mr-2" /> Create Tribe
+                  <Plus className="w-3.5 h-3.5 mr-1" /> New community
                 </Button>
               )}
             </div>
+          </header>
+
+          {/* Search bar */}
+          <div className="relative max-w-md mb-8 group">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-gray-900 dark:group-focus-within:text-gray-100 transition-colors" />
+            <input
+              type="text"
+              placeholder={activeTab === "events" ? "Search public events..." : "Search communities..."}
+              className="w-full h-10 pl-10 pr-4 rounded-xl bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-white/5 text-xs font-semibold placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 dark:focus:border-white/20 transition-all shadow-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-        </header>
 
-        {/* Minimal Toggle Tabs */}
-        <div className="flex gap-6 border-b border-gray-200 dark:border-border mb-8 pb-1">
-          <button 
-            onClick={() => setActiveTab('events')}
-            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'events' ? 'text-[#101828] dark:text-foreground' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            Events
-            {activeTab === 'events' && (
-              <motion.div layoutId="underline" className="absolute bottom-[-1px] left-0 right-0 h-1 bg-[#101828] rounded-t-full" />
-            )}
-          </button>
-          <button 
-            onClick={() => setActiveTab('communities')}
-            className={`pb-3 text-lg font-black transition-colors relative ${activeTab === 'communities' ? 'text-[#101828] dark:text-foreground' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            Communities
-            {activeTab === 'communities' && (
-              <motion.div layoutId="underline" className="absolute bottom-[-1px] left-0 right-0 h-1 bg-[#101828] rounded-t-full" />
-            )}
-          </button>
-        </div>
-
-        {/* Content Area */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {activeTab === 'events' ? (
-              // EVENTS GRID
-              loadingEvents ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="h-[380px] bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-4 shadow-sm border border-gray-100 dark:border-border">
-                      <div className="w-full h-40 bg-gray-50 dark:bg-muted rounded-[24px] animate-pulse mb-6"></div>
-                      <div className="px-4 space-y-4">
-                        <div className="h-6 bg-gray-50 dark:bg-muted rounded-lg w-3/4 animate-pulse"></div>
-                        <div className="h-4 bg-gray-50 dark:bg-muted rounded-md w-1/2 animate-pulse"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : filteredEvents.length === 0 ? (
-                <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-20 text-center shadow-sm border border-gray-100 dark:border-border">
-                  <div className="text-[#101828] dark:text-foreground font-black text-2xl mb-2">No events found.</div>
-                  <p className="text-gray-500 font-medium">Try adjusting your search query.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredEvents.map((event, idx) => (
-                    <ExploreCard key={event.id} event={event} index={idx} />
-                  ))}
-                </div>
-              )
-            ) : (
-              // COMMUNITIES GRID
-              loadingCommunities ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="h-[280px] bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-4 shadow-sm border border-gray-100 dark:border-border animate-pulse"></div>
-                  ))}
-                </div>
+          {/* Grid Content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {activeTab === "events" ? (
+                loadingEvents ? (
+                  <ExploreSkeleton type="events" />
+                ) : filteredEvents.length === 0 ? (
+                  <EmptyState
+                    title="No public events found"
+                    description={search ? "Try searching for another keyword or location." : "Events will show up here once hosts make them public."}
+                  />
+                ) : (
+                  <motion.div
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                  >
+                    {filteredEvents.map((event, idx) => (
+                      <ExploreCard key={event.id} event={event} index={idx} />
+                    ))}
+                  </motion.div>
+                )
+              ) : loadingCommunities ? (
+                <ExploreSkeleton type="communities" />
               ) : filteredCommunities.length === 0 ? (
-                <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-20 text-center shadow-sm border border-gray-100 dark:border-border">
-                  <div className="text-[#101828] dark:text-foreground font-black text-2xl mb-2">No communities found.</div>
-                  <p className="text-gray-500 font-medium">Be the first to start a tribe!</p>
-                </div>
+                <EmptyState
+                  title="No communities found"
+                  description={search ? "Try searching for another title or description." : "Create the first community to get people together!"}
+                  action={user ? (
+                    <Button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="mt-4 rounded-xl text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" /> Create community
+                    </Button>
+                  ) : undefined}
+                />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredCommunities.map((comm, idx) => {
-                    const isMember = user ? (comm.members || []).includes(user.uid) : false;
-                    
-                    return (
-                      <motion.div
-                        key={comm.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.05, duration: 0.4, ease: "easeOut" }}
-                        className="group h-full"
-                      >
-                        <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-border h-full flex flex-col relative overflow-hidden">
-                          <div className="absolute top-0 left-0 right-0 h-2" style={{ backgroundColor: comm.color || '#101828' }}></div>
-                          
-                          <div className="flex items-start justify-between mt-2">
-                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-sm" style={{ backgroundColor: comm.color || '#101828' }}>
-                              {comm.title?.[0]?.toUpperCase() || 'C'}
-                            </div>
-                            <div className="flex items-center gap-1 bg-gray-50 dark:bg-muted px-3 py-1 rounded-full">
-                              <Users className="w-3 h-3 text-gray-400" />
-                              <span className="text-xs font-bold text-gray-500">{(comm.members || []).length}</span>
-                            </div>
-                          </div>
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                >
+                  {filteredCommunities.map((comm, idx) => (
+                    <CommunityCard
+                      key={comm.id}
+                      comm={comm}
+                      index={idx}
+                      isMember={user ? (comm.members || []).includes(user.uid) : false}
+                      onToggleJoin={() => toggleJoin(comm.id, comm.members || [])}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
 
-                          <div className="mt-5 flex-1">
-                            <h3 className="text-xl font-black tracking-tight text-[#101828] dark:text-foreground mb-1 leading-tight">
-                              {comm.title || 'Untitled Community'}
-                            </h3>
-                            <p className="text-gray-500 font-medium line-clamp-2 text-sm leading-relaxed">
-                              {comm.description || "A community on MEOW."}
-                            </p>
-                          </div>
-
-                          <div className="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
-                            <div className="text-[10px] font-bold uppercase text-gray-400">
-                              By {comm.ownerName || 'Unknown'}
-                            </div>
-                            <Button 
-                              size="sm"
-                              onClick={() => toggleJoin(comm.id, comm.members || [])}
-                              className={`rounded-full px-4 font-bold h-8 border-none transition-all ${
-                                isMember 
-                                  ? 'bg-green-50 text-green-600 hover:bg-green-100' 
-                                  : 'bg-[#101828] text-white hover:bg-gray-800'
-                              }`}
-                            >
-                              {isMember ? (
-                                <><CheckCircle2 className="w-3 h-3 mr-1" /> Joined</>
-                              ) : (
-                                'Join'
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      {/* Create Community Modal */}
+      {/* Create Community Dialog Modal */}
       <AnimatePresence>
         {isCreateModalOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCreateModalOpen(false)}
-              className="fixed inset-0 bg-[#101828]/40 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 px-4"
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm z-50 px-4"
             >
-              <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] shadow-2xl p-8 border border-gray-100 dark:border-border">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-black tracking-tight text-[#101828] dark:text-foreground">Create a Tribe</h2>
-                  <button onClick={() => setIsCreateModalOpen(false)} className="w-8 h-8 rounded-full bg-gray-50 dark:bg-muted flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:text-foreground transition-colors">
-                    <X className="w-4 h-4" />
+              <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-black/5 dark:border-white/5 shadow-2xl p-6">
+                <div className="flex justify-between items-start mb-5">
+                  <div>
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Create community</h2>
+                    <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Host meetings, forums, or hobby groups.</p>
+                  </div>
+                  <button
+                    onClick={() => setIsCreateModalOpen(false)}
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <form onSubmit={handleCreateCommunity} className="space-y-5">
+                <form onSubmit={handleCreateCommunity} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Community Name</label>
-                    <Input 
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Community name</label>
+                    <Input
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="e.g. Midnight Cyber Hackers"
-                      className="h-12 rounded-xl border-gray-200 dark:border-border bg-gray-50 dark:bg-muted font-bold px-4"
+                      placeholder="e.g. Design Enthusiasts"
+                      className="h-10 rounded-xl border-black/5 dark:border-white/10 bg-black/[0.01] dark:bg-white/[0.01] text-xs font-semibold"
                       required
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Description</label>
-                    <textarea 
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</label>
+                    <textarea
                       value={newDesc}
                       onChange={(e) => setNewDesc(e.target.value)}
-                      placeholder="What is this collective about?"
-                      className="w-full h-24 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted font-medium text-sm p-4 outline-none focus:border-[#101828] focus:ring-1 focus:ring-[#101828] transition-all resize-none"
+                      placeholder="What is this community about?"
+                      className="w-full h-20 rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.01] dark:bg-white/[0.01] text-xs font-medium p-3 outline-none focus:ring-1 focus:ring-primary/10 focus:border-primary/20 dark:focus:border-white/20 transition-all resize-none"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Theme Color</label>
-                    <div className="flex gap-3">
-                      {['#101828', '#2856E8', '#8B5CF6', '#FF3F80', '#00B7FF', '#D9FF3F'].map(color => (
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Accent color</label>
+                    <div className="flex gap-2">
+                      {["#2856E8", "#8B5CF6", "#FF3F80", "#00B7FF", "#D9FF00", "#101828"].map((color) => (
                         <button
                           key={color}
                           type="button"
                           onClick={() => setNewColor(color)}
-                          className={`w-10 h-10 rounded-full border-4 transition-transform ${newColor === color ? 'scale-110 border-white shadow-md' : 'border-transparent hover:scale-105'}`}
+                          className={`w-7 h-7 rounded-full transition-transform ${
+                            newColor === color
+                              ? "ring-2 ring-offset-2 ring-black dark:ring-white scale-105"
+                              : "hover:scale-105 opacity-80"
+                          }`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={creating}
-                    className="w-full h-12 rounded-xl font-bold text-white border-none mt-2 transition-all"
-                    style={{ backgroundColor: '#101828' }}
+                    className="w-full h-10 rounded-xl text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90 border-none mt-2 shadow-sm"
                   >
-                    {creating ? "Creating..." : "Launch Community"}
+                    {creating ? "Launching..." : "Launch community"}
                   </Button>
                 </form>
               </div>
@@ -372,72 +368,213 @@ export default function Explore() {
           </>
         )}
       </AnimatePresence>
+    </AppLayout>
+  );
+}
+
+function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 px-4 text-center rounded-2xl border border-dashed border-black/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.02]">
+      <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center mb-4">
+        <Calendar className="w-5 h-5 text-gray-400" />
+      </div>
+      <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+      <p className="text-xs text-gray-400 mt-1 max-w-xs leading-relaxed">{description}</p>
+      {action}
     </div>
   );
 }
 
-function ExploreCard({ event, index }: { event: any, index: number }) {
-  const gradientStyle = {
-    background: `linear-gradient(135deg, ${event.color} 0%, #101828 150%)`
-  };
+function ExploreSkeleton({ type }: { type: "events" | "communities" }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div
+          key={i}
+          className={`rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] animate-pulse border border-black/5 dark:border-white/5 ${
+            type === "events" ? "h-64" : "h-40"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EventCover({ event, children }: { event: any; children?: React.ReactNode }) {
+  const color = event.color || "#2856E8";
+  return (
+    <div className="relative overflow-hidden aspect-[16/10] w-full bg-slate-900">
+      {event.creativeUrl ? (
+        <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(135deg, ${color} 0%, ${color}aa 50%, #101828 100%)`,
+          }}
+        />
+      )}
+      <div
+        className="absolute inset-0 opacity-[0.25]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 10% 20%, rgba(255,255,255,0.3) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(255,255,255,0.2) 0%, transparent 50%)`,
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
+      {children}
+    </div>
+  );
+}
+
+function ExploreCard({ event, index }: { event: any; index: number }) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0 }
+      }}
+      className="h-full"
+    >
+      <Link href={`/e/${event.id}`}>
+        <article className="group h-full flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-white/5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+          
+          <EventCover event={event}>
+            {event.date && (
+              <div className="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold">
+                {formatEventDate(event.date)}
+              </div>
+            )}
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="inline-flex w-7 h-7 rounded-full bg-white/90 dark:bg-[#111]/90 items-center justify-center text-gray-900 dark:text-gray-100 shadow-sm">
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </EventCover>
+
+          <div className="p-4 flex flex-col flex-1">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2">
+              {event.title || "Untitled Event"}
+            </h3>
+
+            {event.date && (
+              <p className="mt-1 text-[10px] font-semibold text-gray-400">
+                {formatEventTime(event.date)}
+              </p>
+            )}
+
+            {/* Spacer */}
+            <div className="flex-1 min-h-[16px]" />
+
+            {/* Info and location */}
+            <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between gap-4 mt-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[9px] font-bold text-gray-500 dark:text-gray-400 shrink-0">
+                  {event.userName?.[0]?.toUpperCase() || "?"}
+                </div>
+                <span className="text-[10px] font-semibold text-gray-400 truncate">
+                  {event.userName || "Anonymous"}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 shrink-0 text-gray-400">
+                {event.location && (
+                  <span className="text-[10px] font-semibold flex items-center gap-1 max-w-[100px] truncate">
+                    <MapPin className="w-3 h-3 stroke-[2.5px] opacity-70" />
+                    <span className="truncate">{event.location.split(',')[0]}</span>
+                  </span>
+                )}
+                <span className="text-[10px] font-bold flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {event.rsvpCount || 0}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </article>
+      </Link>
+    </motion.div>
+  );
+}
+
+function CommunityCard({
+  comm,
+  index,
+  isMember,
+  onToggleJoin,
+}: {
+  comm: any;
+  index: number;
+  isMember: boolean;
+  onToggleJoin: () => void;
+}) {
+  const accent = comm.color || "#2856E8";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.4, ease: "easeOut" }}
-      className="group h-full"
+      variants={{
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0 }
+      }}
+      className="h-full"
     >
-      <Link href={`/e/${event.id}`}>
-        <div className="bg-white dark:bg-card dark:text-card-foreground rounded-[32px] p-3 shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-border h-full flex flex-col relative overflow-hidden cursor-pointer">
-          <div 
-            className="h-44 rounded-[24px] relative overflow-hidden mb-3" 
-            style={gradientStyle}
-          >
-            <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-3 py-1 rounded-xl flex flex-col items-center justify-center shadow-sm">
-              <span className="text-[9px] font-bold uppercase tracking-wider">{new Date(event.date).toLocaleDateString([], { month: 'short' })}</span>
-              <span className="text-lg font-black leading-none">{new Date(event.date).getDate()}</span>
-            </div>
-          </div>
+      <article className="group h-full flex flex-col p-5 rounded-2xl bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-white/5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+        
+        {/* Color accent line */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[3px]"
+          style={{ backgroundColor: accent }}
+        />
 
-          <div className="px-4 pb-4 flex-1 flex flex-col">
-            <h3 className="text-lg font-black tracking-tight text-[#101828] dark:text-foreground mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
-              {event.title || 'Untitled Event'}
-            </h3>
-            
-            <div className="space-y-2 mt-auto">
-              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 dark:bg-muted p-2 rounded-xl">
-                <div className="w-6 h-6 rounded-lg bg-white dark:bg-card dark:text-card-foreground shadow-sm flex items-center justify-center shrink-0">
-                  <MapPin className="w-3 h-3 text-[#101828] dark:text-foreground" />
-                </div>
-                <span className="text-xs font-bold truncate">{event.location}</span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-gray-500 bg-gray-50 dark:bg-muted p-2 rounded-xl">
-                <div className="w-6 h-6 rounded-lg bg-white dark:bg-card dark:text-card-foreground shadow-sm flex items-center justify-center shrink-0">
-                  <Users className="w-3 h-3 text-[#101828] dark:text-foreground" />
-                </div>
-                <span className="text-xs font-bold">{event.rsvpCount || 0} RSVPs</span>
-              </div>
-              
-              <div className="pt-3 mt-1 border-t border-gray-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-black text-gray-500">{event.userName?.[0]?.toUpperCase() || 'A'}</span>
-                  </div>
-                  <div>
-                    <div className="text-[8px] font-bold uppercase tracking-wider text-gray-400">Host</div>
-                    <div className="text-xs font-bold text-[#101828] dark:text-foreground truncate max-w-[100px]">{event.userName || 'Anonymous'}</div>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-[#101828] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="w-3 h-3" />
-                </div>
-              </div>
-            </div>
+        <div className="flex items-start justify-between gap-4">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-sm"
+            style={{ backgroundColor: accent }}
+          >
+            {comm.title?.[0]?.toUpperCase() || "C"}
           </div>
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[9px] font-bold text-gray-400">
+            <Users className="w-3 h-3" />
+            {(comm.members || []).length}
+          </span>
         </div>
-      </Link>
+
+        <div className="mt-4 flex-1">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            {comm.title || "Untitled Community"}
+          </h3>
+          <p className="text-[11px] text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+            {comm.description || "A community on MEOW."}
+          </p>
+        </div>
+
+        <div className="mt-5 pt-3 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between gap-3">
+          <p className="text-[10px] text-gray-400 truncate">
+            by {comm.ownerName || "Unknown"}
+          </p>
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleJoin();
+            }}
+            className={`rounded-xl px-3 h-7 text-[10px] font-bold border-none transition-all shrink-0 ${
+              isMember
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15"
+                : "bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+            }`}
+          >
+            {isMember ? (
+              <>
+                <CheckCircle2 className="w-3 h-3 mr-1" />
+                Joined
+              </>
+            ) : (
+              "Join"
+            )}
+          </Button>
+        </div>
+      </article>
     </motion.div>
   );
 }
