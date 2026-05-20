@@ -69,6 +69,8 @@ export default function ManageEvent() {
       });
 
       const ticketUrl = `${window.location.origin}/ticket/${id}/${attendeeId}`;
+      const qrData = JSON.stringify({ eventId: id, rsvpId: attendeeId });
+      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
       
       try {
         await emailjs.send(
@@ -78,6 +80,7 @@ export default function ManageEvent() {
             to_email: attendee.email,
             event_name: event.title,
             ticket_url: ticketUrl,
+            qr_image_url: qrImageUrl,
             otp: ticketUrl,
             passcode: event.title,
             time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
@@ -97,7 +100,7 @@ export default function ManageEvent() {
 
       toast({
         title: "Approved!",
-        description: "Guest has been confirmed and ticket has been emailed.",
+        description: "Guest has been confirmed and their QR ticket has been emailed.",
       });
     } catch (error: any) {
       console.error("Confirmation Error:", error);
@@ -122,6 +125,9 @@ export default function ManageEvent() {
         await updateDoc(rsvpRef, { confirmationSent: true });
 
         const ticketUrl = `${window.location.origin}/ticket/${id}/${a.id}`;
+        const qrData = JSON.stringify({ eventId: id, rsvpId: a.id });
+        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+        
         try {
           await emailjs.send(
             import.meta.env.VITE_EMAILJS_SERVICE_ID,
@@ -130,6 +136,7 @@ export default function ManageEvent() {
               to_email: a.email,
               event_name: event.title,
               ticket_url: ticketUrl,
+              qr_image_url: qrImageUrl,
               otp: ticketUrl,
               passcode: event.title,
               time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
@@ -147,7 +154,7 @@ export default function ManageEvent() {
 
       toast({
         title: "Bulk Approval Complete",
-        description: `Successfully approved and emailed ${successCount} guests at once.`,
+        description: `Successfully approved and emailed QR tickets to ${successCount} guests.`,
       });
     } catch (error: any) {
       toast({
