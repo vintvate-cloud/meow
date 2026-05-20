@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { db } from "@/lib/firebase";
@@ -13,6 +13,7 @@ export default function QRScanner() {
   const [, setLocation] = useLocation();
   const [result, setResult] = useState<any>(null);
   const [scanning, setScanning] = useState(true);
+  const scanningRef = useRef(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,6 +24,11 @@ export default function QRScanner() {
     );
 
     async function onScanSuccess(decodedText: string) {
+      if (!scanningRef.current) return;
+      
+      scanningRef.current = false;
+      setScanning(false);
+
       try {
         const data = JSON.parse(decodedText);
         if (data.eventId !== id) {
@@ -35,6 +41,7 @@ export default function QRScanner() {
           setResult({ success: false, message: "Event ID is missing!" });
           return;
         }
+        
         const rsvpRef = doc(db, "events", id, "rsvps", data.rsvpId);
         const rsvpSnap = await getDoc(rsvpRef);
 
@@ -46,28 +53,25 @@ export default function QRScanner() {
           await updateDoc(rsvpRef, { checkedIn: true });
           setResult({ success: true, message: "Welcome!", email: rsvpSnap.data().email });
         }
-
-        setScanning(false);
-        scanner.clear();
       } catch (e) {
-        console.error(e);
+        console.error("Scan error:", e);
+        setResult({ success: false, message: "Invalid QR format!" });
       }
     }
 
-    if (scanning) {
-      scanner.render(onScanSuccess, (err) => {
-        // quiet error
-      });
-    }
+    scanner.render(onScanSuccess, (err) => {
+      // quiet error
+    });
 
     return () => {
-      scanner.clear().catch(e => console.error(e));
+      scanner.clear().catch(e => console.error("Failed to clear scanner", e));
     };
-  }, [id, scanning]);
+  }, [id]);
 
   const resetScanner = () => {
     setResult(null);
     setScanning(true);
+    scanningRef.current = true;
   };
 
   return (
@@ -85,27 +89,23 @@ export default function QRScanner() {
           <p className="text-gray-400 font-medium mt-2">Scan attendee QR codes to confirm entry.</p>
         </header>
 
-        <div className="relative">
+        <div className="relative min-h-[350px]">
+          {/* Scanner is always mounted but hidden visually when a result is shown */}
+          <div className={`bg-white/5 rounded-[40px] border-4 border-dashed border-white/20 p-4 overflow-hidden relative ${!scanning ? 'hidden' : 'block'}`}>
+            <div id="reader" className="w-full h-full rounded-3xl overflow-hidden [&>video]:object-cover [&>video]:rounded-3xl"></div>
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-64 h-64 border-2 border-[#D9FF00] rounded-3xl opacity-50 animate-pulse"></div>
+            </div>
+          </div>
+
           <AnimatePresence mode="wait">
-            {scanning ? (
-              <motion.div
-                key="scanner"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="bg-white/5 rounded-[40px] border-4 border-dashed border-white/20 p-4 overflow-hidden relative"
-              >
-                <div id="reader" className="w-full h-full rounded-3xl overflow-hidden"></div>
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="w-64 h-64 border-2 border-[#D9FF00] rounded-3xl opacity-50 animate-pulse"></div>
-                </div>
-              </motion.div>
-            ) : (
+            {!scanning && result && (
               <motion.div
                 key="result"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className={`p-10 rounded-[40px] text-center space-y-6 ${result?.success ? 'bg-[#D9FF00] text-[#111827] dark:text-foreground' : 'bg-red-500 text-white'}`}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className={`p-10 rounded-[40px] text-center space-y-6 absolute inset-0 w-full flex flex-col justify-center items-center ${result?.success ? 'bg-[#D9FF00] text-[#111827]' : 'bg-red-500 text-white'}`}
               >
                 <div className="flex justify-center">
                   <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
@@ -114,13 +114,13 @@ export default function QRScanner() {
                 </div>
 
                 <div>
-                  <h2 className="text-4xl font-black leading-tight">{result?.message}</h2>
-                  {result?.email && <p className="text-xl font-bold opacity-80 mt-2">{result.email}</p>}
+                  <h2 className="text-3xl font-black leading-tight">{result?.message}</h2>
+                  {result?.email && <p className="text-lg font-bold opacity-80 mt-2 truncate max-w-full">{result.email}</p>}
                 </div>
 
                 <Button
                   onClick={resetScanner}
-                  className="w-full h-14 rounded-2xl font-black text-lg bg-black/10 hover:bg-black/20 border-none"
+                  className="w-full h-14 rounded-2xl font-black text-lg bg-black/10 hover:bg-black/20 border-none text-current"
                 >
                   Scan Next
                 </Button>
