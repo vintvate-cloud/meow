@@ -135,6 +135,22 @@ export default function Dashboard() {
         );
         const hostingSnap = await getDocs(hostingQ);
         const hostingData = hostingSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Fetch Co-Hosting Events
+        const storedUsername = localStorage.getItem("user-username");
+        if (storedUsername) {
+          const coHostingQ = query(
+            collection(db, "events"),
+            where("coHosts", "array-contains", storedUsername.toLowerCase().trim())
+          );
+          const coHostingSnap = await getDocs(coHostingQ);
+          coHostingSnap.docs.forEach(docSnap => {
+            if (!hostingData.find(e => e.id === docSnap.id)) {
+              hostingData.push({ id: docSnap.id, ...docSnap.data() });
+            }
+          });
+        }
+
         hostingData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setHostingEvents(hostingData);
 

@@ -34,6 +34,20 @@ export default function HostProfile() {
           );
           const eventsSnap = await getDocs(eventsQ);
           const eventsList = eventsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+          // Also fetch co-hosted events
+          const coHostingQ = query(
+            collection(db, "events"),
+            where("coHosts", "array-contains", profileData.username),
+            where("isPublic", "==", true)
+          );
+          const coHostingSnap = await getDocs(coHostingQ);
+          coHostingSnap.docs.forEach(docSnap => {
+            if (!eventsList.find(e => e.id === docSnap.id)) {
+              eventsList.push({ id: docSnap.id, ...docSnap.data() });
+            }
+          });
+
           // Sort by date desc
           eventsList.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
           setEvents(eventsList);

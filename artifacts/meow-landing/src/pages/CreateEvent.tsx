@@ -8,9 +8,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
 
 const THEMES = [
@@ -140,8 +141,51 @@ export default function CreateEvent() {
     location: "",
     theme: "cream-cozy",
     creativeUrl: "",
+    coHosts: [] as string[],
     isPublic: true,
   });
+
+  const [coHostInput, setCoHostInput] = useState("");
+  const [hostSearchResults, setHostSearchResults] = useState<any[]>([]);
+  const [isSearchingHosts, setIsSearchingHosts] = useState(false);
+
+  useEffect(() => {
+    const searchHosts = async () => {
+      const searchTerm = coHostInput.trim().toLowerCase();
+      if (!searchTerm) {
+        setHostSearchResults([]);
+        setIsSearchingHosts(false);
+        return;
+      }
+      
+      setIsSearchingHosts(true);
+      try {
+        const q = query(
+          collection(db, "profiles"),
+          where("username", ">=", searchTerm),
+          where("username", "<=", searchTerm + "\uf8ff")
+        );
+        const snap = await getDocs(q);
+        const results = snap.docs.map(doc => doc.data());
+        // Filter out already selected co-hosts and self
+        const filtered = results.filter(
+          p => !formData.coHosts.includes(p.username) && p.userId !== user?.uid
+        ).slice(0, 5); // Limit to top 5 matches
+        
+        setHostSearchResults(filtered);
+      } catch (err) {
+        console.error("Error searching hosts:", err);
+      } finally {
+        setIsSearchingHosts(false);
+      }
+    };
+
+    const delayDebounceFn = setTimeout(() => {
+      searchHosts();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [coHostInput, formData.coHosts, user]);
 
   const [uploading, setUploading] = useState(false);
 
@@ -216,8 +260,10 @@ export default function CreateEvent() {
 
     try {
       const currentThemeObj = THEMES.find(t => t.id === formData.theme) || THEMES[0];
+      
       const docRef = await addDoc(collection(db, "events"), {
         ...formData,
+        coHosts: formData.coHosts,
         color: currentThemeObj.accent,
         customFields,
         userId: user.uid,
@@ -475,7 +521,7 @@ export default function CreateEvent() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-inner overflow-hidden" style={{ background: `linear-gradient(to top right, ${currentThemeObj.accent}, #2457FF)` }}>
                   {user?.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName || ""} className="w-full h-full object-cover" />
+                    <img src={parseAvatarUrlFromStorage(user.photoURL)} alt={user.displayName || ""} className="w-full h-full object-cover" />
                   ) : (
                     user?.displayName?.[0]?.toUpperCase() || "H"
                   )}
@@ -498,7 +544,7 @@ export default function CreateEvent() {
                <div className="flex items-center gap-3 inline-flex opacity-90">
                   <div className="w-8 h-8 rounded-full bg-current/10 flex items-center justify-center text-xs font-bold border border-current/20 shadow-sm overflow-hidden">
                     {user?.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName || ""} className="w-full h-full object-cover" />
+                      <img src={parseAvatarUrlFromStorage(user.photoURL)} alt={user.displayName || ""} className="w-full h-full object-cover" />
                     ) : (
                       user?.displayName?.[0]?.toUpperCase() || "H"
                     )}
@@ -552,6 +598,13 @@ export default function CreateEvent() {
                      type="datetime-local"
                      value={formData.date}
                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                     onClick={(e) => {
+                       try {
+                         if ('showPicker' in HTMLInputElement.prototype) {
+                           (e.target as HTMLInputElement).showPicker();
+                         }
+                       } catch (err) {}
+                     }}
                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                      required
                    />
@@ -579,6 +632,83 @@ export default function CreateEvent() {
                     required
                   />
                   <div className="opacity-60 font-medium text-sm mt-2">Check map for details</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-5">
+                <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
+                   <Users className="w-5 h-5 opacity-60" />
+                </div>
+                <div className="pt-1 flex-1">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.coHosts.map((host, idx) => (
+                      <span key={idx} className="flex items-center gap-1.5 px-3 py-1.5 bg-current/10 rounded-full text-xs font-bold text-current border border-current/10">
+                        @{host}
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, coHosts: prev.coHosts.filter((_, i) => i !== idx) }))}
+                          className="hover:text-red-500 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <input
+                      placeholder={formData.coHosts.length === 0 ? "Search for a host..." : "Add another..."}
+                      value={coHostInput}
+                      onChange={(e) => setCoHostInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                          e.preventDefault();
+                          const val = coHostInput.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+                          if (val && !formData.coHosts.includes(val)) {
+                            setFormData(prev => ({ ...prev, coHosts: [...prev.coHosts, val] }));
+                          }
+                          setCoHostInput("");
+                        }
+                      }}
+                      className="w-full bg-transparent border-none outline-none font-bold text-lg focus:ring-0 p-0 text-current placeholder-current/40 leading-none"
+                    />
+                    
+                    {/* Search Results Dropdown */}
+                    {(hostSearchResults.length > 0 || isSearchingHosts) && coHostInput.trim() && (
+                      <div className="absolute top-full left-0 mt-2 w-full max-w-sm bg-white dark:bg-[#1A1A1A] border border-black/10 dark:border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                        {isSearchingHosts ? (
+                          <div className="p-3 text-xs font-bold text-gray-400 text-center">Searching...</div>
+                        ) : hostSearchResults.length > 0 ? (
+                          <div className="max-h-48 overflow-y-auto">
+                            {hostSearchResults.map((host) => (
+                              <div 
+                                key={host.username}
+                                onClick={() => {
+                                  if (!formData.coHosts.includes(host.username)) {
+                                    setFormData(prev => ({ ...prev, coHosts: [...prev.coHosts, host.username] }));
+                                  }
+                                  setCoHostInput("");
+                                }}
+                                className="flex items-center gap-3 p-3 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors border-b border-black/5 dark:border-white/5 last:border-0"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center font-bold text-xs overflow-hidden text-gray-500">
+                                  {host.photoURL ? (
+                                    <img src={parseAvatarUrlFromStorage(host.photoURL)} alt={host.username} className="w-full h-full object-cover" />
+                                  ) : (
+                                    host.username[0].toUpperCase()
+                                  )}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{host.displayName || host.username}</span>
+                                  <span className="text-[10px] font-bold text-gray-400">@{host.username}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                  <div className="opacity-60 font-medium text-sm mt-2">Optional. Adds event to their profile. Type to search or press Enter.</div>
                 </div>
               </div>
             </div>

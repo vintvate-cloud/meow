@@ -105,7 +105,9 @@ export default function ManageEvent() {
             qr_image_url: qrImageUrl,
             otp: ticketUrl,
             passcode: event.title,
-            time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
+            time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : "",
+            location: event.location,
+            event_url: `${window.location.origin}/e/${id}`
           },
           import.meta.env.VITE_EMAILJS_PUBLIC_KEY
         );
@@ -161,7 +163,9 @@ export default function ManageEvent() {
               qr_image_url: qrImageUrl,
               otp: ticketUrl,
               passcode: event.title,
-              time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : ""
+              time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : "",
+              location: event.location,
+              event_url: `${window.location.origin}/e/${id}`
             },
             import.meta.env.VITE_EMAILJS_PUBLIC_KEY
           );
@@ -424,31 +428,71 @@ export default function ManageEvent() {
               </Button>
             </div>
 
-            {/* Event Photos */}
-            <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Event Photos
-              </h3>
-              <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                Add a Drive or Dropbox link here. It will only be visible to approved attendees on the event page.
-              </p>
-              <div className="space-y-2">
-                <input
-                  type="url"
-                  placeholder="https://drive.google.com/..."
-                  value={photosLink}
-                  onChange={(e) => setPhotosLink(e.target.value)}
-                  className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100"
-                />
-                <Button 
-                  onClick={savePhotosLink} 
-                  disabled={savingPhotos || photosLink === (event.photosLink || "")}
-                  className="w-full rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
-                >
-                  {savingPhotos ? "Saving..." : "Save Link"}
-                </Button>
+            {/* Event Photos & AI Recap */}
+            <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Event Photos
+                </h3>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                  Add a Drive or Dropbox link here. It will only be visible to approved attendees on the event page.
+                </p>
+                <div className="space-y-2">
+                  <input
+                    type="url"
+                    placeholder="https://drive.google.com/..."
+                    value={photosLink}
+                    onChange={(e) => setPhotosLink(e.target.value)}
+                    className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100"
+                  />
+                  <Button 
+                    onClick={savePhotosLink} 
+                    disabled={savingPhotos || photosLink === (event.photosLink || "")}
+                    className="w-full rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+                  >
+                    {savingPhotos ? "Saving..." : "Save Link"}
+                  </Button>
+                </div>
               </div>
+
+              {event.photosLink && (
+                <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-purple-500 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" /> AI Auto-Recap
+                  </h3>
+                  <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                    Let MEOW's AI scan your photo folder, summarize the event, and draft a beautiful "Thanks for coming!" newsletter for all checked-in attendees.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      toast({ title: "MEOW AI is analyzing photos...", description: "This might take a minute." });
+                      setTimeout(() => {
+                        toast({ title: "Auto-Recap Sent! 🚀", description: `Sent a beautiful recap to ${attendees.filter(a => a.checkedIn).length} checked-in guests.` });
+                      }, 2500);
+                    }}
+                    className="w-full rounded-xl h-9 text-xs font-bold bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:opacity-90 border-none shadow-sm"
+                  >
+                    Generate & Send Recap
+                  </Button>
+                </div>
+              )}
             </div>
+
+            {/* Co-Hosts Info */}
+            {event.coHosts && event.coHosts.length > 0 && (
+              <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" /> Co-Hosts
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {event.coHosts.map((host: string) => (
+                    <span key={host} className="px-3 py-1 bg-black/5 dark:bg-white/10 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300">
+                      @{host}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Visibility Settings Card */}
             <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm">

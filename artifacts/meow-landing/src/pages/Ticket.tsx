@@ -78,7 +78,14 @@ export default function Ticket() {
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="w-5 h-5 opacity-30" />
-              <div className="font-bold text-sm">{data.event.location}</div>
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.event.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-sm hover:underline cursor-pointer transition-all"
+              >
+                {data.event.location}
+              </a>
             </div>
           </div>
 
@@ -99,9 +106,16 @@ export default function Ticket() {
             </div>
           </div>
 
-          <Button className="w-full h-16 rounded-[32px] font-black text-lg shadow-xl" style={{ backgroundColor: '#111827', color: '#D9FF00' }}>
-            <Download className="w-5 h-5 mr-2" /> Save to Phone
-          </Button>
+          <div className="flex flex-col gap-3">
+            <Button className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-black text-white hover:bg-gray-900 border-none flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.63.11 2.87.72 3.66 1.84-3.07 1.77-2.5 5.92.51 7.23-.74 1.76-1.74 3.55-2.75 3.9zm-3.2-14c-.06-2.03 1.58-3.9 3.5-4.14.39 2.22-1.71 4.1-3.5 4.14z"/></svg>
+              Add to Apple Wallet
+            </Button>
+            <Button className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1-2-2 2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10"/><path d="M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><line x1="16" y1="15" x2="16.01" y2="15"/></svg>
+              Add to Google Wallet
+            </Button>
+          </div>
         </div>
 
         {/* Ticket Notch Effect */}

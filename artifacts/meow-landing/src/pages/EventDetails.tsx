@@ -11,6 +11,7 @@ import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft } fr
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
+import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
 const THEMES_MAP: Record<string, { bg: string, text: string, accent: string, starburst: string }> = {
   "cream-cozy": { bg: "#FAF8F5", text: "#101828", accent: "#8129D9", starburst: "#8129D9" },
@@ -180,7 +181,7 @@ export default function EventDetails() {
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
 
   return (
-    <AppLayout>
+    <>
       <div 
         className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300"
         style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
@@ -235,7 +236,7 @@ export default function EventDetails() {
                 <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D9FF00] to-[#2457FF] flex items-center justify-center font-bold text-white text-sm shadow-inner overflow-hidden" style={{ background: `linear-gradient(to top right, ${themeColors.accent}, #2457FF)` }}>
                     {hostProfile?.photoURL ? (
-                      <img src={hostProfile.photoURL} alt={hostProfile.displayName} className="w-full h-full object-cover" />
+                      <img src={parseAvatarUrlFromStorage(hostProfile.photoURL)} alt={hostProfile.displayName} className="w-full h-full object-cover" />
                     ) : (
                       (hostProfile?.displayName || event.userName || "H")?.[0]?.toUpperCase()
                     )}
@@ -298,8 +299,24 @@ export default function EventDetails() {
                    <MapPin className="w-5 h-5 opacity-60" style={{ color: themeColors.text }} />
                 </div>
                 <div className="pt-1">
-                  <div className="font-bold text-lg" style={{ color: themeColors.text }}>{event.location}</div>
-                  <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>Check map for details</div>
+                  {isApproved || user?.uid === event.userId ? (
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-lg hover:underline hover:opacity-80 transition-all cursor-pointer block"
+                      style={{ color: themeColors.text }}
+                    >
+                      {event.location}
+                    </a>
+                  ) : (
+                    <div className="font-bold text-lg" style={{ color: themeColors.text }}>
+                      Location revealed upon approval
+                    </div>
+                  )}
+                  <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>
+                    {isApproved || user?.uid === event.userId ? "Click to open in Google Maps" : "RSVP to get the exact location"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -476,6 +493,6 @@ export default function EventDetails() {
         </div>
       </div>
       </div>
-    </AppLayout>
+    </>
   );
 }
