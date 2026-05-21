@@ -6,14 +6,18 @@ import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Calendar, MapPin, CheckCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Ticket() {
   const { eventId, rsvpId } = useParams();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [permError, setPermError] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchTicket = async () => {
+      if (authLoading) return;
       if (!eventId || !rsvpId) return;
       try {
         const eventDoc = await getDoc(doc(db, "events", eventId));
@@ -30,16 +34,31 @@ export default function Ticket() {
             });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
+        if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+          setPermError(true);
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchTicket();
-  }, [eventId, rsvpId]);
+  }, [eventId, rsvpId, authLoading]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
+  if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
+
+  if (permError || (!user && !data)) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <h1 className="text-4xl font-black">Login Required</h1>
+        <p className="text-gray-500 font-medium max-w-md">You need to log in to the account that registered for this event to view the ticket.</p>
+        <Link href={`/login?redirect=${encodeURIComponent(`/ticket/${eventId}/${rsvpId}`)}`}>
+          <Button className="rounded-full font-bold">Log In</Button>
+        </Link>
+      </div>
+    );
+  }
 
   if (!data) return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-4">

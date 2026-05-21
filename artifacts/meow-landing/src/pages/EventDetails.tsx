@@ -35,6 +35,7 @@ export default function EventDetails() {
   const { user } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [hostProfile, setHostProfile] = useState<any>(null);
+  const [coHostProfiles, setCoHostProfiles] = useState<any[]>([]);
   const [isApproved, setIsApproved] = useState(false);
 
   useEffect(() => {
@@ -83,8 +84,8 @@ export default function EventDetails() {
       setCustomResponses(initial);
     }
     
-    // Fetch host profile
-    const fetchHostProfile = async () => {
+    // Fetch host and co-host profiles
+    const fetchProfiles = async () => {
       if (!event?.userId) return;
       try {
         const q = query(collection(db, "profiles"), where("userId", "==", event.userId));
@@ -92,11 +93,25 @@ export default function EventDetails() {
         if (!snap.empty) {
           setHostProfile(snap.docs[0].data());
         }
+
+        if (event.coHosts && event.coHosts.length > 0) {
+          const chunks = [];
+          for (let i = 0; i < event.coHosts.length; i += 10) {
+            chunks.push(event.coHosts.slice(i, i + 10));
+          }
+          const allCoHosts = [];
+          for (const chunk of chunks) {
+            const coHostQ = query(collection(db, "profiles"), where("username", "in", chunk));
+            const coHostSnap = await getDocs(coHostQ);
+            allCoHosts.push(...coHostSnap.docs.map(d => d.data()));
+          }
+          setCoHostProfiles(allCoHosts);
+        }
       } catch (error) {
-        console.error("Error fetching host profile:", error);
+        console.error("Error fetching profiles:", error);
       }
     };
-    fetchHostProfile();
+    fetchProfiles();
   }, [event]);
 
   useEffect(() => {
@@ -260,18 +275,35 @@ export default function EventDetails() {
             {/* Hosted By section */}
             <div className="pt-6">
                <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-80" style={{ color: themeColors.text }}>Hosted By</h3>
-               <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
-                 <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
-                      {hostProfile?.photoURL ? (
-                        <img src={hostProfile.photoURL} alt={hostProfile.displayName} className="w-full h-full object-cover" />
-                      ) : (
-                        (hostProfile?.displayName || event.userName || "A")?.[0]?.toUpperCase()
-                      )}
-                    </div>
-                    <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "A Community Member"}</span>
-                 </div>
-               </Link>
+               <div className="flex flex-wrap items-center gap-6">
+                 <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
+                   <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
+                      <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
+                        {hostProfile?.photoURL ? (
+                          <img src={parseAvatarUrlFromStorage(hostProfile.photoURL)} alt={hostProfile.displayName} className="w-full h-full object-cover" />
+                        ) : (
+                          (hostProfile?.displayName || event.userName || "A")?.[0]?.toUpperCase()
+                        )}
+                      </div>
+                      <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "A Community Member"}</span>
+                   </div>
+                 </Link>
+                 
+                 {coHostProfiles.map((coHost, idx) => (
+                   <Link key={idx} href={`/p/${coHost.username}`}>
+                     <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
+                        <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
+                          {coHost.photoURL ? (
+                            <img src={parseAvatarUrlFromStorage(coHost.photoURL)} alt={coHost.displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            coHost.displayName?.[0]?.toUpperCase() || coHost.username?.[0]?.toUpperCase()
+                          )}
+                        </div>
+                        <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{coHost.displayName || coHost.username}</span>
+                     </div>
+                   </Link>
+                 ))}
+               </div>
             </div>
           </div>
 
