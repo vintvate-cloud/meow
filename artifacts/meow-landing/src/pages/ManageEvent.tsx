@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from "wouter";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, updateDoc } from "firebase/firestore";
 import emailjs from '@emailjs/browser';
+import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +35,8 @@ export default function ManageEvent() {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [photosLink, setPhotosLink] = useState("");
+  const [savingPhotos, setSavingPhotos] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,7 +45,9 @@ export default function ManageEvent() {
       try {
         const eventDoc = await getDoc(doc(db, "events", id));
         if (eventDoc.exists()) {
-          setEvent({ id: eventDoc.id, ...eventDoc.data() });
+          const data = eventDoc.data();
+          setEvent({ id: eventDoc.id, ...data });
+          setPhotosLink(data.photosLink || "");
 
           const rsvpSnap = await getDocs(query(collection(db, "events", id, "rsvps"), orderBy("createdAt", "desc")));
           setAttendees(rsvpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -55,6 +60,23 @@ export default function ManageEvent() {
     };
     fetchData();
   }, [id]);
+
+  const savePhotosLink = async () => {
+    if (!id) return;
+    setSavingPhotos(true);
+    try {
+      await updateDoc(doc(db, "events", id), { photosLink });
+      setEvent({ ...event, photosLink });
+      toast({
+        title: "Photos link updated",
+        description: "Approved attendees can now access the event photos."
+      });
+    } catch (error: any) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+    } finally {
+      setSavingPhotos(false);
+    }
+  };
 
   const sendIndividualConfirmation = async (attendeeId: string) => {
     try {
@@ -287,11 +309,24 @@ export default function ManageEvent() {
                   attendees.map((a) => (
                     <div key={a.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-[#222]/50 transition-colors">
                       <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                        <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex-shrink-0 flex items-center justify-center font-bold text-xs text-gray-500 dark:text-gray-400">
-                          {a.email[0].toUpperCase()}
+                        <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex-shrink-0 flex items-center justify-center font-bold text-xs text-gray-500 dark:text-gray-400 overflow-hidden">
+                          {a.photoURL ? (
+                            <img src={parseAvatarUrlFromStorage(a.photoURL)} alt={a.displayName || a.email} className="w-full h-full object-cover" />
+                          ) : (
+                            (a.displayName || a.email)[0].toUpperCase()
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">{a.email}</div>
+                          <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+                            {a.displayName ? (
+                              <div className="flex flex-col">
+                                <span>{a.displayName}</span>
+                                <span className="text-[10px] text-gray-500 font-normal">{a.email}</span>
+                              </div>
+                            ) : (
+                              a.email
+                            )}
+                          </div>
                           {Object.keys(a.customResponses || {}).length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
                               {Object.entries(a.customResponses || {}).map(([label, value]: any) => (
@@ -387,6 +422,32 @@ export default function ManageEvent() {
               <Button className="w-full rounded-xl h-10 text-xs font-semibold bg-[#D9FF00] text-black hover:bg-[#D9FF00]/90 border-none shadow-sm">
                 Write message
               </Button>
+            </div>
+
+            {/* Event Photos */}
+            <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> Event Photos
+              </h3>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                Add a Drive or Dropbox link here. It will only be visible to approved attendees on the event page.
+              </p>
+              <div className="space-y-2">
+                <input
+                  type="url"
+                  placeholder="https://drive.google.com/..."
+                  value={photosLink}
+                  onChange={(e) => setPhotosLink(e.target.value)}
+                  className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100"
+                />
+                <Button 
+                  onClick={savePhotosLink} 
+                  disabled={savingPhotos || photosLink === (event.photosLink || "")}
+                  className="w-full rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+                >
+                  {savingPhotos ? "Saving..." : "Save Link"}
+                </Button>
+              </div>
             </div>
 
             {/* Visibility Settings Card */}

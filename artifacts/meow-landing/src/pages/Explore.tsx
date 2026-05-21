@@ -234,7 +234,7 @@ export default function Explore() {
                   />
                 ) : (
                   <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6"
                     initial="hidden"
                     animate="visible"
                     variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
@@ -261,7 +261,7 @@ export default function Explore() {
                 />
               ) : (
                 <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6"
                   initial="hidden"
                   animate="visible"
                   variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
@@ -387,7 +387,7 @@ function EmptyState({ title, description, action }: { title: string; description
 
 function ExploreSkeleton({ type }: { type: "events" | "communities" }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div
           key={i}

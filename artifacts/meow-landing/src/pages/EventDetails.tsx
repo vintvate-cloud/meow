@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp, arrayUnion, query, where, getDocs } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
+import { AppLayout } from "@/components/Navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft } from "lucide-react";
@@ -32,6 +33,8 @@ export default function EventDetails() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isDark, setIsDark] = useState(false);
+  const [hostProfile, setHostProfile] = useState<any>(null);
+  const [isApproved, setIsApproved] = useState(false);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
@@ -78,7 +81,42 @@ export default function EventDetails() {
       });
       setCustomResponses(initial);
     }
+    
+    // Fetch host profile
+    const fetchHostProfile = async () => {
+      if (!event?.userId) return;
+      try {
+        const q = query(collection(db, "profiles"), where("userId", "==", event.userId));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setHostProfile(snap.docs[0].data());
+        }
+      } catch (error) {
+        console.error("Error fetching host profile:", error);
+      }
+    };
+    fetchHostProfile();
   }, [event]);
+
+  useEffect(() => {
+    const checkRsvpStatus = async () => {
+      if (!id || !user?.email) return;
+      try {
+        const q = query(collection(db, "events", id, "rsvps"), where("email", "==", user.email));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          setRsvpDone(true);
+          const rsvpData = snap.docs[0].data();
+          if (rsvpData.confirmationSent || rsvpData.checkedIn) {
+            setIsApproved(true);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking RSVP status", err);
+      }
+    };
+    checkRsvpStatus();
+  }, [id, user]);
 
 
   const handleRSVP = async (e: React.FormEvent) => {
@@ -90,6 +128,9 @@ export default function EventDetails() {
       // 1. Add to RSVPs collection
       const rsvpDoc = await addDoc(collection(db, "events", id, "rsvps"), {
         email,
+        userId: user?.uid || null,
+        displayName: user?.displayName || null,
+        photoURL: user?.photoURL || null,
         customResponses,
         createdAt: serverTimestamp(),
         checkedIn: false,
@@ -139,10 +180,11 @@ export default function EventDetails() {
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
 
   return (
-    <div 
-      className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300"
-      style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
-    >
+    <AppLayout>
+      <div 
+        className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300"
+        style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
+      >
       {/* Dynamic Starburst/Ray Background Effect */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40">
         <div className="absolute w-[150vw] h-[150vw] md:w-[100vw] md:h-[100vw]" style={{
@@ -189,15 +231,21 @@ export default function EventDetails() {
 
             {/* Presented By */}
             <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D9FF00] to-[#2457FF] flex items-center justify-center font-bold text-white text-sm shadow-inner" style={{ background: `linear-gradient(to top right, ${themeColors.accent}, #2457FF)` }}>
-                  {(event.userName || "H")?.[0]?.toUpperCase()}
+              <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
+                <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D9FF00] to-[#2457FF] flex items-center justify-center font-bold text-white text-sm shadow-inner overflow-hidden" style={{ background: `linear-gradient(to top right, ${themeColors.accent}, #2457FF)` }}>
+                    {hostProfile?.photoURL ? (
+                      <img src={hostProfile.photoURL} alt={hostProfile.displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      (hostProfile?.displayName || event.userName || "H")?.[0]?.toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-widest opacity-60 font-bold">Presented by</div>
+                    <div className="font-bold text-sm" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "Community"}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest opacity-60 font-bold">Presented by</div>
-                  <div className="font-bold text-sm" style={{ color: themeColors.text }}>{event.userName || "Community"}</div>
-                </div>
-              </div>
+              </Link>
               <button className="px-5 py-2 rounded-full bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 text-xs font-bold transition-all border border-gray-200 dark:border-white/5 shadow-sm" style={{ color: themeColors.text }}>
                 Subscribe
               </button>
@@ -211,12 +259,18 @@ export default function EventDetails() {
             {/* Hosted By section */}
             <div className="pt-6">
                <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-80" style={{ color: themeColors.text }}>Hosted By</h3>
-               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm" style={{ color: themeColors.text }}>
-                    {(event.userName || "A")?.[0]?.toUpperCase()}
-                  </div>
-                  <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{event.userName || "A Community Member"}</span>
-               </div>
+               <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
+                 <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
+                    <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
+                      {hostProfile?.photoURL ? (
+                        <img src={hostProfile.photoURL} alt={hostProfile.displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        (hostProfile?.displayName || event.userName || "A")?.[0]?.toUpperCase()
+                      )}
+                    </div>
+                    <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "A Community Member"}</span>
+                 </div>
+               </Link>
             </div>
           </div>
 
@@ -370,27 +424,42 @@ export default function EventDetails() {
                    </motion.div>
                  ) : (
                    <motion.div
-                     key="done"
-                     initial={{ opacity: 0, scale: 0.95 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-2xl p-8 rounded-[20px] border border-gray-200 dark:border-white/10 text-center space-y-6 shadow-xl dark:shadow-2xl"
-                   >
-                     <div className="flex justify-center">
-                       <div className="w-16 h-16 bg-white dark:bg-white/10 rounded-full flex items-center justify-center text-[#111827] dark:text-white border border-gray-200 dark:border-white/20 shadow-sm">
-                         <CheckCircle2 className="w-8 h-8" />
-                       </div>
-                     </div>
-                     <h3 className="text-2xl font-bold text-[#111827] dark:text-white">You're registered!</h3>
+                      key="done"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-2xl p-8 rounded-[20px] border border-gray-200 dark:border-white/10 text-center space-y-6 shadow-xl dark:shadow-2xl"
+                    >
+                      <div className="flex justify-center">
+                        <div className="w-16 h-16 bg-white dark:bg-white/10 rounded-full flex items-center justify-center text-[#111827] dark:text-white border border-gray-200 dark:border-white/20 shadow-sm">
+                          <CheckCircle2 className="w-8 h-8" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-[#111827] dark:text-white">You're registered!</h3>
 
-                     <div className="bg-gray-50 dark:bg-white/5 p-5 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
-                       <p className="text-[#111827] dark:text-white font-semibold text-sm">
-                         Pending Approval
-                       </p>
-                       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
-                         The host will review your request. You'll receive a ticket via email once confirmed.
-                       </p>
-                     </div>
-                   </motion.div>
+                      <div className="bg-gray-50 dark:bg-white/5 p-5 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
+                        <p className="text-[#111827] dark:text-white font-semibold text-sm">
+                          {isApproved ? "Approved & Confirmed" : "Pending Approval"}
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
+                          {isApproved 
+                            ? "You're on the guest list! Your ticket has been emailed to you."
+                            : "The host will review your request. You'll receive a ticket via email once confirmed."}
+                        </p>
+                      </div>
+
+                      {isApproved && event.photosLink && (
+                        <div className="pt-2">
+                          <a href={event.photosLink} target="_blank" rel="noopener noreferrer">
+                            <Button
+                              className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] shadow-md border-none text-white flex items-center justify-center gap-2"
+                              style={{ backgroundColor: themeColors.accent }}
+                            >
+                              <Download className="w-4 h-4" /> View Event Photos
+                            </Button>
+                          </a>
+                        </div>
+                      )}
+                    </motion.div>
                  )}
                </AnimatePresence>
             </div>
@@ -406,6 +475,7 @@ export default function EventDetails() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

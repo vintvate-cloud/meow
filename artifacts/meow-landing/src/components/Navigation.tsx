@@ -12,18 +12,18 @@ export function NavItem({ icon, label, active = false, isMobile = false, isNavba
   const content = (
     <>
       {isMobile ? (
-        <div className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-[#8129D9] dark:text-[#E8C8EC]' : 'text-gray-400 dark:text-gray-500'}`}>
+        <div className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-foreground' : 'text-gray-400 dark:text-gray-500'}`}>
           <div className={active ? 'scale-110' : ''}>{icon}</div>
           <span className="text-[10px] font-bold tracking-tight">{label}</span>
         </div>
       ) : isNavbar ? (
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all group ${active ? 'bg-[#8129D9] text-white dark:bg-[#E8C8EC] dark:text-[#101828]' : 'hover:bg-gray-50 dark:bg-muted text-gray-500 hover:text-[#101828] dark:text-foreground'}`}>
-          <div className={active ? '' : 'group-hover:scale-115 transition-transform'}>{icon}</div>
-          <span className="font-semibold text-sm">{label}</span>
+        <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full transition-all duration-300 group ${active ? 'bg-black/5 dark:bg-white/10 text-foreground border border-black/5 dark:border-white/10 backdrop-blur-md shadow-sm' : 'hover:bg-black/5 dark:hover:bg-white/5 text-gray-500 hover:text-foreground border border-transparent'}`}>
+          <div className={active ? '' : 'group-hover:scale-105 transition-transform opacity-70 group-hover:opacity-100'}>{icon}</div>
+          <span className="hidden sm:inline font-medium text-sm tracking-wide">{label}</span>
         </div>
       ) : (
         <div className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all group ${active ? 'bg-gray-100 dark:bg-white/10 text-foreground font-semibold' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-foreground'}`}>
-          <div className={active ? 'text-[#8129D9] dark:text-[#E8C8EC]' : 'group-hover:scale-110 transition-transform'}>{icon}</div>
+          <div className={active ? 'text-foreground' : 'group-hover:scale-110 transition-transform'}>{icon}</div>
           <span className="font-medium text-sm">{label}</span>
         </div>
       )}
@@ -36,100 +36,6 @@ export function NavItem({ icon, label, active = false, isMobile = false, isNavba
   return <button className="w-full text-left">{content}</button>;
 }
 
-export function TopNavbar() {
-  const { user, logout } = useAuth();
-  const [location] = useLocation();
-  const [isDark, setIsDark] = useState(false);
-  const avatarUrl = parseAvatarUrlFromStorage(user?.photoURL || null);
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-  }, []);
-
-  const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
-
-  return (
-    <nav className="hidden md:flex w-full bg-white dark:bg-[#0A0A0A] border-b border-gray-100 dark:border-[#222] items-center justify-between px-8 py-4 z-50 sticky top-0 shadow-sm">
-      <div className="flex items-center gap-8">
-        <Link href="/" className="flex items-center">
-          <span className="font-bold text-xl tracking-tight text-[#101828] dark:text-white flex items-center gap-1.5">
-            MEOW 🐾
-          </span>
-        </Link>
-
-        <div className="flex items-center space-x-1">
-          <NavItem icon={<Calendar className="w-4 h-4" />} label="Dashboard" active={location === '/' || location === '/dashboard'} isNavbar href="/" />
-          <NavItem icon={<Globe className="w-4 h-4" />} label="Explore" active={location === '/explore'} isNavbar href="/explore" />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <Link href="/create-event">
-          <Button size="sm" className="rounded-full font-bold h-9 px-4 hidden md:flex border-none shadow-sm bg-[#8129D9] hover:bg-[#7020C4] text-white">
-            <Plus className="w-4 h-4 mr-1" />
-            Create Event
-          </Button>
-        </Link>
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full hover:bg-gray-50 dark:hover:bg-white/5 text-gray-500 transition-colors mr-2"
-          title="Toggle Theme"
-        >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-        <Link href="/settings">
-          <button className={`relative rounded-full overflow-hidden transition-all border-2 ${location === '/settings' ? 'border-[#8129D9] scale-105' : 'border-transparent hover:border-[#8129D9]/50 hover:scale-105'}`}>
-            <img src={avatarUrl} alt="Profile" className="w-8 h-8 object-cover" />
-          </button>
-        </Link>
-        <div className="h-6 w-px bg-gray-200 dark:bg-border mx-2"></div>
-        <button
-          onClick={() => logout()}
-          className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 transition-colors group"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="font-semibold text-sm">Log out</span>
-        </button>
-      </div>
-    </nav>
-  );
-}
-
-export function BottomNavbar() {
-  const [location] = useLocation();
-  const { user } = useAuth();
-  const avatarUrl = parseAvatarUrlFromStorage(user?.photoURL || null);
-
-  return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-card border-t border-gray-100 dark:border-border px-6 py-3 flex justify-between items-center z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pb-4">
-      <NavItem icon={<Calendar className="w-5 h-5" />} label="My Events" active={location === '/' || location === '/dashboard'} isMobile href="/" />
-      <NavItem icon={<Globe className="w-5 h-5" />} label="Explore" active={location === '/explore'} isMobile href="/explore" />
-      <Link href="/create-event">
-        <div className="w-12 h-12 rounded-full flex items-center justify-center -translate-y-4 shadow-xl border-4 border-white dark:border-background transition-transform active:scale-90 bg-[#8129D9] text-white">
-          <Plus className="w-6 h-6 text-white" />
-        </div>
-      </Link>
-      <Link href="/settings">
-        <div className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${location === '/settings' ? 'text-[#8129D9]' : 'text-gray-400'}`}>
-          <div className={`w-5 h-5 rounded-full overflow-hidden transition-transform ${location === '/settings' ? 'scale-110 ring-2 ring-[#8129D9] ring-offset-1 dark:ring-offset-card' : ''}`}>
-            <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
-          </div>
-          <span className="text-[10px] font-bold tracking-tight">Settings</span>
-        </div>
-      </Link>
-    </nav>
-  );
-}
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -174,111 +80,79 @@ export function AppLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#0A0A0A] text-foreground flex flex-col md:flex-row transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAF9F6] dark:bg-[#0A0A0A] text-foreground flex flex-col transition-colors duration-300">
       
-      {/* Desktop Left Sidebar (Clean Linktree Aesthetic) */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-gray-100 dark:border-[#222] bg-[#FAF9F6] dark:bg-[#0A0A0A] shrink-0 h-screen sticky top-0 z-40 p-6 justify-between">
-        <div className="space-y-6">
-          
-          {/* Header Workspace Display */}
-          <div className="flex items-center gap-3 px-1 py-2">
-            <span className="font-black text-lg tracking-wider text-[#101828] dark:text-white">
+      {/* Universal Top Navbar */}
+      <nav className="w-full bg-white/60 dark:bg-[#0A0A0A]/60 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 sticky top-0 z-50 px-4 md:px-8 py-3 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.2)]">
+        <div className="flex items-center gap-4 md:gap-8">
+          <Link href="/">
+            <span className="font-black text-lg md:text-xl tracking-tighter text-[#101828] dark:text-white flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity">
               MEOW 🐾
             </span>
+          </Link>
+          
+          {/* Main Nav Links */}
+          <div className="flex items-center gap-1 md:gap-2">
+            <NavItem icon={<Calendar className="w-4 h-4" strokeWidth={1.5} />} label="Events" active={location === '/' || location === '/dashboard'} isNavbar href="/" />
+            <NavItem icon={<Globe className="w-4 h-4" strokeWidth={1.5} />} label="Explore" active={location === '/explore'} isNavbar href="/explore" />
           </div>
+        </div>
 
-          {/* User Profile Card Dropdown */}
-          <Link href="/settings">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-all shadow-sm">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-100 dark:border-gray-800 object-cover shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate leading-tight">{user?.displayName || "Creator"}</p>
-                  <p className="text-[10px] text-gray-400 truncate mt-0.5">Admin Hub</p>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+        <div className="flex items-center gap-2 md:gap-4">
+          <button 
+            onClick={handleOpenScanner}
+            className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-foreground transition-all duration-300 hidden sm:flex backdrop-blur-md"
+            title="QR Scanner"
+          >
+            <QrCode className="w-4 h-4" strokeWidth={1.5} />
+          </button>
+          
+          <Link href="/create-event">
+            <Button size="sm" className="rounded-full font-medium h-9 px-4 border border-black/10 dark:border-white/10 shadow-sm bg-white/50 dark:bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 backdrop-blur-xl text-foreground hidden sm:flex transition-all duration-300">
+              <Plus className="w-4 h-4 md:mr-1.5" strokeWidth={2} />
+              <span className="hidden md:inline tracking-wide">Create Event</span>
+            </Button>
+          </Link>
+          
+          {/* Mobile Create Event */}
+          <Link href="/create-event" className="sm:hidden">
+            <div className="w-9 h-9 rounded-full bg-white/50 dark:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-xl text-foreground flex items-center justify-center cursor-pointer shadow-sm hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300">
+              <Plus className="w-4 h-4" strokeWidth={2} />
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-wider uppercase px-4 mb-2">My MEOW Hub</p>
-            <NavItem icon={<Calendar className="w-4 h-4 stroke-[2px]" />} label="Events" active={location === '/' || location === '/dashboard'} href="/" />
-            <NavItem icon={<Globe className="w-4 h-4 stroke-[2px]" />} label="Explore" active={location === '/explore'} href="/explore" />
-            <NavItem icon={<Paintbrush className="w-4 h-4 stroke-[2px]" />} label="Appearance" active={location.includes('/settings') && location.includes('tab=appearance')} href="/settings?tab=appearance" />
-          </div>
-
-          {/* Tools / Integrations */}
-          <div className="space-y-1 pt-2">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-wider uppercase px-4 mb-2">Tools</p>
-            <button 
-              onClick={handleOpenScanner}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-foreground text-left transition-all"
-            >
-              <QrCode className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              <span className="font-medium text-sm">QR Ticket Scanner</span>
-            </button>
-            <NavItem icon={<Settings className="w-4 h-4 stroke-[2px]" />} label="Settings" active={location === '/settings'} href="/settings" />
-          </div>
-        </div>
-
-        {/* Sidebar Footer */}
-        <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-[#222]">
-          {/* Create Event prominent pill */}
-          <Link href="/create-event">
-            <button className="w-full py-3 rounded-full bg-[#8129D9] hover:bg-[#7020C4] text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01]">
-              <Plus className="w-4 h-4" />
-              Create Event
-            </button>
-          </Link>
-
-          <div className="flex justify-between items-center pt-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 transition-all"
-              title="Toggle Theme"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={() => logout()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 text-red-500 transition-colors text-xs font-semibold"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              Log Out
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile Header */}
-      <header className="md:hidden flex items-center justify-between px-5 py-4 bg-white dark:bg-card border-b border-gray-100 dark:border-border sticky top-0 z-40">
-        <Link href="/">
-          <span className="font-black text-lg tracking-wider text-[#101828] dark:text-white">
-            MEOW 🐾
-          </span>
-        </Link>
-        <div className="flex items-center gap-3">
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-muted"
+            className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-foreground transition-all duration-300 backdrop-blur-md"
+            title="Toggle Theme"
           >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {isDark ? <Sun className="w-4 h-4" strokeWidth={1.5} /> : <Moon className="w-4 h-4" strokeWidth={1.5} />}
+          </button>
+          
+          <div className="h-6 w-px bg-black/10 dark:bg-white/10 mx-1 hidden md:block"></div>
+          
+          <Link href="/settings">
+            <div className={`w-9 h-9 rounded-full overflow-hidden border-2 cursor-pointer transition-all duration-300 shadow-sm ${location === '/settings' ? 'border-foreground scale-105' : 'border-transparent hover:border-black/20 dark:hover:border-white/20 hover:scale-105'}`}>
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+            </div>
+          </Link>
+
+          <button
+            onClick={() => logout()}
+            className="p-2.5 rounded-full hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-all duration-300 hidden md:flex backdrop-blur-md"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
-      </header>
+      </nav>
 
       {/* Main Content Workspace */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col w-full mx-auto">
         <div className="flex-1">
           {children}
         </div>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNavbar />
 
       {/* QR Scanner Selection Modal */}
       <Dialog open={isScannerModalOpen} onOpenChange={setIsScannerModalOpen}>

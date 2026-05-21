@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Accordion,
   AccordionContent,
@@ -43,6 +44,7 @@ export default function Home() {
   const navRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
+  const { user } = useAuth();
   const [phoneStep, setPhoneStep] = useState(0);
   const [testimonialStep, setTestimonialStep] = useState(0);
   const [activeFaq, setActiveFaq] = useState<string | undefined>();
@@ -154,14 +156,24 @@ export default function Home() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: "var(--foreground)" }}>Log in</Button>
-            </Link>
-            <Link href="/signup">
-              <motion.div whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }}>
-                <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>Get Started</Button>
-              </motion.div>
-            </Link>
+            {user ? (
+              <Link href="/dashboard">
+                <motion.div whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }}>
+                  <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>Dashboard</Button>
+                </motion.div>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="rounded-full hidden sm:inline-flex" style={{ color: "var(--foreground)" }}>Log in</Button>
+                </Link>
+                <Link href="/signup">
+                  <motion.div whileHover={{ scale: 1.05, rotate: 1 }} whileTap={{ scale: 0.97 }}>
+                    <Button className="rounded-full font-bold px-6 border-none" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>Get Started</Button>
+                  </motion.div>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
