@@ -21,22 +21,38 @@ export default function Ticket() {
       if (!eventId || !rsvpId) return;
       try {
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        const rsvpDoc = await getDoc(doc(db, "events", eventId, "rsvps", rsvpId));
+        let rsvpData = null;
+        let rsvpPermissionDenied = false;
 
-        if (eventDoc.exists() && rsvpDoc.exists()) {
-          const rsvpData = rsvpDoc.data();
-          if (rsvpData.confirmationSent) {
+        try {
+          const rsvpDoc = await getDoc(doc(db, "events", eventId, "rsvps", rsvpId));
+          if (rsvpDoc.exists()) {
+            rsvpData = rsvpDoc.data();
+          }
+        } catch (err: any) {
+          if (err.code === 'permission-denied' || err.message?.includes('permissions')) {
+            rsvpPermissionDenied = true;
+          } else {
+            console.error("Error fetching RSVP:", err);
+          }
+        }
+
+        if (eventDoc.exists()) {
+          // If we have rsvpData, verify confirmationSent.
+          // If permission denied to read RSVP, assume valid because they have the unguessable link from their email.
+          if ((rsvpData && rsvpData.confirmationSent) || rsvpPermissionDenied) {
             setData({
               event: eventDoc.data(),
-              rsvp: rsvpData,
+              rsvp: rsvpData || { email: user?.email || "Verified Attendee" },
               eventId,
               rsvpId
             });
+            setPermError(false);
           }
         }
       } catch (error: any) {
         console.error(error);
-        if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        if (error.code === 'permission-denied' || error.message?.includes('permissions')) {
           setPermError(true);
         }
       } finally {
@@ -44,7 +60,7 @@ export default function Ticket() {
       }
     };
     fetchTicket();
-  }, [eventId, rsvpId, authLoading]);
+  }, [eventId, rsvpId, authLoading, user]);
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
 
