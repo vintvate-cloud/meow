@@ -180,16 +180,30 @@ export default function EventDetails() {
   }, [user, email]);
 
   const themeColors = (() => {
-    if (event?.theme && THEMES_MAP[event.theme]) {
-      return THEMES_MAP[event.theme];
-    }
     const color = event?.color || '#D9FF00';
-    return {
+    let base = {
       bg: isDark ? "#0A0A0A" : "#F3F0E8",
       text: isDark ? "#FFFFFF" : "#111827",
       accent: color,
       starburst: color
     };
+
+    if (event?.theme === "dynamic") {
+      base = {
+        bg: color,
+        text: event?.isDark ? "#FFFFFF" : "#111827",
+        accent: event?.isDark ? "#FFFFFF" : "#111827",
+        starburst: color
+      };
+    } else if (event?.theme && THEMES_MAP[event.theme]) {
+      base = { ...THEMES_MAP[event.theme] };
+      // Override accent if an extracted color is somehow set alongside a standard theme
+      if (event?.color) {
+        base.accent = event.color;
+        base.starburst = event.color;
+      }
+    }
+    return base;
   })();
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;

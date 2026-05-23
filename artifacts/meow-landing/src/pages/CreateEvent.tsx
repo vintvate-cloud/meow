@@ -12,6 +12,7 @@ import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Glo
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
+import { FastAverageColor } from 'fast-average-color';
 
 
 const THEMES = [
@@ -188,11 +189,25 @@ export default function CreateEvent() {
   }, [coHostInput, formData.coHosts, user]);
 
   const [uploading, setUploading] = useState(false);
+  const [extractedColor, setExtractedColor] = useState<{hex: string, isDark: boolean} | null>(null);
+  const [autoColorMatch, setAutoColorMatch] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     
+    // Extract average color robustly
+    const fac = new FastAverageColor();
+    const imageUrl = URL.createObjectURL(file);
+    fac.getColorAsync(imageUrl)
+      .then(color => {
+        setExtractedColor({ hex: color.hex, isDark: color.isDark });
+        URL.revokeObjectURL(imageUrl);
+      })
+      .catch(e => {
+        console.error("Color extraction failed:", e);
+      });
+
     setUploading(true);
     try {
       const formDataUpload = new FormData();
@@ -260,11 +275,16 @@ export default function CreateEvent() {
 
     try {
       const currentThemeObj = THEMES.find(t => t.id === formData.theme) || THEMES[0];
+      const finalColor = autoColorMatch && extractedColor ? extractedColor.hex : currentThemeObj.accent;
+      const finalTheme = autoColorMatch && extractedColor ? "dynamic" : formData.theme;
+      const finalIsDark = autoColorMatch && extractedColor ? extractedColor.isDark : false;
       
       const docRef = await addDoc(collection(db, "events"), {
         ...formData,
+        theme: finalTheme,
         coHosts: formData.coHosts,
-        color: currentThemeObj.accent,
+        color: finalColor,
+        isDark: finalIsDark,
         customFields,
         userId: user.uid,
         userName: user.displayName,
@@ -424,19 +444,25 @@ export default function CreateEvent() {
   }
 
   const currentThemeObj = THEMES.find(t => t.id === formData.theme) || THEMES[0];
+  
+  // Apply Spotify-style dynamic color theme if toggle is on
+  const previewBg = autoColorMatch && extractedColor ? extractedColor.hex : currentThemeObj.bg;
+  const previewText = autoColorMatch && extractedColor ? (extractedColor.isDark ? "#FFFFFF" : "#111827") : currentThemeObj.text;
+  const previewAccent = autoColorMatch && extractedColor ? (extractedColor.isDark ? "#FFFFFF" : "#111827") : currentThemeObj.accent;
+  const previewStarburst = autoColorMatch && extractedColor ? extractedColor.hex : currentThemeObj.starburst;
 
   return (
     <div 
       className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-500"
-      style={{ backgroundColor: currentThemeObj.bg, color: currentThemeObj.text }}
+      style={{ backgroundColor: previewBg, color: previewText }}
     >
       {/* Dynamic Starburst/Ray Background Effect */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40">
         <div className="absolute w-[150vw] h-[150vw] md:w-[100vw] md:h-[100vw]" style={{
-          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${currentThemeObj.starburst}22 10deg, transparent 11deg)`
+          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${previewStarburst}22 10deg, transparent 11deg)`
         }} />
         <div className="absolute inset-0" style={{
-          background: `radial-gradient(circle_at_center, transparent 20%, ${currentThemeObj.bg} 70%)`
+          background: `radial-gradient(circle_at_center, transparent 20%, ${previewBg} 70%)`
         }} />
       </div>
 
@@ -479,7 +505,7 @@ export default function CreateEvent() {
             {/* Event Poster Box */}
             <div 
               className="w-full aspect-square rounded-[24px] border border-current/10 flex items-center justify-center relative overflow-hidden transition-all duration-500 shadow-xl group cursor-pointer"
-              style={{ backgroundColor: currentThemeObj.accent }}
+              style={{ backgroundColor: previewAccent }}
             >
               {formData.creativeUrl ? (
                 <img src={formData.creativeUrl} alt="Event Cover" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -512,14 +538,37 @@ export default function CreateEvent() {
             </div>
             {formData.creativeUrl && (
               <div className="flex justify-end mt-[-1rem]">
-                 <button type="button" onClick={() => setFormData({...formData, creativeUrl: ''})} className="text-xs font-bold opacity-60 hover:opacity-100 transition-colors">Remove Cover</button>
+                 <button type="button" onClick={() => {
+                   setFormData({...formData, creativeUrl: ''});
+                   setExtractedColor(null);
+                 }} className="text-xs font-bold opacity-60 hover:opacity-100 transition-colors">Remove Cover</button>
               </div>
             )}
+
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-current/5 border border-current/10">
+              <div className="flex items-center gap-3">
+                {extractedColor ? (
+                  <div className="w-8 h-8 rounded-full border-2 border-current/20 shadow-sm transition-colors duration-500" style={{ backgroundColor: autoColorMatch ? extractedColor.hex : 'transparent' }} />
+                ) : (
+                  <div className="w-8 h-8 rounded-full border-2 border-current/20 shadow-sm flex items-center justify-center opacity-30">
+                    <span className="text-[10px]">🎨</span>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-bold">Dynamic Color Match</p>
+                  <p className="text-xs font-medium opacity-60">Match theme to cover image</p>
+                </div>
+              </div>
+              <Switch 
+                checked={autoColorMatch}
+                onCheckedChange={setAutoColorMatch}
+              />
+            </div>
 
             {/* Presented By Mock */}
             <div className="flex items-center justify-between pt-2 opacity-80">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-inner overflow-hidden" style={{ background: `linear-gradient(to top right, ${currentThemeObj.accent}, #2457FF)` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-sm shadow-inner overflow-hidden" style={{ background: `linear-gradient(to top right, ${previewAccent}, #2457FF)` }}>
                   {user?.photoURL ? (
                     <img src={parseAvatarUrlFromStorage(user.photoURL)} alt={user.displayName || ""} className="w-full h-full object-cover" />
                   ) : (
