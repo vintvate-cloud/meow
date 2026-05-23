@@ -12,8 +12,10 @@ import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from "fireba
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import { useForceLightTheme } from "@/hooks/use-theme-force";
 
 export default function Onboarding() {
+  useForceLightTheme();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');

@@ -39,7 +39,10 @@ const TESTIMONIALS = [
   }
 ];
 
+import { useForceLightTheme } from "@/hooks/use-theme-force";
+
 export default function Home() {
+  useForceLightTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -343,7 +346,7 @@ export default function Home() {
               <div className="w-20 h-4 rounded-full" style={{ backgroundColor: '#111827' }}></div>
             </div>
 
-            <div className="flex-1 mt-8 relative">
+            <div className="flex-1 mt-8 relative bg-white">
               <AnimatePresence mode="wait">
                 {phoneStep === 0 && (
                   <motion.div
@@ -351,22 +354,35 @@ export default function Home() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="absolute inset-0 flex flex-col px-4 pt-4 pb-16"
+                    className="absolute inset-0 flex flex-col bg-[#F3F0E8] overflow-hidden"
                   >
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">←</div>
-                      <div className="font-bold text-gray-900 dark:text-foreground">New Event</div>
-                    </div>
-                    <div className="h-32 rounded-2xl w-full flex items-center justify-center font-bold text-sm text-[#111827] dark:text-foreground" style={{ backgroundColor: '#D9FF00' }}>
-                      Event Cover
-                    </div>
-                    <div className="mt-4 space-y-3">
-                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm font-bold text-gray-800 dark:text-foreground">Design Drink & Draw</div>
-                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Thu, June 12 · 7PM</div>
-                      <div className="h-10 w-full rounded-lg bg-gray-100 flex items-center px-3 text-sm text-gray-600">Brooklyn, NY</div>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827] dark:text-foreground" style={{ backgroundColor: '#D9FF00' }}>Next →</div>
+                    {/* Background Rays */}
+                    <div className="absolute inset-0 z-0 opacity-30" style={{ background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, #D9FF0022 10deg, transparent 11deg)` }} />
+                    <div className="absolute inset-0 z-0" style={{ background: `radial-gradient(circle_at_center, transparent 20%, #F3F0E8 70%)` }} />
+                    
+                    <div className="relative z-10 px-4 pt-4 pb-16 flex flex-col h-full">
+                      <div className="mt-8 border-4 border-[#111827] bg-[#D9FF00] rounded-2xl p-4 shadow-[4px_4px_0px_#111827]">
+                        <div className="w-8 h-8 rounded-full bg-white mb-2 border-2 border-[#111827] flex items-center justify-center font-bold text-xs">V</div>
+                        <div className="text-[8px] uppercase font-bold tracking-widest opacity-60">Presented by</div>
+                        <div className="font-bold text-xs">Vedant</div>
+                      </div>
+
+                      <div className="mt-6 space-y-1">
+                        <h1 className="text-3xl font-black leading-[1.1] tracking-tight">Sunset<br/>Rooftop<br/>Mixer</h1>
+                      </div>
+
+                      <div className="mt-6">
+                        <div className="text-[10px] uppercase font-bold tracking-widest opacity-60 mb-2">Hosted By</div>
+                        <div className="flex gap-2">
+                          <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-xs font-bold">V</div>
+                          <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 shadow-sm flex items-center justify-center text-xs font-bold">A</div>
+                          <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 shadow-sm flex items-center justify-center text-xs font-bold">M</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto">
+                        <div className="h-12 w-full rounded-full flex items-center justify-center font-bold text-[#111827] shadow-lg border-2 border-[#111827]" style={{ backgroundColor: '#D9FF00' }}>RSVP Now</div>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -376,36 +392,33 @@ export default function Home() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="absolute inset-0 flex flex-col px-4 pt-4 pb-16"
+                    className="absolute inset-0 flex flex-col bg-[#F3F0E8] p-4 pt-12 pb-16"
                   >
-                    <div className="font-bold text-gray-900 dark:text-foreground text-lg mb-6 mt-2">Ticket Setup</div>
-                    <div className="flex gap-3 mb-6">
-                      <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent relative">
-                        <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
-                        <div className="font-bold text-sm text-gray-800 dark:text-foreground">Free</div>
+                    <div className="bg-white w-full h-full rounded-[24px] shadow-lg overflow-hidden flex flex-col border border-gray-100">
+                      <div className="bg-[#D9FF00] p-4 text-center border-b border-gray-100">
+                        <h1 className="text-xl font-black tracking-tight">Sunset Mixer</h1>
+                        <p className="text-[8px] font-bold uppercase tracking-widest opacity-70 mt-1">Official Entry Ticket</p>
                       </div>
-                      <div className="flex-1 h-20 rounded-xl bg-gray-100 flex flex-col items-center justify-center border-2 border-transparent opacity-50">
-                        <div className="font-bold text-sm text-gray-800 dark:text-foreground">Paid</div>
-                        <div className="text-xs font-bold mt-1 bg-white dark:bg-card dark:text-card-foreground px-2 rounded-md">$25</div>
+                      
+                      <div className="flex-1 flex flex-col items-center p-4 text-center">
+                        <p className="text-xs font-medium text-gray-500 mb-6">You're on the list! Present this QR code.</p>
+                        
+                        <div className="w-32 h-32 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center p-2 mb-6">
+                          <div className="w-full h-full bg-[#111827] rounded-lg relative overflow-hidden">
+                            <div className="absolute inset-0 grid grid-cols-4 gap-1 p-1">
+                              {Array.from({length: 16}).map((_, i) => <div key={i} className={`bg-white ${i%3===0 ? 'opacity-0' : ''}`} />)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="w-full bg-gray-50 rounded-xl p-3 border border-gray-100 mb-auto">
+                          <p className="text-xs font-bold">📍 Secret Location</p>
+                        </div>
+
+                        <div className="w-full h-12 rounded-full bg-[#111827] text-[#D9FF00] flex items-center justify-center font-bold text-sm mt-4">
+                          Add to Apple Wallet
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between bg-gray-100 p-3 rounded-xl mb-auto">
-                      <div className="text-sm font-bold text-gray-800 dark:text-foreground">Guest Limit</div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">-</div>
-                        <div className="font-bold text-gray-900 dark:text-foreground">50</div>
-                        <div className="w-6 h-6 rounded bg-gray-200 flex items-center justify-center font-bold text-gray-600">+</div>
-                      </div>
-                    </div>
-                    <div className="mt-auto">
-                      <motion.div
-                        animate={{ scale: [1, 1.02, 1] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-[#111827] dark:text-foreground"
-                        style={{ backgroundColor: '#D9FF00' }}
-                      >
-                        Publish Event
-                      </motion.div>
                     </div>
                   </motion.div>
                 )}
@@ -415,35 +428,50 @@ export default function Home() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="absolute inset-0 flex flex-col items-center px-4 pt-12 pb-16 text-center"
+                    className="absolute inset-0 flex flex-col bg-white px-4 pt-12 pb-16"
                   >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
-                      className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                      style={{ backgroundColor: '#D9FF00' }}
-                    >
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </motion.div>
-                    <div className="font-black text-2xl text-gray-900 dark:text-foreground mb-1">Your event is live!</div>
-                    <div className="text-sm font-medium text-gray-500 mb-8">34 people notified</div>
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="font-black text-xl">Dashboard</div>
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold">V</div>
+                    </div>
+                    
+                    <div className="flex gap-2 mb-6">
+                      <div className="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div className="text-xs text-gray-500 font-medium">Approved</div>
+                        <div className="text-xl font-black text-green-500">45</div>
+                      </div>
+                      <div className="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div className="text-xs text-gray-500 font-medium">Pending</div>
+                        <div className="text-xl font-black text-orange-500">12</div>
+                      </div>
+                    </div>
 
-                    <div className="grid grid-cols-5 gap-1 p-2 bg-gray-100 rounded-xl mb-auto">
-                      {Array.from({ length: 25 }).map((_, i) => (
-                        <div key={i} className={`w-4 h-4 rounded-sm ${i % 2 === 0 ? 'bg-[#111827]' : 'bg-white dark:bg-card dark:text-card-foreground'}`}></div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Waitlist</div>
+                    
+                    <div className="space-y-2 mb-auto">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gray-200" />
+                            <div className="text-sm font-bold">Guest {i}</div>
+                          </div>
+                          <div className="px-3 py-1 bg-green-500 text-white rounded-md text-xs font-bold">Approve</div>
+                        </div>
                       ))}
                     </div>
 
-                    <div className="mt-auto w-full">
-                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-white bg-[#111827]">Share Link</div>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <div className="h-12 w-full rounded-xl flex items-center justify-center font-bold text-white bg-[#111827] shadow-lg gap-2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                        Scan QR Code
+                      </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <div className="absolute bottom-4 left-0 w-full flex justify-center gap-2">
+            <div className="absolute bottom-4 left-0 w-full flex justify-center gap-2 z-50">
               {[0, 1, 2].map((i) => (
                 <div key={i} className={`w-2 h-2 rounded-full ${phoneStep === i ? 'bg-[#D9FF00]' : 'bg-gray-300'}`} />
               ))}

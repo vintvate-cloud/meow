@@ -7,8 +7,10 @@ import { SiGoogle } from "react-icons/si";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getAdditionalUserInfo } from "firebase/auth";
+import { useForceLightTheme } from "@/hooks/use-theme-force";
 
 export default function Login() {
+  useForceLightTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

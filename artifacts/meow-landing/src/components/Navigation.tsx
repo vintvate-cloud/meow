@@ -85,7 +85,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Universal Top Navbar */}
       <nav className="w-full bg-white/60 dark:bg-[#0A0A0A]/60 backdrop-blur-2xl border-b border-black/5 dark:border-white/5 sticky top-0 z-50 px-4 md:px-8 py-3 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.2)]">
         <div className="flex items-center gap-4 md:gap-8">
-          <Link href="/">
+          <Link href="/welcome">
             <span className="font-black text-lg md:text-xl tracking-tighter text-[#101828] dark:text-white flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity">
               MEOW 🐾
             </span>

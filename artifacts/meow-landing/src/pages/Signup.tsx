@@ -8,8 +8,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile, getAdditionalUserInfo } from "firebase/auth";
 import emailjs from '@emailjs/browser';
+import { useForceLightTheme } from "@/hooks/use-theme-force";
 
 export default function Signup() {
+  useForceLightTheme();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

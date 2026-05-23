@@ -55,6 +55,7 @@ function Router() {
       <Route path="/">
         {user ? <Dashboard /> : <Home />}
       </Route>
+      <Route path="/welcome" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <ProtectedRoute path="/onboarding" component={Onboarding} />
