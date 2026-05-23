@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Calendar, MapPin, CheckCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export default function Ticket() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [permError, setPermError] = useState(false);
+  const [isScanned, setIsScanned] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
@@ -167,14 +168,65 @@ END:VCALENDAR`;
           </div>
 
           <div className="bg-[#F3F0E8] dark:bg-background p-8 rounded-[40px] flex flex-col items-center space-y-6">
-            <div className="bg-white dark:bg-card dark:text-card-foreground p-4 rounded-3xl shadow-sm">
-              <QRCodeSVG
-                value={JSON.stringify({ eventId: data.eventId, rsvpId: data.rsvpId })}
-                size={200}
-                level="H"
-                includeMargin={true}
-              />
-            </div>
+            <AnimatePresence mode="wait">
+              {!isScanned ? (
+                <motion.div
+                  key="qr"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ 
+                    opacity: 0, 
+                    scale: 1.2, 
+                    filter: "blur(20px)",
+                    rotate: 15,
+                    transition: { duration: 0.6, ease: "easeOut" } 
+                  }}
+                  className="bg-white dark:bg-card dark:text-card-foreground p-4 rounded-3xl shadow-sm relative group cursor-pointer"
+                  onClick={() => setIsScanned(true)}
+                  title="Click to simulate scan"
+                >
+                  <QRCodeSVG
+                    value={JSON.stringify({ eventId: data.eventId, rsvpId: data.rsvpId })}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                  />
+                  {/* Interactive burn hint overlay */}
+                  <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl backdrop-blur-sm">
+                    <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center mb-2 animate-pulse">
+                      <div className="w-4 h-4 bg-white rounded-full" />
+                    </div>
+                    <span className="text-white font-bold text-sm">Simulate Scan</span>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="souvenir"
+                  initial={{ opacity: 0, scale: 0.5, rotateY: -180 }}
+                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                  transition={{ type: "spring", damping: 12, stiffness: 100, delay: 0.2 }}
+                  className="w-[232px] h-[232px] rounded-3xl shadow-2xl flex flex-col items-center justify-center relative overflow-hidden border border-white/20"
+                  style={{
+                    background: `linear-gradient(135deg, ${data.event.color || '#D9FF00'} 0%, #111 100%)`
+                  }}
+                >
+                  {/* Holographic sweeping shine */}
+                  <motion.div
+                    animate={{ x: ["-200%", "200%"] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                    className="absolute inset-0 w-[50%] h-[200%] bg-gradient-to-r from-transparent via-white/40 to-transparent -rotate-45 pointer-events-none"
+                  />
+                  {/* Particle effects */}
+                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30 mix-blend-overlay pointer-events-none"></div>
+                  
+                  <div className="relative z-10 flex flex-col items-center">
+                    <img src="/meowlogo2.png" alt="MEOW" className="h-12 w-auto mb-3 filter drop-shadow-lg brightness-0 invert opacity-90" />
+                    <span className="text-white font-black tracking-widest text-2xl drop-shadow-md">VERIFIED</span>
+                    <span className="text-white/70 font-bold text-[10px] mt-1 uppercase tracking-[0.2em] bg-black/20 px-3 py-1 rounded-full">Digital Souvenir</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className="text-center">
               <div className="font-black text-xl">{data.rsvp.email}</div>
               <div className="text-xs font-bold text-gray-400 uppercase tracking-tighter mt-1 flex items-center justify-center gap-1">

@@ -323,8 +323,8 @@ export default function Dashboard() {
     <AppLayout>
       <div className="flex min-h-screen bg-[#FAF9F6] dark:bg-[#0A0A0A] transition-colors duration-300">
         
-        {/* Left Column: Admin Interface */}
-        <div className="flex-1 w-full lg:w-[60%] border-r border-gray-150 dark:border-[#222] p-4 sm:p-8 md:p-12 pb-32 md:pb-16 max-w-4xl mx-auto space-y-8">
+        {/* Main Dashboard Area */}
+        <div className="flex-1 w-full p-4 sm:p-8 md:p-12 pb-32 md:pb-16 max-w-7xl mx-auto space-y-8">
           
           {/* Header Block */}
           <header className="flex items-center justify-between gap-4 pb-2">
@@ -343,11 +343,11 @@ export default function Dashboard() {
 
 
           {/* Add Event Button (signature purple pill) */}
-          <div className="flex flex-col items-center">
-            <Link href="/create-event" className="w-full">
-              <button className="w-full py-4 rounded-full bg-foreground text-background hover:opacity-90 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.01]">
+          <div className="flex justify-end">
+            <Link href="/create-event">
+              <button className="px-8 py-3 rounded-full bg-foreground text-background hover:opacity-90 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.02]">
                 <Plus className="w-5 h-5 stroke-[2.5px]" />
-                Add Event
+                Create New Event
               </button>
             </Link>
           </div>
@@ -397,71 +397,76 @@ export default function Dashboard() {
                   actionHref="/create-event" 
                 />
               ) : (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredHosting.map(event => (
                     <div 
                       key={event.id} 
-                      className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 transition-all hover:shadow-md"
+                      className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-5 rounded-[24px] shadow-sm flex flex-col justify-between gap-5 transition-all hover:shadow-xl hover:-translate-y-1 group"
                     >
-                      <div className="flex items-center gap-4 min-w-0">
+                      <div className="flex items-start gap-4">
                         {/* Event Color Accent Block */}
                         <div 
-                          className="w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 overflow-hidden relative" 
+                          className="w-16 h-16 rounded-[16px] flex flex-col items-center justify-center shrink-0 overflow-hidden relative shadow-inner" 
                           style={{ backgroundColor: event.color || '#D9FF00' }}
                         >
                           {event.creativeUrl ? (
-                            <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+                            <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           ) : (
-                            <span className="text-[14px] font-black text-black">🐾</span>
+                            <span className="text-[20px] font-black text-black">🐾</span>
                           )}
                         </div>
 
                         {/* Title & Info */}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-bold text-foreground truncate">{event.title}</h4>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="text-base font-black text-foreground line-clamp-2 leading-tight mb-1">{event.title}</h4>
                             <Link href={`/e/${event.id}`}>
-                              <button className="text-gray-400 hover:text-foreground">
-                                <ExternalLink className="w-3.5 h-3.5" />
+                              <button className="text-gray-400 hover:text-foreground shrink-0 mt-1">
+                                <ExternalLink className="w-4 h-4" />
                               </button>
                             </Link>
                           </div>
                           
-                          <p className="text-[10px] font-medium text-gray-400 mt-1 flex flex-wrap gap-x-2 gap-y-1">
-                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                            {event.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {event.location}</span>}
-                          </p>
+                          <div className="space-y-1 mt-2">
+                            <p className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 opacity-70" /> {new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </p>
+                            {event.location && (
+                              <p className="text-xs font-medium text-gray-400 flex items-center gap-1.5 line-clamp-1">
+                                <MapPin className="w-3.5 h-3.5 opacity-70 shrink-0" /> {event.location}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Tool Actions & Switch Visibility */}
-                      <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 border-gray-100 dark:border-[#222] pt-3 md:pt-0">
+                      <div className="flex items-center justify-between border-t border-gray-100 dark:border-[#222] pt-4 mt-auto">
                         {/* Clicks/RSVP statistics count */}
-                        <div className="flex items-center gap-1 text-xs font-semibold text-gray-500 pr-2 border-r border-gray-100 dark:border-[#222]">
-                          <Users className="w-3.5 h-3.5 text-gray-400" />
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300">
+                          <Users className="w-4 h-4 text-gray-400" />
                           <span>{event.rsvpCount || 0}</span>
-                          <span className="text-[10px] text-gray-400 font-normal">RSVPs</span>
                         </div>
 
                         {/* Event controls */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleShareEvent(event.id, event.title)}
-                            className="p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-gray-400 hover:text-foreground"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
                             title="Copy link"
                           >
                             <Share2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setActiveQRDialog(event.id)}
-                            className="p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-gray-400 hover:text-foreground"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
                             title="View QR Code"
                           >
                             <QrCode className="w-4 h-4" />
                           </button>
                           <Link href={`/manage/${event.id}`}>
                             <button
-                              className="p-2 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg text-gray-400 hover:text-foreground"
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
                               title="Manage settings"
                             >
                               <Settings className="w-4 h-4" />
@@ -469,18 +474,18 @@ export default function Dashboard() {
                           </Link>
                           <button
                             onClick={() => handleDeleteEvent(event.id)}
-                            className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500"
+                            className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
                             title="Delete event"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        </div>
-
-                        {/* Switch visibility toggle */}
-                        <div className="flex items-center gap-2 pl-2 border-l border-gray-100 dark:border-[#222]">
+                          
+                          <div className="w-px h-4 bg-gray-200 dark:bg-[#333] mx-1"></div>
+                          
                           <Switch
                             checked={event.isPublic !== false}
                             onCheckedChange={() => handleToggleVisibility(event.id, event.isPublic !== false)}
+                            className="scale-90"
                           />
                         </div>
                       </div>

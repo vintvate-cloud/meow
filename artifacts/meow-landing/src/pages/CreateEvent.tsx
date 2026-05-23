@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X, ChevronRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
@@ -33,36 +33,76 @@ const THEMES = [
     starburst: "#D9FF00"
   },
   {
-    id: "retro-mint",
-    name: "Retro Mint",
-    bg: "#E6F0EA",
-    text: "#1E3B27",
-    accent: "#1E3B27",
-    starburst: "#1E3B27"
+    id: "luma-aura",
+    name: "Luma Aura",
+    bg: "#0d0a14",
+    text: "#FFFFFF",
+    accent: "#FFFFFF",
+    starburst: "#8129D9",
+    bgGradient: "radial-gradient(circle at 15% 50%, rgba(129, 41, 217, 0.25), transparent 25%), radial-gradient(circle at 85% 30%, rgba(217, 41, 100, 0.2), transparent 25%)"
   },
   {
-    id: "burgundy-velvet",
-    name: "Burgundy Velvet",
-    bg: "#1C0A0E",
-    text: "#FAF8F5",
-    accent: "#D4AF37",
-    starburst: "#79001B"
+    id: "glass-aurora",
+    name: "Glass Aurora",
+    bg: "#ffffff",
+    text: "#101828",
+    accent: "#101828",
+    starburst: "#00F0FF",
+    bgGradient: "linear-gradient(135deg, rgba(230, 240, 255, 1) 0%, rgba(255, 230, 240, 1) 100%)"
   },
   {
-    id: "cyberpunk-neon",
-    name: "Cyberpunk Neon",
-    bg: "#030F12",
-    text: "#00F0FF",
-    accent: "#FF007F",
-    starburst: "#00F0FF"
+    id: "obsidian-mesh",
+    name: "Obsidian Mesh",
+    bg: "#050505",
+    text: "#FFFFFF",
+    accent: "#FFFFFF",
+    starburst: "#333333",
+    bgGradient: "radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.5) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.5) 0, transparent 50%)"
   },
   {
-    id: "royal-lavender",
-    name: "Royal Lavender",
-    bg: "#F0EBF7",
-    text: "#2A1B4E",
-    accent: "#58268C",
-    starburst: "#8B5CF6"
+    id: "ethereal-blur",
+    name: "Ethereal Blur",
+    bg: "#f3f4f6",
+    text: "#111827",
+    accent: "#4f46e5",
+    starburst: "#4f46e5",
+    bgGradient: "radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f3f4f6 80%)"
+  },
+  {
+    id: "sunset-mirage",
+    name: "Sunset Mirage",
+    bg: "#1a0b12",
+    text: "#FFFFFF",
+    accent: "#FF7B00",
+    starburst: "#FF3300",
+    bgGradient: "radial-gradient(circle at 100% 0%, rgba(255, 123, 0, 0.3) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(255, 51, 0, 0.3) 0%, transparent 40%)"
+  },
+  {
+    id: "oceanic-deep",
+    name: "Oceanic Deep",
+    bg: "#020813",
+    text: "#E0F2FE",
+    accent: "#38BDF8",
+    starburst: "#0369A1",
+    bgGradient: "radial-gradient(circle at 50% 50%, rgba(3, 105, 161, 0.2) 0%, transparent 60%), linear-gradient(180deg, #020813 0%, #082f49 100%)"
+  },
+  {
+    id: "emerald-oasis",
+    name: "Emerald Oasis",
+    bg: "#022c22",
+    text: "#F0FDF4",
+    accent: "#34D399",
+    starburst: "#059669",
+    bgGradient: "radial-gradient(ellipse at top left, rgba(5, 150, 105, 0.4) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(16, 185, 129, 0.2) 0%, transparent 50%)"
+  },
+  {
+    id: "peachy-clean",
+    name: "Peachy Clean",
+    bg: "#fff5f0",
+    text: "#431407",
+    accent: "#EA580C",
+    starburst: "#F97316",
+    bgGradient: "linear-gradient(120deg, #fff5f0 0%, #ffedd5 100%)"
   }
 ];
 
@@ -191,6 +231,7 @@ export default function CreateEvent() {
   const [uploading, setUploading] = useState(false);
   const [extractedColor, setExtractedColor] = useState<{hex: string, isDark: boolean} | null>(null);
   const [autoColorMatch, setAutoColorMatch] = useState(false);
+  const [showAllThemes, setShowAllThemes] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -450,20 +491,28 @@ export default function CreateEvent() {
   const previewText = autoColorMatch && extractedColor ? (extractedColor.isDark ? "#FFFFFF" : "#111827") : currentThemeObj.text;
   const previewAccent = autoColorMatch && extractedColor ? (extractedColor.isDark ? "#FFFFFF" : "#111827") : currentThemeObj.accent;
   const previewStarburst = autoColorMatch && extractedColor ? extractedColor.hex : currentThemeObj.starburst;
+  const previewBgGradient = autoColorMatch && extractedColor ? undefined : currentThemeObj.bgGradient;
 
   return (
     <div 
-      className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-500"
-      style={{ backgroundColor: previewBg, color: previewText }}
+      className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-all duration-700"
+      style={{ 
+        backgroundColor: previewBg, 
+        backgroundImage: previewBgGradient || 'none',
+        color: previewText 
+      }}
     >
       {/* Dynamic Starburst/Ray Background Effect */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40 mix-blend-screen">
         <div className="absolute w-[150vw] h-[150vw] md:w-[100vw] md:h-[100vw]" style={{
-          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${previewStarburst}22 10deg, transparent 11deg)`
+          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${previewStarburst}22 10deg, transparent 11deg)`,
+          animation: "spin 60s linear infinite"
         }} />
-        <div className="absolute inset-0" style={{
-          background: `radial-gradient(circle_at_center, transparent 20%, ${previewBg} 70%)`
-        }} />
+        {!previewBgGradient && (
+          <div className="absolute inset-0" style={{
+            background: `radial-gradient(circle_at_center, transparent 20%, ${previewBg} 70%)`
+          }} />
+        )}
       </div>
 
       {/* Top Bar with Back & Themes */}
@@ -475,7 +524,72 @@ export default function CreateEvent() {
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
         </button>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-2 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-full border border-black/5 dark:border-white/5">
+        {/* Mobile Theme Layout (first 5 + arrow) */}
+        <div className="md:hidden flex items-center gap-2 sm:gap-3 p-2 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-[2rem] border border-black/5 dark:border-white/5 w-full max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 w-max pr-1">
+            {/* Always visible 5 themes */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {THEMES.slice(0, 5).map((theme) => {
+                const isSelected = formData.theme === theme.id;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, theme: theme.id })}
+                    className={`w-8 h-8 rounded-full border-2 transition-all duration-300 flex items-center justify-center shrink-0 ${
+                      isSelected ? 'scale-110 shadow-md' : 'hover:scale-105 opacity-60 hover:opacity-100'
+                    }`}
+                    style={{ backgroundColor: theme.bg, borderColor: isSelected ? theme.accent : 'transparent' }}
+                    title={theme.name}
+                  >
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.accent }} />
+                  </button>
+                );
+              })}
+            </div>
+
+            <AnimatePresence>
+              {showAllThemes && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "auto", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 24, mass: 0.8 }}
+                  className="flex items-center gap-2 sm:gap-3 overflow-hidden origin-left shrink-0"
+                >
+                  {THEMES.slice(5).map((theme) => {
+                    const isSelected = formData.theme === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, theme: theme.id })}
+                        className={`w-8 h-8 rounded-full border-2 transition-all duration-300 flex items-center justify-center shrink-0 ${
+                          isSelected ? 'scale-110 shadow-md' : 'hover:scale-105 opacity-60 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: theme.bg, borderColor: isSelected ? theme.accent : 'transparent' }}
+                        title={theme.name}
+                      >
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.accent }} />
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Toggle Arrow */}
+            <button
+              onClick={() => setShowAllThemes(!showAllThemes)}
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-black/10 dark:bg-white/10 text-foreground transition-all duration-500 hover:bg-black/20 dark:hover:bg-white/20 shrink-0"
+            >
+              <ChevronRight className={`w-4 h-4 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${showAllThemes ? "rotate-180" : "rotate-0"}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Theme Layout (Original All Visible) */}
+        <div className="hidden md:flex flex-wrap items-center gap-2 sm:gap-3 p-2 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-[2rem] border border-black/5 dark:border-white/5">
           {THEMES.map((theme) => {
             const isSelected = formData.theme === theme.id;
             return (
@@ -518,7 +632,7 @@ export default function CreateEvent() {
                 </>
               )}
               
-              <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm z-20">
+              <div className={`absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-opacity backdrop-blur-sm z-20 ${uploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                 {uploading ? (
                   <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (

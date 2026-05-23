@@ -13,13 +13,17 @@ import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
-const THEMES_MAP: Record<string, { bg: string, text: string, accent: string, starburst: string }> = {
+const THEMES_MAP: Record<string, { bg: string, text: string, accent: string, starburst: string, bgGradient?: string }> = {
   "cream-cozy": { bg: "#FAF8F5", text: "#101828", accent: "#8129D9", starburst: "#8129D9" },
   "sleek-midnight": { bg: "#0A0A0A", text: "#FFFFFF", accent: "#D9FF00", starburst: "#D9FF00" },
-  "retro-mint": { bg: "#E6F0EA", text: "#1E3B27", accent: "#1E3B27", starburst: "#1E3B27" },
-  "burgundy-velvet": { bg: "#1C0A0E", text: "#FAF8F5", accent: "#D4AF37", starburst: "#79001B" },
-  "cyberpunk-neon": { bg: "#030F12", text: "#00F0FF", accent: "#FF007F", starburst: "#00F0FF" },
-  "royal-lavender": { bg: "#F0EBF7", text: "#2A1B4E", accent: "#58268C", starburst: "#8B5CF6" }
+  "luma-aura": { bg: "#0d0a14", text: "#FFFFFF", accent: "#FFFFFF", starburst: "#8129D9", bgGradient: "radial-gradient(circle at 15% 50%, rgba(129, 41, 217, 0.25), transparent 25%), radial-gradient(circle at 85% 30%, rgba(217, 41, 100, 0.2), transparent 25%)" },
+  "glass-aurora": { bg: "#ffffff", text: "#101828", accent: "#101828", starburst: "#00F0FF", bgGradient: "linear-gradient(135deg, rgba(230, 240, 255, 1) 0%, rgba(255, 230, 240, 1) 100%)" },
+  "obsidian-mesh": { bg: "#050505", text: "#FFFFFF", accent: "#FFFFFF", starburst: "#333333", bgGradient: "radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.5) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.5) 0, transparent 50%)" },
+  "ethereal-blur": { bg: "#f3f4f6", text: "#111827", accent: "#4f46e5", starburst: "#4f46e5", bgGradient: "radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f3f4f6 80%)" },
+  "sunset-mirage": { bg: "#1a0b12", text: "#FFFFFF", accent: "#FF7B00", starburst: "#FF3300", bgGradient: "radial-gradient(circle at 100% 0%, rgba(255, 123, 0, 0.3) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(255, 51, 0, 0.3) 0%, transparent 40%)" },
+  "oceanic-deep": { bg: "#020813", text: "#E0F2FE", accent: "#38BDF8", starburst: "#0369A1", bgGradient: "radial-gradient(circle at 50% 50%, rgba(3, 105, 161, 0.2) 0%, transparent 60%), linear-gradient(180deg, #020813 0%, #082f49 100%)" },
+  "emerald-oasis": { bg: "#022c22", text: "#F0FDF4", accent: "#34D399", starburst: "#059669", bgGradient: "radial-gradient(ellipse at top left, rgba(5, 150, 105, 0.4) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(16, 185, 129, 0.2) 0%, transparent 50%)" },
+  "peachy-clean": { bg: "#fff5f0", text: "#431407", accent: "#EA580C", starburst: "#F97316", bgGradient: "linear-gradient(120deg, #fff5f0 0%, #ffedd5 100%)" }
 };
 
 export default function EventDetails() {
@@ -212,17 +216,24 @@ export default function EventDetails() {
   return (
     <>
       <div 
-        className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-colors duration-300"
-        style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
+        className="min-h-screen font-sans relative selection:bg-[#111827] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 overflow-hidden transition-all duration-700"
+        style={{ 
+          backgroundColor: themeColors.bg, 
+          backgroundImage: (themeColors as any).bgGradient || "none",
+          color: themeColors.text 
+        }}
       >
       {/* Dynamic Starburst/Ray Background Effect */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex justify-center items-center opacity-40 mix-blend-screen">
         <div className="absolute w-[150vw] h-[150vw] md:w-[100vw] md:h-[100vw]" style={{
-          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${themeColors.starburst}22 10deg, transparent 11deg)`
+          background: `repeating-conic-gradient(from 0deg, transparent 0deg, transparent 10deg, ${themeColors.starburst}22 10deg, transparent 11deg)`,
+          animation: "spin 60s linear infinite"
         }} />
-        <div className="absolute inset-0" style={{
-          background: `radial-gradient(circle_at_center, transparent 20%, ${themeColors.bg} 70%)`
-        }} />
+        {!(themeColors as any).bgGradient && (
+          <div className="absolute inset-0" style={{
+            background: `radial-gradient(circle_at_center, transparent 20%, ${themeColors.bg} 70%)`
+          }} />
+        )}
       </div>
 
       {/* Back Button Only (No Navbar) */}
