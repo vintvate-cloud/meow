@@ -17,10 +17,43 @@ export default function Ticket() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
-  const handleAddToWallet = () => {
+  const handleAddToCalendar = () => {
+    if (!data?.event) return;
+    const event = data.event;
+    const startDate = new Date(event.date);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // Assume 2 hour duration
+
+    const formatICSDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//MEOW//EN
+BEGIN:VEVENT
+UID:${eventId}@meow.events
+DTSTAMP:${formatICSDate(new Date())}
+DTSTART:${formatICSDate(startDate)}
+DTEND:${formatICSDate(endDate)}
+SUMMARY:${event.title}
+LOCATION:${event.location}
+DESCRIPTION:Your RSVP ticket is confirmed.
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
     toast({
-      title: "Apple Wallet Integration",
-      description: "Ready for integration! Requires a backend like PassKit with an Apple Developer Certificate to cryptographically sign the .pkpass file.",
+      title: "Calendar Invite Downloaded!",
+      description: "Open the file to instantly add this event to your Apple or Google Calendar.",
     });
   };
 
@@ -151,13 +184,13 @@ export default function Ticket() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button onClick={handleAddToWallet} className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-black text-white hover:bg-gray-900 border-none flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
+            <Button onClick={handleAddToCalendar} className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-black text-white hover:bg-gray-900 border-none flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.63.11 2.87.72 3.66 1.84-3.07 1.77-2.5 5.92.51 7.23-.74 1.76-1.74 3.55-2.75 3.9zm-3.2-14c-.06-2.03 1.58-3.9 3.5-4.14.39 2.22-1.71 4.1-3.5 4.14z"/></svg>
-              Add to Apple Wallet
+              Add to Apple Calendar
             </Button>
-            <Button onClick={() => toast({ title: "Google Wallet Integration", description: "Backend integration ready."})} className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
+            <Button onClick={handleAddToCalendar} className="w-full h-14 rounded-2xl font-bold text-[15px] shadow-md bg-white text-gray-900 hover:bg-gray-50 border border-gray-200 flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1-2-2 2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10"/><path d="M3 11v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><line x1="16" y1="15" x2="16.01" y2="15"/></svg>
-              Add to Google Wallet
+              Add to Google Calendar
             </Button>
           </div>
         </div>
