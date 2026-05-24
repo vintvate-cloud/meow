@@ -631,7 +631,6 @@ export default function ManageEvent() {
                             <span className="text-purple-600 dark:text-purple-400">🔥 Interested</span>
                             <span>{interestedCount} ({totalResponses > 0 ? Math.round(interestedCount / totalResponses * 100) : 0}%)</span>
                           </div>
-<<<<<<< HEAD
                           <div className="h-2 w-full bg-black/[0.04] dark:bg-white/10 rounded-full overflow-hidden">
                             <div className="h-full bg-purple-600" style={{ width: `${totalResponses > 0 ? (interestedCount / totalResponses * 100) : 0}%` }} />
                           </div>
@@ -654,25 +653,6 @@ export default function ManageEvent() {
                             <div className="h-full bg-gray-400 dark:bg-gray-600" style={{ width: `${totalResponses > 0 ? (notInterestedCount / totalResponses * 100) : 0}%` }} />
                           </div>
                         </div>
-=======
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => sendIndividualConfirmation(a.id)}
-                            disabled={approvingId === a.id}
-                            className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50"
-                          >
-                            {approvingId === a.id ? (
-                              <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5" />
-                            ) : null}
-                            {approvingId === a.id ? "Approving..." : "Approve"}
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full">
-                          <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                        </Button>
->>>>>>> b24cbd1fb6ff71ce7b7f996e70301628f940fd8c
                       </div>
                     </div>
                     <div className="pt-6 border-t border-black/[0.03] dark:border-white/[0.03] mt-6 flex justify-between text-xs font-semibold text-gray-500">
