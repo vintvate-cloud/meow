@@ -418,6 +418,11 @@ export default function Dashboard() {
 
                         {/* Title & Info */}
                         <div className="min-w-0 flex-1">
+                          {event.isPreLaunch && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/10 uppercase mb-1">
+                              <Sparkles className="w-3 h-3" /> Pre-Launch
+                            </span>
+                          )}
                           <div className="flex items-start justify-between gap-2">
                             <h4 className="text-base font-black text-foreground line-clamp-2 leading-tight mb-1">{event.title}</h4>
                             <Link href={`/e/${event.id}`}>
@@ -429,7 +434,7 @@ export default function Dashboard() {
                           
                           <div className="space-y-1 mt-2">
                             <p className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 opacity-70" /> {new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                              <Calendar className="w-3.5 h-3.5 opacity-70" /> {event.isPreLaunch ? event.tentativeDate : new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                             </p>
                             {event.location && (
                               <p className="text-xs font-medium text-gray-400 flex items-center gap-1.5 line-clamp-1">
@@ -439,13 +444,13 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-
+ 
                       {/* Tool Actions & Switch Visibility */}
                       <div className="flex items-center justify-between border-t border-gray-100 dark:border-[#222] pt-4 mt-auto">
                         {/* Clicks/RSVP statistics count */}
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300" title={event.isPreLaunch ? "Interested count" : "RSVP count"}>
                           <Users className="w-4 h-4 text-gray-400" />
-                          <span>{event.rsvpCount || 0}</span>
+                          <span>{event.isPreLaunch ? event.interestedCount || 0 : event.rsvpCount || 0}</span>
                         </div>
 
                         {/* Event controls */}
@@ -529,7 +534,7 @@ export default function Dashboard() {
                             <h4 className="text-[15px] font-bold text-foreground truncate">{event.title}</h4>
                             <p className="text-[11px] font-semibold text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
                               <span className="bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-gray-500 dark:text-gray-300">
-                                {new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+                                {event.isPreLaunch ? event.tentativeDate : new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
                               </span>
                               <span className="truncate max-w-[150px]">{event.location || "Online"}</span>
                             </p>

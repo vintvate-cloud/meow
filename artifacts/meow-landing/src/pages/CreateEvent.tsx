@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X, ChevronRight } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X, ChevronRight, Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
@@ -106,6 +106,64 @@ const THEMES = [
   }
 ];
 
+function PollOptionsBuilder({
+  title,
+  options,
+  setOptions,
+  placeholder
+}: {
+  title: string;
+  options: string[];
+  setOptions: (opts: string[]) => void;
+  placeholder: string;
+}) {
+  const addOption = () => setOptions([...options, ""]);
+  const removeOption = (idx: number) => setOptions(options.filter((_, i) => i !== idx));
+  const updateOption = (idx: number, val: string) => {
+    const updated = [...options];
+    updated[idx] = val;
+    setOptions(updated);
+  };
+
+  return (
+    <div className="space-y-2 bg-current/5 border border-current/10 p-4 rounded-2xl">
+      <div className="flex justify-between items-center mb-1">
+        <label className="text-xs font-bold uppercase tracking-wider opacity-85">{title}</label>
+        <button
+          type="button"
+          onClick={addOption}
+          className="text-[10px] font-bold bg-current/10 px-2 py-1.5 rounded-full hover:bg-current/25 transition-colors"
+        >
+          + Add Option
+        </button>
+      </div>
+      <div className="space-y-2">
+        {options.map((opt, idx) => (
+          <div key={idx} className="flex gap-2 items-center">
+            <Input
+              placeholder={`${placeholder} #${idx + 1}`}
+              value={opt}
+              onChange={(e) => updateOption(idx, e.target.value)}
+              className="h-9 rounded-xl bg-white dark:bg-black/40 text-xs font-semibold text-foreground"
+            />
+            <button
+              type="button"
+              onClick={() => removeOption(idx)}
+              className="p-2 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500/20 transition-colors shrink-0"
+              title="Remove Option"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ))}
+        {options.length === 0 && (
+          <p className="text-[10px] opacity-40 italic">No options added. This poll will be disabled.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CreateEvent() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
@@ -184,6 +242,23 @@ export default function CreateEvent() {
     creativeUrl: "",
     coHosts: [] as string[],
     isPublic: true,
+    isPreLaunch: false,
+    city: "",
+    audienceType: "",
+    tentativeDate: "",
+    targetInterest: 100,
+    showHypeMeter: true,
+    showPolls: true,
+    showSuggestions: true,
+    showReferral: true,
+    showTicker: true,
+    showComments: true,
+    dateOptions: [] as string[],
+    venueOptions: [] as string[],
+    artistsOptions: [] as string[],
+    foodOptions: [] as string[],
+    themeOptions: [] as string[],
+    timingOptions: [] as string[],
   });
 
   const [coHostInput, setCoHostInput] = useState("");
@@ -732,6 +807,22 @@ export default function CreateEvent() {
                    onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })} 
                  />
                </div>
+
+               <div className="flex items-center justify-between border-t border-current/10 pt-4">
+                 <div>
+                   <Label className="text-sm font-bold flex items-center gap-2 cursor-pointer select-none text-purple-600 dark:text-purple-400">
+                     <Sparkles className="w-4 h-4 animate-pulse" />
+                     Validation Mode (Pre-launch)
+                   </Label>
+                   <p className="text-[10px] opacity-60 font-bold mt-1 uppercase tracking-widest">
+                     Gauge demand before launch
+                   </p>
+                 </div>
+                 <Switch 
+                   checked={formData.isPreLaunch} 
+                   onCheckedChange={(checked) => setFormData({ ...formData, isPreLaunch: checked })} 
+                 />
+               </div>
             </div>
           </div>
 
@@ -749,54 +840,196 @@ export default function CreateEvent() {
 
             {/* Info rows */}
             <div className="space-y-6">
-              <div className="flex items-start gap-5">
-                <div className="w-12 h-14 rounded-xl bg-current/5 border border-current/10 flex flex-col items-center justify-center overflow-hidden shadow-sm relative focus-within:ring-2 focus-within:ring-current/20 transition-all">
-                   <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-current/10">
-                     {formData.date ? new Date(formData.date).toLocaleString('en-US', { month: 'short' }) : "Mon"}
-                   </div>
-                   <div className="text-lg font-bold leading-none pt-1 pb-1">
-                     {formData.date ? new Date(formData.date).getDate() : "DD"}
-                   </div>
-                   <input
-                     type="datetime-local"
-                     value={formData.date}
-                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                     onClick={(e) => {
-                       try {
-                         if ('showPicker' in HTMLInputElement.prototype) {
-                           (e.target as HTMLInputElement).showPicker();
-                         }
-                       } catch (err) {}
-                     }}
-                     className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                     required
-                   />
-                </div>
-                <div className="pt-1">
-                  <div className="font-bold text-lg text-current">
-                    {formData.date ? new Date(formData.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) : "Select Date & Time"}
+              {!formData.isPreLaunch ? (
+                <>
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-14 rounded-xl bg-current/5 border border-current/10 flex flex-col items-center justify-center overflow-hidden shadow-sm relative focus-within:ring-2 focus-within:ring-current/20 transition-all">
+                       <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-current/10">
+                         {formData.date ? new Date(formData.date).toLocaleString('en-US', { month: 'short' }) : "Mon"}
+                       </div>
+                       <div className="text-lg font-bold leading-none pt-1 pb-1">
+                         {formData.date ? new Date(formData.date).getDate() : "DD"}
+                       </div>
+                       <input
+                         type="datetime-local"
+                         value={formData.date}
+                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                         onClick={(e) => {
+                           try {
+                             if ('showPicker' in HTMLInputElement.prototype) {
+                               (e.target as HTMLInputElement).showPicker();
+                             }
+                           } catch (err) {}
+                         }}
+                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                         required={!formData.isPreLaunch}
+                       />
+                    </div>
+                    <div className="pt-1">
+                      <div className="font-bold text-lg text-current">
+                        {formData.date ? new Date(formData.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) : "Select Date & Time"}
+                      </div>
+                      <div className="opacity-60 font-medium text-sm mt-1 text-current">
+                        {formData.date ? new Date(formData.date).toLocaleTimeString([], { timeStyle: 'short' }) : "Time not set"}
+                      </div>
+                    </div>
                   </div>
-                  <div className="opacity-60 font-medium text-sm mt-1 text-current">
-                    {formData.date ? new Date(formData.date).toLocaleTimeString([], { timeStyle: 'short' }) : "Time not set"}
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex items-start gap-5">
-                <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
-                   <MapPin className="w-5 h-5 opacity-60" />
-                </div>
-                <div className="pt-1 flex-1">
-                  <input
-                    placeholder="Enter location (e.g. Brooklyn, NY)"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full bg-transparent border-none outline-none font-bold text-lg focus:ring-0 p-0 text-current placeholder-current/40 leading-none"
-                    required
-                  />
-                  <div className="opacity-60 font-medium text-sm mt-2">Check map for details</div>
-                </div>
-              </div>
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
+                       <MapPin className="w-5 h-5 opacity-60" />
+                    </div>
+                    <div className="pt-1 flex-1">
+                      <input
+                        placeholder="Enter location (e.g. Brooklyn, NY)"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none font-bold text-lg focus:ring-0 p-0 text-current placeholder-current/40 leading-none"
+                        required={!formData.isPreLaunch}
+                      />
+                      <div className="opacity-60 font-medium text-sm mt-2">Check map for details</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* PRE-LAUNCH VALIDATION FIELDS */}
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
+                       <MapPin className="w-5 h-5 opacity-60 text-purple-500" />
+                    </div>
+                    <div className="pt-1 flex-1">
+                      <input
+                        placeholder="Enter Target City (e.g. New York, SF)"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value, location: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none font-bold text-lg focus:ring-0 p-0 text-current placeholder-current/40 leading-none"
+                        required={formData.isPreLaunch}
+                      />
+                      <div className="opacity-60 font-medium text-sm mt-2">What city will host this event?</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
+                       <Calendar className="w-5 h-5 opacity-60 text-purple-500" />
+                    </div>
+                    <div className="pt-1 flex-1">
+                      <input
+                        placeholder="Tentative Date/Month (e.g. Late Oct 2026)"
+                        value={formData.tentativeDate}
+                        onChange={(e) => setFormData({ ...formData, tentativeDate: e.target.value, date: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none font-bold text-lg focus:ring-0 p-0 text-current placeholder-current/40 leading-none"
+                        required={formData.isPreLaunch}
+                      />
+                      <div className="opacity-60 font-medium text-sm mt-2">Tentative date or season for the event</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5 bg-current/5 border border-current/10 p-3.5 rounded-2xl text-left">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Audience Type</label>
+                      <input
+                        placeholder="e.g. Tech Professionals"
+                        value={formData.audienceType}
+                        onChange={(e) => setFormData({ ...formData, audienceType: e.target.value })}
+                        className="w-full bg-transparent border-none outline-none font-bold text-sm focus:ring-0 p-0 text-current placeholder-current/40 mt-1"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 bg-current/5 border border-current/10 p-3.5 rounded-2xl text-left">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pl-1">Target Interest (Goal)</label>
+                      <input
+                        type="number"
+                        value={formData.targetInterest}
+                        onChange={(e) => setFormData({ ...formData, targetInterest: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-transparent border-none outline-none font-bold text-sm focus:ring-0 p-0 text-current mt-1"
+                        min="1"
+                        required={formData.isPreLaunch}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pre-launch feature visibility switches */}
+                  <div className="space-y-4 pt-2">
+                    <div className="text-left">
+                      <label className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest flex items-center gap-1.5 font-serif">
+                        <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Feature Visibility Controls
+                      </label>
+                      <p className="text-[9px] opacity-65 font-medium mt-0.5">Choose which validation features to share publicly. Admin can always view all sections.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Hype Progress</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Goal progress tracker</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showHypeMeter} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showHypeMeter: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Community Polls</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Visitor custom voting</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showPolls} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showPolls: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Suggestions Form</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Date/venue/price input</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showSuggestions} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showSuggestions: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Referral Engine</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Share loop & rewards</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showReferral} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showReferral: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Activity Ticker</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Live ticker feed</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showTicker} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showTicker: checked })} 
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-current/5 border border-current/10 text-left">
+                        <div className="pr-2">
+                          <span className="text-xs font-bold block">Hype Feed</span>
+                          <span className="text-[9px] opacity-50 block font-medium">Comments and notes</span>
+                        </div>
+                        <Switch 
+                          checked={formData.showComments} 
+                          onCheckedChange={(checked) => setFormData({ ...formData, showComments: checked })} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
 
               <div className="flex items-start gap-5">
                 <div className="w-12 h-12 rounded-xl bg-current/5 border border-current/10 flex items-center justify-center shadow-sm shrink-0">
@@ -874,7 +1107,59 @@ export default function CreateEvent() {
                   <div className="opacity-60 font-medium text-sm mt-2">Optional. Adds event to their profile. Type to search or press Enter.</div>
                 </div>
               </div>
-            </div>
+
+
+            {formData.isPreLaunch && (
+              <div className="space-y-6 pt-4 text-left">
+                <div className="bg-current/5 backdrop-blur-2xl rounded-[20px] border border-current/10 overflow-hidden shadow-xl p-6 space-y-6">
+                  <div>
+                    <h3 className="text-sm font-bold opacity-80 flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+                      <Sparkles className="w-4 h-4" /> Community Polls Creator
+                    </h3>
+                    <p className="text-xs font-semibold opacity-60 mt-1">Let visitors vote on these options on the pre-launch landing page.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <PollOptionsBuilder 
+                      title="Date Options" 
+                      options={formData.dateOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, dateOptions: opts })} 
+                      placeholder="e.g. Oct 12th" 
+                    />
+                    <PollOptionsBuilder 
+                      title="Venue Options" 
+                      options={formData.venueOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, venueOptions: opts })} 
+                      placeholder="e.g. Rooftop Lounge" 
+                    />
+                    <PollOptionsBuilder 
+                      title="Artist / Speaker Options" 
+                      options={formData.artistsOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, artistsOptions: opts })} 
+                      placeholder="e.g. DJ Shadow" 
+                    />
+                    <PollOptionsBuilder 
+                      title="Food & Drink Options" 
+                      options={formData.foodOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, foodOptions: opts })} 
+                      placeholder="e.g. Pizza & Drinks" 
+                    />
+                    <PollOptionsBuilder 
+                      title="Theme Options" 
+                      options={formData.themeOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, themeOptions: opts })} 
+                      placeholder="e.g. Retro Arcade" 
+                    />
+                    <PollOptionsBuilder 
+                      title="Timing Options" 
+                      options={formData.timingOptions} 
+                      setOptions={(opts) => setFormData({ ...formData, timingOptions: opts })} 
+                      placeholder="e.g. Evening (7-10 PM)" 
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Fake Registration Card with RSVP Builder inside */}
             <div className="pt-4">
@@ -930,7 +1215,7 @@ export default function CreateEvent() {
                       className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] mt-2 shadow-xl border-none"
                       style={{ backgroundColor: currentThemeObj.text, color: currentThemeObj.bg }}
                     >
-                      {loading ? "Publishing Event..." : "Publish Event"}
+                      {loading ? (formData.isPreLaunch ? "Launching Campaign..." : "Publishing Event...") : (formData.isPreLaunch ? "Launch Pre-Launch Campaign 🚀" : "Publish Event")}
                     </Button>
                   </div>
                </div>

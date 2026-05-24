@@ -440,9 +440,14 @@ function ExploreCard({ event, index }: { event: any; index: number }) {
         <article className="group h-full flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-white/5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer">
           
           <EventCover event={event}>
+            {event.isPreLaunch && (
+              <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-purple-600/90 text-white text-[9px] font-bold tracking-wider uppercase animate-pulse flex items-center gap-1 shadow-sm">
+                <Sparkles className="w-3 h-3" /> Pre-Launch
+              </div>
+            )}
             {event.date && (
               <div className="absolute bottom-3 left-3 z-10 px-2.5 py-1 rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold">
-                {formatEventDate(event.date)}
+                {event.isPreLaunch ? event.tentativeDate : formatEventDate(event.date)}
               </div>
             )}
             <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -459,7 +464,7 @@ function ExploreCard({ event, index }: { event: any; index: number }) {
 
             {event.date && (
               <p className="mt-1 text-[10px] font-semibold text-gray-400">
-                {formatEventTime(event.date)}
+                {event.isPreLaunch ? "Timeline: " + event.tentativeDate : formatEventTime(event.date)}
               </p>
             )}
 
@@ -483,9 +488,9 @@ function ExploreCard({ event, index }: { event: any; index: number }) {
                     <span className="truncate">{event.location.split(',')[0]}</span>
                   </span>
                 )}
-                <span className="text-[10px] font-bold flex items-center gap-1">
+                <span className="text-[10px] font-bold flex items-center gap-1" title={event.isPreLaunch ? "Interested count" : "RSVP count"}>
                   <Users className="w-3 h-3" />
-                  {event.rsvpCount || 0}
+                  {event.isPreLaunch ? event.interestedCount || 0 : event.rsvpCount || 0}
                 </span>
               </div>
             </div>
