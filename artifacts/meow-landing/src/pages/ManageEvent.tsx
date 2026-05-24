@@ -35,6 +35,7 @@ export default function ManageEvent() {
   const [attendees, setAttendees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [photosLink, setPhotosLink] = useState("");
   const [savingPhotos, setSavingPhotos] = useState(false);
   const { toast } = useToast();
@@ -80,6 +81,7 @@ export default function ManageEvent() {
 
   const sendIndividualConfirmation = async (attendeeId: string) => {
     try {
+      setApprovingId(attendeeId);
       if (!id) throw new Error("Missing event ID");
 
       const attendee = attendees.find(a => a.id === attendeeId);
@@ -133,6 +135,8 @@ export default function ManageEvent() {
         description: error.message || "Could not approve guest. Check your Firebase Rules.",
         variant: "destructive"
       });
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -368,9 +372,13 @@ export default function ManageEvent() {
                             size="sm"
                             variant="outline"
                             onClick={() => sendIndividualConfirmation(a.id)}
+                            disabled={approvingId === a.id}
                             className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50"
                           >
-                            Approve
+                            {approvingId === a.id ? (
+                              <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5" />
+                            ) : null}
+                            {approvingId === a.id ? "Approving..." : "Approve"}
                           </Button>
                         )}
                         <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full">
