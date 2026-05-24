@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/Navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
@@ -42,6 +42,7 @@ export default function EventDetails() {
   const [hostProfile, setHostProfile] = useState<any>(null);
   const [coHostProfiles, setCoHostProfiles] = useState<any[]>([]);
   const [isApproved, setIsApproved] = useState(false);
+  const [approvedAttendees, setApprovedAttendees] = useState<any[]>([]);
 
   // Validation Campaign states
   const [interestLevel, setInterestLevel] = useState<"interested" | "maybe" | "not-interested" | null>(null);
@@ -155,6 +156,22 @@ export default function EventDetails() {
     };
     checkRsvpStatus();
   }, [id, user]);
+
+  useEffect(() => {
+    if (!id || !isApproved) return;
+    const fetchApproved = async () => {
+      try {
+        const snap = await getDocs(collection(db, "events", id, "rsvps"));
+        const list = snap.docs
+          .map(doc => doc.data())
+          .filter((r: any) => r.confirmationSent || r.checkedIn);
+        setApprovedAttendees(list);
+      } catch (err) {
+        console.error("Error fetching approved attendees for gallery", err);
+      }
+    };
+    fetchApproved();
+  }, [id, isApproved]);
 
   // Real-time listener for validation campaign RSVPs and votes
   useEffect(() => {
@@ -796,16 +813,99 @@ export default function EventDetails() {
                        </div>
 
                        {isApproved && event.photosLink && (
-                         <div className="pt-2">
-                           <a href={event.photosLink} target="_blank" rel="noopener noreferrer">
-                             <Button
-                               className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] shadow-md border-none text-white flex items-center justify-center gap-2"
-                               style={{ backgroundColor: themeColors.accent }}
-                             >
-                               <Download className="w-4 h-4" /> View Event Photos
-                             </Button>
-                           </a>
-                         </div>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                            className="p-6 rounded-[24px] border border-black/10 dark:border-white/10 shadow-xl space-y-5 text-left relative overflow-hidden bg-cover bg-center"
+                            style={{
+                              backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(15,15,25,0.95) 100%), url(${event.creativeUrl || ""})`,
+                              boxShadow: `0 10px 30px -10px ${themeColors.accent}33`
+                            }}
+                          >
+                            {/* Theme glow indicator */}
+                            <div 
+                              className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-40 animate-pulse"
+                              style={{ backgroundColor: themeColors.accent }}
+                            />
+
+                            <div className="flex items-center justify-between">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                                Gallery Unlocked
+                              </span>
+                              <span className="text-[10px] font-extrabold opacity-60 text-white uppercase tracking-wider">
+                                {approvedAttendees.length > 0 ? `${approvedAttendees.length} Guests Joined` : "Exclusive Access"}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <h4 className="text-xl font-black tracking-tight text-white font-serif">Relive the Magic</h4>
+                              <p className="text-xs text-gray-400 font-medium leading-relaxed">
+                                Access the official gallery and download high-resolution captures shared by the organizers.
+                              </p>
+                            </div>
+
+                            {/* Memory stats */}
+                            <div className="grid grid-cols-3 gap-2.5 py-1 text-center">
+                              <div className="bg-white/5 border border-white/5 p-2 rounded-xl">
+                                <span className="block text-sm font-black text-white">4K</span>
+                                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wide">Quality</span>
+                              </div>
+                              <div className="bg-white/5 border border-white/5 p-2 rounded-xl">
+                                <span className="block text-sm font-black text-white">Photo/Vid</span>
+                                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wide">Format</span>
+                              </div>
+                              <div className="bg-white/5 border border-white/5 p-2 rounded-xl">
+                                <span className="block text-sm font-black text-white">Live</span>
+                                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wide">Status</span>
+                              </div>
+                            </div>
+
+                            {/* Attendee Avatar Stack */}
+                            {approvedAttendees.length > 0 && (
+                              <div className="flex items-center gap-3 pt-1">
+                                <div className="flex -space-x-2.5 overflow-hidden">
+                                  {approvedAttendees.slice(0, 5).map((att, idx) => (
+                                    <div 
+                                      key={idx} 
+                                      className="w-7 h-7 rounded-full bg-[#1A1A1A] border-2 border-[#000] overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-[10px] text-white"
+                                    >
+                                      {att.photoURL ? (
+                                        <img src={parseAvatarUrlFromStorage(att.photoURL)} alt={att.displayName || att.email} className="w-full h-full object-cover" />
+                                      ) : (
+                                        (att.displayName || att.email || "G")[0].toUpperCase()
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-400">
+                                  Access shared with you and{" "}
+                                  <span className="text-white font-bold">
+                                    {approvedAttendees.length} other{approvedAttendees.length > 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-1">
+                              <a href={event.photosLink} target="_blank" rel="noopener noreferrer" className="block">
+                                <Button
+                                  className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.01] text-white border-none shadow-lg flex items-center justify-center gap-2 group relative overflow-hidden"
+                                  style={{ 
+                                    backgroundColor: themeColors.accent,
+                                    boxShadow: `0 4px 20px ${themeColors.accent}4d`
+                                  }}
+                                >
+                                  {/* Button reflection effect */}
+                                  <div className="absolute inset-0 w-1/2 h-full bg-white/10 skew-x-[-20deg] -translate-x-full group-hover:translate-x-[250%] transition-transform duration-1000 ease-out" />
+                                  <Sparkles className="w-4 h-4 animate-spin-slow text-white" />
+                                  Open Event Gallery
+                                  <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                </Button>
+                              </a>
+                            </div>
+                          </motion.div>
                        )}
                      </motion.div>
                   )}

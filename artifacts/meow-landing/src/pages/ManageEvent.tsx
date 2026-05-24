@@ -215,6 +215,24 @@ export default function ManageEvent() {
     }
   };
 
+  const removePhotosLink = async () => {
+    if (!id) return;
+    setSavingPhotos(true);
+    try {
+      await updateDoc(doc(db, "events", id), { photosLink: "" });
+      setPhotosLink("");
+      setEvent({ ...event, photosLink: "" });
+      toast({
+        title: "Gallery access disabled",
+        description: "Approved attendees will no longer see the gallery option."
+      });
+    } catch (error: any) {
+      toast({ title: "Operation failed", description: error.message, variant: "destructive" });
+    } finally {
+      setSavingPhotos(false);
+    }
+  };
+
   const sendIndividualConfirmation = async (attendeeId: string) => {
     try {
       setApprovingId(attendeeId);
@@ -1114,11 +1132,22 @@ export default function ManageEvent() {
                 {/* Event Photos & AI Recap */}
                 <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-6">
                   <div className="space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" /> Event Photos
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" /> Event Photos
+                      </h3>
+                      {event.photosLink ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Active & Shared
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-gray-500/10 text-gray-500 border border-gray-500/20">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                      Add a Drive or Dropbox link here. It will only be visible to approved attendees on the event page.
+                      Add a Google Drive or Dropbox folder URL here. Only approved/checked-in attendees will see the premium memories hub on the event details page.
                     </p>
                     <div className="space-y-2">
                       <input
@@ -1128,13 +1157,25 @@ export default function ManageEvent() {
                         onChange={(e) => setPhotosLink(e.target.value)}
                         className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100"
                       />
-                      <Button 
-                        onClick={savePhotosLink} 
-                        disabled={savingPhotos || photosLink === (event.photosLink || "")}
-                        className="w-full rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
-                      >
-                        {savingPhotos ? "Saving..." : "Save Link"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={savePhotosLink} 
+                          disabled={savingPhotos || photosLink === (event.photosLink || "")}
+                          className="flex-1 rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+                        >
+                          {savingPhotos ? "Saving..." : "Save Link"}
+                        </Button>
+                        {event.photosLink && (
+                          <Button 
+                            onClick={removePhotosLink} 
+                            disabled={savingPhotos}
+                            variant="outline"
+                            className="rounded-xl h-9 text-xs font-semibold border-red-500/20 hover:border-red-500 text-red-500 bg-transparent hover:bg-red-500/10"
+                          >
+                            Disable Gallery
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
