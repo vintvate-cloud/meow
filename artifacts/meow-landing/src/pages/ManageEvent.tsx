@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, getDocs, query, orderBy, updateDoc, increment, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, orderBy, updateDoc, increment, serverTimestamp, where } from "firebase/firestore";
 import emailjs from '@emailjs/browser';
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +37,13 @@ import {
   Trophy,
   Flame,
   UserCheck,
-  Heart
+  Heart,
+  Shield,
+  ShieldAlert,
+  Unlock,
+  EyeOff,
+  Eye,
+  X
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -65,6 +72,20 @@ export default function ManageEvent() {
   const [photosLink, setPhotosLink] = useState("");
   const [savingPhotos, setSavingPhotos] = useState(false);
   const { toast } = useToast();
+
+  const { user } = useAuth();
+  const [username, setUsername] = useState<string>("");
+  const [authLoading, setAuthLoading] = useState(true);
+  const [savingPermissions, setSavingPermissions] = useState<string | null>(null);
+  const [coHostProfiles, setCoHostProfiles] = useState<Record<string, any>>({});
+
+  const isMainHost = event && user && event.userId === user.uid;
+  const isCoHost = event && username && event.coHosts?.includes(username);
+  
+  const permissions = {
+    canSee: isMainHost || (isCoHost && (event.coHostPermissions?.[user?.uid || ""]?.canSee ?? false)),
+    canApprove: isMainHost || (isCoHost && (event.coHostPermissions?.[user?.uid || ""]?.canApprove ?? false)),
+  };
 
   const [isLaunchDialogOpen, setIsLaunchDialogOpen] = useState(false);
   const [launchDate, setLaunchDate] = useState("");
@@ -122,7 +143,7 @@ export default function ManageEvent() {
     let maxV = -1;
     event.venueOptions?.forEach((opt: string) => {
       const votes = pollVotes.venue?.[opt] || 0;
-      if (votes > maxV) { maxV = votes; winVenue = opt; }
+      if (votes > maxV) { maxV = votes; winningVenue = opt; }
     });
 
     const prices = attendees
@@ -178,25 +199,125 @@ export default function ManageEvent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
+      if (!id || !user) return;
       try {
+        // Fetch current user's profile username
+        const profileQuery = query(collection(db, "profiles"), where("userId", "==", user.uid));
+        const profileSnap = await getDocs(profileQuery);
+        let currentUsername = "";
+        if (!profileSnap.empty) {
+          const profileData = profileSnap.docs[0].data();
+          currentUsername = profileData.username || "";
+          setUsername(currentUsername);
+        }
+
         const eventDoc = await getDoc(doc(db, "events", id));
         if (eventDoc.exists()) {
           const data = eventDoc.data();
           setEvent({ id: eventDoc.id, ...data });
           setPhotosLink(data.photosLink || "");
 
-          const rsvpSnap = await getDocs(query(collection(db, "events", id, "rsvps"), orderBy("createdAt", "desc")));
-          setAttendees(rsvpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+          // Check authorization before fetching RSVPs
+          const isMain = data.userId === user.uid;
+          const isCo = currentUsername && data.coHosts?.includes(currentUsername);
+          
+          if (!isMain && !isCo) {
+            toast({
+              title: "Access Denied",
+              description: "You are not authorized to view the management dashboard for this event.",
+              variant: "destructive",
+            });
+            setLocation("/dashboard");
+            return;
+          }
+
+          // Fetch profiles of all co-hosts to map usernames to UIDs for permission management
+          if (data.coHosts && data.coHosts.length > 0) {
+            const profilesQuery = query(collection(db, "profiles"), where("username", "in", data.coHosts));
+            const profilesSnap = await getDocs(profilesQuery);
+            const pMap: Record<string, any> = {};
+            profilesSnap.docs.forEach(doc => {
+              const p = doc.data();
+              pMap[p.username] = p;
+            });
+            setCoHostProfiles(pMap);
+          }
+
+          const canSeeRSVPs = isMain || (isCo && (data.coHostPermissions?.[user.uid]?.canSee ?? false));
+          if (canSeeRSVPs) {
+            const rsvpSnap = await getDocs(query(collection(db, "events", id, "rsvps"), orderBy("createdAt", "desc")));
+            setAttendees(rsvpSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Event not found.",
+            variant: "destructive",
+          });
+          setLocation("/dashboard");
         }
       } catch (error) {
         console.error("Error fetching event data:", error);
       } finally {
         setLoading(false);
+        setAuthLoading(false);
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, user]);
+
+  const handleTogglePermission = async (coHostUsername: string, permissionType: 'canSee' | 'canApprove', currentValue: boolean) => {
+    if (!id || !event) return;
+    const coHostProfile = coHostProfiles[coHostUsername];
+    if (!coHostProfile || !coHostProfile.userId) {
+      toast({
+        title: "Error",
+        description: `Could not resolve user ID for co-host @${coHostUsername}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const coHostUid = coHostProfile.userId;
+
+    try {
+      setSavingPermissions(coHostUsername);
+      
+      const currentPermissions = event.coHostPermissions?.[coHostUid] || { canSee: false, canApprove: false, username: coHostUsername };
+      const updatedPermissions = {
+        ...currentPermissions,
+        username: coHostUsername,
+        [permissionType]: !currentValue
+      };
+
+      const newCoHostPermissions = {
+        ...(event.coHostPermissions || {}),
+        [coHostUid]: updatedPermissions
+      };
+
+      await updateDoc(doc(db, "events", id), {
+        coHostPermissions: newCoHostPermissions
+      });
+
+      setEvent((prev: any) => ({
+        ...prev,
+        coHostPermissions: newCoHostPermissions
+      }));
+
+      toast({
+        title: "Permissions updated!",
+        description: `Updated permissions for @${coHostUsername}.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Failed to update permissions",
+        description: err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setSavingPermissions(null);
+    }
+  };
 
   const savePhotosLink = async () => {
     if (!id) return;
@@ -410,6 +531,102 @@ export default function ManageEvent() {
     ? Math.round(pricesList.reduce((sum, p) => sum + p, 0) / pricesList.length)
     : 0;
 
+  const renderCoHostPermissionsCard = () => {
+    if (!event || !event.coHosts || event.coHosts.length === 0) return null;
+
+    return (
+      <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-[24px] border border-black/5 dark:border-white/5 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+            <Shield className="w-4 h-4 text-purple-600" /> Co-Host Permissions
+          </h3>
+          <p className="text-[10px] text-gray-505 font-semibold mt-0.5">
+            {isMainHost 
+              ? "Assign viewing and approval rights to your partner hosts." 
+              : "Partners hosting this event with you."}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {event.coHosts.map((host: string) => {
+            const hostProfile = coHostProfiles[host];
+            const hostUid = hostProfile?.userId;
+            const hostPerms = (hostUid && event.coHostPermissions?.[hostUid]) || { canSee: false, canApprove: false };
+            const isSaving = savingPermissions === host;
+
+            return (
+              <div 
+                key={host} 
+                className="bg-black/[0.01] dark:bg-white/[0.01] p-4 rounded-2xl border border-black/[0.02] dark:border-white/5 space-y-3.5 transition-all"
+              >
+                <div className="flex items-center justify-between border-b border-black/[0.03] dark:border-white/[0.03] pb-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center font-bold text-[10px] overflow-hidden text-gray-500 shrink-0">
+                      {hostProfile?.photoURL ? (
+                        <img src={parseAvatarUrlFromStorage(hostProfile.photoURL)} alt={host} className="w-full h-full object-cover" />
+                      ) : (
+                        host[0].toUpperCase()
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-gray-900 dark:text-gray-150 truncate leading-tight">{hostProfile?.displayName || host}</span>
+                      <span className="text-[9px] font-semibold text-gray-400 leading-tight">@{host}</span>
+                    </div>
+                    {isSaving && (
+                      <div className="w-3 h-3 border-2 border-purple-650 border-t-transparent rounded-full animate-spin shrink-0 ml-1" />
+                    )}
+                  </div>
+                  <span className="text-[9px] font-bold uppercase text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full shrink-0">
+                    Co-Host
+                  </span>
+                </div>
+
+                {isMainHost ? (
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5 opacity-70" /> View Applications
+                      </Label>
+                      <Switch 
+                        checked={hostPerms.canSee}
+                        disabled={isSaving}
+                        onCheckedChange={() => handleTogglePermission(host, 'canSee', hostPerms.canSee)}
+                        className="scale-90"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer flex items-center gap-1.5">
+                        <UserCheck className="w-3.5 h-3.5 opacity-70" /> Approve RSVPs
+                      </Label>
+                      <Switch 
+                        checked={hostPerms.canApprove}
+                        disabled={isSaving}
+                        onCheckedChange={() => handleTogglePermission(host, 'canApprove', hostPerms.canApprove)}
+                        className="scale-90"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg flex items-center gap-1 ${hostPerms.canSee ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10' : 'bg-red-500/10 text-red-500 border border-red-500/10'}`}>
+                      {hostPerms.canSee ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
+                      View Access
+                    </span>
+                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg flex items-center gap-1 ${hostPerms.canApprove ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10' : 'bg-red-500/10 text-red-500 border border-red-500/10'}`}>
+                      {hostPerms.canApprove ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
+                      Approval Access
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 pb-24 md:pb-12">
@@ -421,7 +638,36 @@ export default function ManageEvent() {
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
         </button>
 
-        {event.isPreLaunch ? (
+        {!permissions.canSee ? (
+          <div className="min-h-[50vh] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-[#1A1A1A] max-w-md w-full p-8 rounded-[32px] shadow-xl border border-black/5 dark:border-white/5 text-center space-y-6"
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto animate-pulse">
+                <ShieldAlert className="w-8 h-8" />
+              </div>
+              
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Access Restricted</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                  You are a co-host of <strong>{event.title}</strong>, but you do not have permission to see or manage applicant details yet.
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Please ask the main host <span className="text-purple-650 dark:text-purple-400 font-semibold">@{event.userName || "the organizer"}</span> to grant viewing access.
+                </p>
+              </div>
+
+              <Button
+                onClick={() => setLocation("/dashboard")}
+                className="w-full h-11 rounded-full font-bold bg-foreground hover:bg-foreground/90 text-background transition-all shadow-md"
+              >
+                Return to Dashboard
+              </Button>
+            </motion.div>
+          </div>
+        ) : event.isPreLaunch ? (
           // ==================== PRE-LAUNCH VALIDATION DASHBOARD ====================
           (() => {
             const views = event.views || 0;
@@ -561,12 +807,14 @@ export default function ManageEvent() {
                         <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> View Campaign
                       </Button>
                     </Link>
-                    <Button 
-                      onClick={openLaunchDialog}
-                      className="flex-1 md:flex-none rounded-xl text-xs font-bold h-11 px-6 shadow-lg bg-gradient-to-r from-purple-650 to-indigo-650 hover:from-purple-500 hover:to-indigo-500 text-white border-none transition-all duration-300 transform active:scale-95"
-                    >
-                      <Flame className="w-4 h-4 mr-1.5 animate-bounce" /> Launch Event Officially
-                    </Button>
+                    {isMainHost && (
+                      <Button 
+                        onClick={openLaunchDialog}
+                        className="flex-1 md:flex-none rounded-xl text-xs font-bold h-11 px-6 shadow-lg bg-gradient-to-r from-purple-650 to-indigo-650 hover:from-purple-500 hover:to-indigo-500 text-white border-none transition-all duration-300 transform active:scale-95"
+                      >
+                        <Flame className="w-4 h-4 mr-1.5 animate-bounce" /> Launch Event Officially
+                      </Button>
+                    )}
                   </div>
                 </header>
 
@@ -936,6 +1184,11 @@ export default function ManageEvent() {
                     </div>
                   </div>
                 </section>
+                {event.coHosts && event.coHosts.length > 0 && (
+                  <section className="mt-8 max-w-md">
+                    {renderCoHostPermissionsCard()}
+                  </section>
+                )}
               </div>
             );
           })()
@@ -984,13 +1237,14 @@ export default function ManageEvent() {
                     {attendees.filter(a => !a.confirmationSent).length > 0 && (
                       <Button
                         onClick={sendConfirmations}
-                        disabled={sending}
+                        disabled={sending || !permissions.canApprove}
                         size="sm"
                         variant="outline"
                         className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3"
+                        title={!permissions.canApprove ? "Approval permission restricted" : "Approve all pending guests"}
                       >
-                        <Send className="w-3 h-3 mr-1.5" />
-                        {sending ? "Approving..." : "Approve all pending"}
+                        {!permissions.canApprove ? <Lock className="w-3 h-3 mr-1.5" /> : <Send className="w-3 h-3 mr-1.5" />}
+                        {sending ? "Approving..." : !permissions.canApprove ? "Approve Restricted" : "Approve all pending"}
                       </Button>
                     )}
                   </div>
@@ -1069,8 +1323,11 @@ export default function ManageEvent() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => sendIndividualConfirmation(a.id)}
-                                className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] hover:bg-gray-50"
+                                disabled={!permissions.canApprove}
+                                className={`rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] ${!permissions.canApprove ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+                                title={!permissions.canApprove ? "Approval permission restricted" : "Approve attendee"}
                               >
+                                {!permissions.canApprove && <Lock className="w-3 h-3 mr-1" />}
                                 Approve
                               </Button>
                             )}
@@ -1202,21 +1459,8 @@ export default function ManageEvent() {
                   )}
                 </div>
 
-                {/* Co-Hosts Info */}
-                {event.coHosts && event.coHosts.length > 0 && (
-                  <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" /> Co-Hosts
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {event.coHosts.map((host: string) => (
-                        <span key={host} className="px-3 py-1 bg-black/5 dark:bg-white/10 rounded-full text-xs font-bold text-gray-700 dark:text-gray-300">
-                          @{host}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Co-Hosts & Permissions Info */}
+                {renderCoHostPermissionsCard()}
 
                 {/* Visibility Settings Card */}
                 <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm">

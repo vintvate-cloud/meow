@@ -300,7 +300,6 @@ export default function CreateEvent() {
               timingOptions: data.timingOptions || [],
             });
             if (data.customFields) setCustomFields(data.customFields);
-            if (data.creativeUrl) setPreviewImage(data.creativeUrl);
           }
         } catch (error) {
           console.error("Error fetching event to edit:", error);
@@ -472,6 +471,7 @@ export default function CreateEvent() {
           userName: user.displayName,
           createdAt: serverTimestamp(),
           rsvpCount: 0,
+          coHostPermissions: {},
         });
 
         toast({
