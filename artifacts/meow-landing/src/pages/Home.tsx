@@ -12,32 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const TESTIMONIALS = [
-  {
-    quote: "Meow turned our random meetups into a thriving creative community.",
-    author: "Marcus Chen, Co-founder of The Archive Collective",
-    bg1: "#004225", // dark green
-    bg2: "#FF6B00", // orange
-  },
-  {
-    quote: "We sold out our first event in 48 hours using Meow. The RSVP page is stunning.",
-    author: "Priya Sharma, Indie Music Curator",
-    bg1: "#2856E8", // royal blue
-    bg2: "#E6E6FA", // lavender
-  },
-  {
-    quote: "Our campus club went from 20 members to 400 in one semester with Meow.",
-    author: "Jordan Lee, UCLA Events Lead",
-    bg1: "#800020", // burgundy
-    bg2: "#D9FF00", // lime
-  },
-  {
-    quote: "The analytics alone are worth it. I finally understand my audience.",
-    author: "Kai Nakamura, Creative Director",
-    bg1: "#800080", // purple
-    bg2: "#00FFFF", // cyan
-  }
-];
+
 
 import { useForceLightTheme } from "@/hooks/use-theme-force";
 
@@ -49,7 +24,6 @@ export default function Home() {
 
   const { user } = useAuth();
   const [phoneStep, setPhoneStep] = useState(0);
-  const [testimonialStep, setTestimonialStep] = useState(0);
   const [activeFaq, setActiveFaq] = useState<string | undefined>();
 
   useEffect(() => {
@@ -57,13 +31,6 @@ export default function Home() {
       setPhoneStep((prev) => (prev + 1) % 3);
     }, 2500);
     return () => clearInterval(phoneInterval);
-  }, []);
-
-  useEffect(() => {
-    const testimonialInterval = setInterval(() => {
-      setTestimonialStep((prev) => (prev + 1) % TESTIMONIALS.length);
-    }, 3000);
-    return () => clearInterval(testimonialInterval);
   }, []);
 
   useEffect(() => {
@@ -231,20 +198,6 @@ export default function Home() {
                 See Pricing
               </Button>
             </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 1 }}
-            className="flex items-center gap-3 pt-4"
-          >
-            <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-[#101828] bg-gray-300 overflow-hidden" style={{ backgroundColor: i % 2 === 0 ? '#2457FF' : '#F8F4EC' }} />
-              ))}
-            </div>
-            <span className="font-bold text-sm" style={{ color: "var(--foreground)" }}>10,000+ events hosted this week</span>
           </motion.div>
         </motion.div>
 
@@ -567,8 +520,8 @@ export default function Home() {
             {/* Card 1 */}
             <div className="metric-card bg-[#6F7450] rounded-3xl p-6 text-white flex flex-col justify-between shadow-lg relative overflow-hidden h-full">
               <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
-                <div className="text-5xl font-black tracking-tighter">12,847</div>
-                <div className="text-lg font-bold opacity-90 mt-2">RSVPs Collected</div>
+                <div className="text-5xl font-black tracking-tighter">Live</div>
+                <div className="text-lg font-bold opacity-90 mt-2">Analytics Dashboard</div>
                 <svg className="absolute bottom-0 right-0 w-full opacity-30 pointer-events-none" viewBox="0 0 200 50" preserveAspectRatio="none">
                   <path d="M0,50 Q50,0 100,50 T200,50 L200,100 L0,100 Z" fill="currentColor" />
                 </svg>
@@ -581,8 +534,8 @@ export default function Home() {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
                 </div>
                 <div>
-                  <div className="text-5xl font-black tracking-tighter">4,291</div>
-                  <div className="text-lg font-bold opacity-80 mt-1">Tickets Sold</div>
+                  <div className="text-5xl font-black tracking-tighter">0%</div>
+                  <div className="text-lg font-bold opacity-80 mt-1">Hidden Ticketing Fees</div>
                 </div>
               </motion.div>
             </div>
@@ -593,8 +546,8 @@ export default function Home() {
                   <span className="text-2xl font-bold">$</span>
                 </div>
                 <div>
-                  <div className="text-5xl font-black tracking-tighter">68%</div>
-                  <div className="text-lg font-bold opacity-90 mt-1">Return Guests</div>
+                  <div className="text-5xl font-black tracking-tighter">Fast</div>
+                  <div className="text-lg font-bold opacity-90 mt-1">Stripe Payouts</div>
                 </div>
               </motion.div>
             </div>
@@ -602,12 +555,12 @@ export default function Home() {
             <div className="metric-card bg-[#111827] rounded-3xl p-6 text-white shadow-lg h-full" style={{ marginTop: '20px' }}>
               <motion.div whileHover={{ scale: 1.06, y: -4 }} className="metric-card-inner h-full flex flex-col justify-between cursor-default">
                 <div className="flex items-center gap-2 mb-4 bg-white/10 w-fit px-3 py-1 rounded-full">
-                  <div className="w-4 h-4 bg-[#00B7FF] rounded-full"></div>
-                  <span className="text-xs font-bold">New York, USA</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span className="text-xs font-bold">CSV / Excel</span>
                 </div>
                 <div>
-                  <div className="text-5xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>3,200</div>
-                  <div className="text-lg font-bold opacity-80 mt-1">Communities</div>
+                  <div className="text-4xl font-black tracking-tighter" style={{ color: '#D9FF00' }}>1-Click</div>
+                  <div className="text-lg font-bold opacity-80 mt-1">Attendee Export</div>
                 </div>
               </motion.div>
             </div>
@@ -866,56 +819,6 @@ export default function Home() {
           </div>
         </div>
         <style dangerouslySetInnerHTML={{ __html: `.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }` }} />
-      </section>
-
-      {/* D. Testimonial Section - Auto-playing Carousel */}
-      <section className="py-32 px-6 lg:px-12 flex flex-col items-center text-center bg-white dark:bg-card dark:text-card-foreground relative overflow-hidden">
-
-        <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}>
-          <div className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:bg-muted transition-colors">←</div>
-        </div>
-        <div className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 z-20 cursor-pointer" onClick={() => setTestimonialStep(prev => (prev + 1) % TESTIMONIALS.length)}>
-          <div className="w-12 h-12 rounded-full border-2 border-gray-200 dark:border-border flex items-center justify-center hover:bg-gray-50 dark:bg-muted transition-colors">→</div>
-        </div>
-
-        <div className="max-w-4xl min-h-[400px] flex flex-col items-center justify-center relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={testimonialStep}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center"
-            >
-              <div className="relative w-48 h-48 mb-12">
-                {/* Abstract background shape */}
-                <div className="absolute top-0 right-0 w-32 h-40 rounded-full transform rotate-45 mix-blend-multiply" style={{ backgroundColor: TESTIMONIALS[testimonialStep].bg2 }}></div>
-                {/* Foreground portrait shape */}
-                <div className="absolute bottom-0 left-0 w-40 h-48 rounded-[40px] transform -rotate-12 shadow-2xl z-10" style={{ backgroundColor: TESTIMONIALS[testimonialStep].bg1 }}></div>
-              </div>
-
-              <div className="space-y-8">
-                <h2 className="gsap-heading text-4xl md:text-5xl lg:text-6xl font-black leading-tight" style={{ color: "var(--foreground)" }}>
-                  "{TESTIMONIALS[testimonialStep].quote}"
-                </h2>
-                <p className="text-xl font-bold opacity-60" style={{ color: "var(--foreground)" }}>
-                  — {TESTIMONIALS[testimonialStep].author}
-                </p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="flex gap-2 mt-12">
-          {TESTIMONIALS.map((_, i) => (
-            <div
-              key={i}
-              onClick={() => setTestimonialStep(i)}
-              className={`w-3 h-3 rounded-full cursor-pointer transition-all ${testimonialStep === i ? 'bg-[#111827]' : 'bg-gray-200 hover:bg-gray-300'}`}
-            />
-          ))}
-        </div>
       </section>
 
       {/* E. FAQ Section */}

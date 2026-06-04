@@ -63,6 +63,7 @@ function Router() {
       <ProtectedRoute path="/dashboard" component={Dashboard} />
       <ProtectedRoute path="/settings" component={Settings} />
       <ProtectedRoute path="/create-event" component={CreateEvent} />
+      <ProtectedRoute path="/edit-event/:id" component={CreateEvent} />
       <ProtectedRoute path="/manage/:id" component={ManageEvent} />
       <ProtectedRoute path="/scan/:id" component={QRScanner} />
       <Route path="/e/:id" component={EventDetails} />

@@ -469,6 +469,14 @@ export default function Dashboard() {
                           >
                             <QrCode className="w-4 h-4" />
                           </button>
+                          <Link href={`/edit-event/${event.id}`}>
+                            <button
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
+                              title="Edit event"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                          </Link>
                           <Link href={`/manage/${event.id}`}>
                             <button
                               className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"

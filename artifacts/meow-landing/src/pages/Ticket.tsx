@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { Calendar, MapPin, CheckCircle, Download } from "lucide-react";
@@ -59,50 +59,77 @@ END:VCALENDAR`;
   };
 
   useEffect(() => {
+    let unsubscribeRSVP: () => void;
+
     const fetchTicket = async () => {
       if (authLoading) return;
       if (!eventId || !rsvpId) return;
       try {
         const eventDoc = await getDoc(doc(db, "events", eventId));
-        let rsvpData = null;
-        let rsvpPermissionDenied = false;
-
-        try {
-          const rsvpDoc = await getDoc(doc(db, "events", eventId, "rsvps", rsvpId));
-          if (rsvpDoc.exists()) {
-            rsvpData = rsvpDoc.data();
-          }
-        } catch (err: any) {
-          if (err.code === 'permission-denied' || err.message?.includes('permissions')) {
-            rsvpPermissionDenied = true;
-          } else {
-            console.error("Error fetching RSVP:", err);
-          }
+        if (!eventDoc.exists()) {
+          setLoading(false);
+          return;
         }
 
-        if (eventDoc.exists()) {
-          // If we have rsvpData, verify confirmationSent.
-          // If permission denied to read RSVP, assume valid because they have the unguessable link from their email.
-          if ((rsvpData && rsvpData.confirmationSent) || rsvpPermissionDenied) {
-            setData({
-              event: eventDoc.data(),
-              rsvp: rsvpData || { email: user?.email || "Verified Attendee" },
-              eventId,
-              rsvpId
-            });
-            setPermError(false);
+        const rsvpRef = doc(db, "events", eventId, "rsvps", rsvpId);
+        
+        // Listen to RSVP in real time so the ticket automatically burns when scanned
+        unsubscribeRSVP = onSnapshot(rsvpRef, 
+          (rsvpSnap) => {
+            if (rsvpSnap.exists()) {
+              const rsvpData = rsvpSnap.data();
+              if (rsvpData.confirmationSent || rsvpData.checkedIn) {
+                setData({
+                  event: eventDoc.data(),
+                  rsvp: rsvpData,
+                  eventId,
+                  rsvpId
+                });
+                setPermError(false);
+                if (rsvpData.checkedIn) setIsScanned(true);
+              }
+            } else {
+               // Handle case where they don't have direct read access, fallback logic
+               setData({
+                 event: eventDoc.data(),
+                 rsvp: { email: user?.email || "Verified Attendee" },
+                 eventId,
+                 rsvpId
+               });
+               setPermError(false);
+            }
+            setLoading(false);
+          },
+          (err: any) => {
+             if (err.code === 'permission-denied' || err.message?.includes('permissions')) {
+               // If permission denied, assume they have the unguessable link from email
+               setData({
+                 event: eventDoc.data(),
+                 rsvp: { email: user?.email || "Verified Attendee" },
+                 eventId,
+                 rsvpId
+               });
+               setPermError(false);
+             } else {
+               console.error("Error fetching RSVP:", err);
+             }
+             setLoading(false);
           }
-        }
+        );
       } catch (error: any) {
         console.error(error);
         if (error.code === 'permission-denied' || error.message?.includes('permissions')) {
           setPermError(true);
         }
-      } finally {
         setLoading(false);
       }
     };
+    
     fetchTicket();
+    
+    return () => {
+      if (unsubscribeRSVP) unsubscribeRSVP();
+    };
   }, [eventId, rsvpId, authLoading, user]);
 
   if (loading || authLoading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
@@ -181,9 +208,7 @@ END:VCALENDAR`;
                     rotate: 15,
                     transition: { duration: 0.6, ease: "easeOut" } 
                   }}
-                  className="bg-white dark:bg-card dark:text-card-foreground p-4 rounded-3xl shadow-sm relative group cursor-pointer"
-                  onClick={() => setIsScanned(true)}
-                  title="Click to simulate scan"
+                  className="bg-white dark:bg-card dark:text-card-foreground p-4 rounded-3xl shadow-sm relative group"
                 >
                   <QRCodeSVG
                     value={JSON.stringify({ eventId: data.eventId, rsvpId: data.rsvpId })}
@@ -191,13 +216,6 @@ END:VCALENDAR`;
                     level="H"
                     includeMargin={true}
                   />
-                  {/* Interactive burn hint overlay */}
-                  <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl backdrop-blur-sm">
-                    <div className="w-10 h-10 border-2 border-white rounded-full flex items-center justify-center mb-2 animate-pulse">
-                      <div className="w-4 h-4 bg-white rounded-full" />
-                    </div>
-                    <span className="text-white font-bold text-sm">Simulate Scan</span>
-                  </div>
                 </motion.div>
               ) : (
                 <motion.div

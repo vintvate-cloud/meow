@@ -571,6 +571,31 @@ export default function EventDetails() {
                  ))}
                </div>
             </div>
+
+            {/* Attendees Preview */}
+            <div className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-3">
+                  {allRSVPs.slice(0, 5).map((rsvp: any, i: number) => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 overflow-hidden bg-white/20 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
+                      {rsvp.avatar ? (
+                        <img src={rsvp.avatar} alt="Attendee" className="w-full h-full object-cover" />
+                      ) : (
+                        rsvp.name?.[0]?.toUpperCase() || rsvp.email?.[0]?.toUpperCase() || "?"
+                      )}
+                    </div>
+                  ))}
+                  {(event.rsvpCount || allRSVPs.length) === 0 && (
+                     <div className="w-8 h-8 rounded-full border-2 bg-white/20 dark:bg-white/10 flex items-center justify-center text-xs font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
+                      ?
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm font-semibold opacity-80" style={{ color: themeColors.text }}>
+                  {(event.rsvpCount || allRSVPs.length) > 0 ? `${event.rsvpCount || allRSVPs.length} people attending` : "Be the first to RSVP!"}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* RIGHT COLUMN */}

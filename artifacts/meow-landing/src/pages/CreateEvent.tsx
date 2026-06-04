@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ArrowLeft, Calendar, MapPin, Type, Image as ImageIcon, Plus, Users, Globe, Lock, Check, Trash2, Upload, X, ChevronRight, Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -167,8 +167,10 @@ function PollOptionsBuilder({
 export default function CreateEvent() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { id } = useParams<{ id?: string }>();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!!id);
 
   const [profile, setProfile] = useState<any>(null);
   const [fetchingProfile, setFetchingProfile] = useState(true);
@@ -260,6 +262,55 @@ export default function CreateEvent() {
     themeOptions: [] as string[],
     timingOptions: [] as string[],
   });
+
+  useEffect(() => {
+    if (id) {
+      const fetchEvent = async () => {
+        try {
+          const docRef = doc(db, "events", id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setFormData({
+              ...formData,
+              title: data.title || "",
+              description: data.description || "",
+              date: data.date || "",
+              location: data.location || "",
+              theme: data.theme || "cream-cozy",
+              creativeUrl: data.creativeUrl || "",
+              coHosts: data.coHosts || [],
+              isPublic: data.isPublic !== undefined ? data.isPublic : true,
+              isPreLaunch: data.isPreLaunch || false,
+              city: data.city || "",
+              audienceType: data.audienceType || "",
+              tentativeDate: data.tentativeDate || "",
+              targetInterest: data.targetInterest || 100,
+              showHypeMeter: data.showHypeMeter !== false,
+              showPolls: data.showPolls !== false,
+              showSuggestions: data.showSuggestions !== false,
+              showReferral: data.showReferral !== false,
+              showTicker: data.showTicker !== false,
+              showComments: data.showComments !== false,
+              dateOptions: data.dateOptions || [],
+              venueOptions: data.venueOptions || [],
+              artistsOptions: data.artistsOptions || [],
+              foodOptions: data.foodOptions || [],
+              themeOptions: data.themeOptions || [],
+              timingOptions: data.timingOptions || [],
+            });
+            if (data.customFields) setCustomFields(data.customFields);
+            if (data.creativeUrl) setPreviewImage(data.creativeUrl);
+          }
+        } catch (error) {
+          console.error("Error fetching event to edit:", error);
+        } finally {
+          setInitialLoading(false);
+        }
+      };
+      fetchEvent();
+    }
+  }, [id]);
 
   const [coHostInput, setCoHostInput] = useState("");
   const [hostSearchResults, setHostSearchResults] = useState<any[]>([]);
@@ -395,24 +446,40 @@ export default function CreateEvent() {
       const finalTheme = autoColorMatch && extractedColor ? "dynamic" : formData.theme;
       const finalIsDark = autoColorMatch && extractedColor ? extractedColor.isDark : false;
       
-      const docRef = await addDoc(collection(db, "events"), {
-        ...formData,
-        theme: finalTheme,
-        coHosts: formData.coHosts,
-        color: finalColor,
-        isDark: finalIsDark,
-        customFields,
-        userId: user.uid,
-        userName: user.displayName,
-        createdAt: serverTimestamp(),
-        rsvpCount: 0,
-      });
+      if (id) {
+        await updateDoc(doc(db, "events", id), {
+          ...formData,
+          theme: finalTheme,
+          coHosts: formData.coHosts,
+          color: finalColor,
+          isDark: finalIsDark,
+          customFields,
+        });
+        toast({
+          title: "Event updated!",
+          description: "Your changes have been saved.",
+        });
+        setLocation(`/manage/${id}`);
+      } else {
+        const docRef = await addDoc(collection(db, "events"), {
+          ...formData,
+          theme: finalTheme,
+          coHosts: formData.coHosts,
+          color: finalColor,
+          isDark: finalIsDark,
+          customFields,
+          userId: user.uid,
+          userName: user.displayName,
+          createdAt: serverTimestamp(),
+          rsvpCount: 0,
+        });
 
-      toast({
-        title: "Event created!",
-        description: "Your event page is live.",
-      });
-      setLocation(`/e/${docRef.id}`);
+        toast({
+          title: "Event created!",
+          description: "Your event page is live.",
+        });
+        setLocation(`/e/${docRef.id}`);
+      }
     } catch (error: any) {
       toast({
         title: "Failed to create event",
@@ -424,7 +491,7 @@ export default function CreateEvent() {
     }
   };
 
-  if (fetchingProfile) {
+  if (fetchingProfile || initialLoading) {
     return (
       <div className="min-h-screen bg-[#F3F0E8] dark:bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-foreground" />
@@ -1215,7 +1282,7 @@ export default function CreateEvent() {
                       className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] mt-2 shadow-xl border-none"
                       style={{ backgroundColor: currentThemeObj.text, color: currentThemeObj.bg }}
                     >
-                      {loading ? (formData.isPreLaunch ? "Launching Campaign..." : "Publishing Event...") : (formData.isPreLaunch ? "Launch Pre-Launch Campaign 🚀" : "Publish Event")}
+                      {loading ? (id ? "Saving Changes..." : (formData.isPreLaunch ? "Launching Campaign..." : "Publishing Event...")) : (id ? "Save Changes" : (formData.isPreLaunch ? "Launch Pre-Launch Campaign 🚀" : "Publish Event"))}
                     </Button>
                   </div>
                </div>
