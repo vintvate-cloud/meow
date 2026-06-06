@@ -502,8 +502,47 @@ export default function ManageEvent() {
     }
 
     const bccList = approvedEmails.join(',');
-    const subject = encodeURIComponent(`Reminder: ${event.title}`);
-    const body = encodeURIComponent(`Hi everyone,\n\nJust a quick reminder that ${event.title} is coming up!\n\nGet ready to attend.\n\nBest,\nHost`);
+    const subject = encodeURIComponent(`Important Updates: ${event.title} ✨`);
+    
+    // Format date nicely if available
+    let eventDateStr = "the upcoming date";
+    let eventTimeStr = "the scheduled time";
+    if (event.date) {
+      try {
+        const d = new Date(event.date);
+        eventDateStr = d.toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' });
+        eventTimeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        eventDateStr = event.date;
+      }
+    } else if (event.startDate) {
+      eventDateStr = event.startDate;
+    }
+
+    const eventVenue = event.location || "our scheduled venue";
+
+    const emailBody = `Hi everyone! 👋
+
+We are incredibly excited to host you at ${event.title}! As we get closer to the event, we wanted to share some important details so you're fully prepared to have a great time.
+
+📍 Venue Details
+Location: ${eventVenue}
+
+📅 Date & Time
+When: ${eventDateStr} at ${eventTimeStr}
+
+🎟️ Check-in Information
+Please make sure to have your digital ticket ready for a smooth check-in process at the door. You can find your unique ticket link in your original approval email.
+
+If you have any questions or last-minute changes, feel free to reply directly to this email.
+
+Can't wait to see you there!
+
+Best regards,
+${event.userName ? `@${event.userName}` : "The Organizer"}
+`;
+
+    const body = encodeURIComponent(emailBody);
 
     window.location.href = `mailto:?bcc=${bccList}&subject=${subject}&body=${body}`;
   };
@@ -1250,17 +1289,17 @@ export default function ManageEvent() {
                 <Tabs defaultValue="all" className="w-full">
                   <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-black/5 dark:border-white/5 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-black/[0.04] dark:border-white/[0.04] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                      <div className="flex items-center gap-4">
-                        <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+                        <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100 shrink-0">
                           <Users className="w-4 h-4 text-gray-400" /> Guests
                           <span className="text-[10px] font-bold bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full text-gray-500 dark:text-gray-400">
                             {attendees.length}
                           </span>
                         </h2>
-                        <TabsList className="h-8 bg-black/5 dark:bg-white/5">
-                          <TabsTrigger value="all" className="text-xs">All ({attendees.length})</TabsTrigger>
-                          <TabsTrigger value="approved" className="text-xs">Approved ({attendees.filter(a => a.confirmationSent).length})</TabsTrigger>
-                          <TabsTrigger value="pending" className="text-xs">Pending ({attendees.filter(a => !a.confirmationSent).length})</TabsTrigger>
+                        <TabsList className="h-auto flex-wrap bg-black/5 dark:bg-white/5 w-full sm:w-auto justify-start p-1 gap-1">
+                          <TabsTrigger value="all" className="text-xs flex-1 sm:flex-none">All ({attendees.length})</TabsTrigger>
+                          <TabsTrigger value="approved" className="text-xs flex-1 sm:flex-none">Approved ({attendees.filter(a => a.confirmationSent).length})</TabsTrigger>
+                          <TabsTrigger value="pending" className="text-xs flex-1 sm:flex-none">Pending ({attendees.filter(a => !a.confirmationSent).length})</TabsTrigger>
                         </TabsList>
                       </div>
                       {attendees.filter(a => !a.confirmationSent).length > 0 && (
