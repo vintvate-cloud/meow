@@ -45,7 +45,9 @@ import {
   Unlock,
   EyeOff,
   Eye,
-  X
+  X,
+  Download,
+  Edit3
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -62,6 +64,22 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
+
+
+const AnimatedNumber = ({ value }: { value: number }) => (
+  <AnimatePresence mode="popLayout">
+    <motion.span
+      key={value}
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -10, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="inline-block"
+    >
+      {value}
+    </motion.span>
+  </AnimatePresence>
+);
 
 export default function ManageEvent() {
   const { id } = useParams();
@@ -87,6 +105,43 @@ export default function ManageEvent() {
   const permissions = {
     canSee: isMainHost || (isCoHost && (event.coHostPermissions?.[user?.uid || ""]?.canSee ?? false)),
     canApprove: isMainHost || (isCoHost && (event.coHostPermissions?.[user?.uid || ""]?.canApprove ?? false)),
+  };
+
+  // Edit live event details state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editCapacity, setEditCapacity] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  useEffect(() => {
+    if (event && !isEditDialogOpen) {
+      setEditTitle(event.title || "");
+      setEditDate(event.date || event.startDate || "");
+      setEditLocation(event.location || "");
+      setEditCapacity(event.capacity ? String(event.capacity) : "");
+    }
+  }, [event, isEditDialogOpen]);
+
+  const handleSaveDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id || !user) return;
+    setSavingEdit(true);
+    try {
+      await updateDoc(doc(db, "events", id), {
+         title: editTitle,
+         date: editDate,
+         location: editLocation,
+         capacity: editCapacity ? parseInt(editCapacity) : null
+      });
+      setEvent({ ...event, title: editTitle, date: editDate, location: editLocation, capacity: editCapacity ? parseInt(editCapacity) : null });
+      toast({ title: "Event updated successfully" });
+      setIsEditDialogOpen(false);
+    } catch(err: any) {
+      toast({ title: "Failed to update", description: err.message, variant: "destructive" });
+    }
+    setSavingEdit(false);
   };
 
   const [isLaunchDialogOpen, setIsLaunchDialogOpen] = useState(false);
@@ -490,7 +545,7 @@ export default function ManageEvent() {
 
 
 
-  const handleBroadcast = () => {
+  const handleBroadcast = (templateId: "general" | "reminder" | "thankyou" = "general") => {
     const approvedEmails = attendees.filter(a => a.confirmationSent).map(a => a.email);
     if (approvedEmails.length === 0) {
       toast({
@@ -502,7 +557,6 @@ export default function ManageEvent() {
     }
 
     const bccList = approvedEmails.join(',');
-    const subject = encodeURIComponent(`Important Updates: ${event.title} ✨`);
     
     // Format date nicely if available
     let eventDateStr = "the upcoming date";
@@ -520,40 +574,74 @@ export default function ManageEvent() {
     }
 
     const eventVenue = event.location || "our scheduled venue";
+    const signOff = `\n\nBest regards,\n${event.userName ? `@${event.userName}` : "The Organizer"}`;
+    
+    let subjectText = "";
+    let bodyText = "";
 
-    const emailBody = `Hi everyone! 👋
+    if (templateId === "reminder") {
+      subjectText = `⏰ 5 Hours to Go! Get Ready for ${event.title}`;
+      bodyText = `Hi everyone! 👋\n\nJust a quick reminder that ${event.title} is starting in exactly 5 hours! We are so excited to see you.\n\n📍 Venue Reminder:\n${eventVenue}\n\nPlease have your digital ticket ready at the door.\n\nSee you very soon!`;
+    } else if (templateId === "thankyou") {
+      subjectText = `📸 Thank you for attending ${event.title}!`;
+      bodyText = `Hi everyone,\n\nWe just wanted to send a huge thank you to everyone who joined us for ${event.title}! Your energy made it unforgettable.\n\nKeep an eye out for photos, and we hope to see you at our next event!\n\nCheers,`;
+    } else {
+      subjectText = `Important Updates: ${event.title} ✨`;
+      bodyText = `Hi everyone! 👋\n\nWe are incredibly excited to host you at ${event.title}! As we get closer to the event, we wanted to share some important details.\n\n📍 Venue Details\nLocation: ${eventVenue}\n\n📅 Date & Time\nWhen: ${eventDateStr} at ${eventTimeStr}\n\n🎟️ Check-in Information\nPlease make sure to have your digital ticket ready for a smooth check-in process at the door. You can find your unique ticket link in your original approval email.\n\nCan't wait to see you there!`;
+    }
 
-We are incredibly excited to host you at ${event.title}! As we get closer to the event, we wanted to share some important details so you're fully prepared to have a great time.
-
-📍 Venue Details
-Location: ${eventVenue}
-
-📅 Date & Time
-When: ${eventDateStr} at ${eventTimeStr}
-
-🎟️ Check-in Information
-Please make sure to have your digital ticket ready for a smooth check-in process at the door. You can find your unique ticket link in your original approval email.
-
-If you have any questions or last-minute changes, feel free to reply directly to this email.
-
-Can't wait to see you there!
-
-Best regards,
-${event.userName ? `@${event.userName}` : "The Organizer"}
-`;
-
-    const body = encodeURIComponent(emailBody);
+    const subject = encodeURIComponent(subjectText);
+    const body = encodeURIComponent(bodyText + signOff);
 
     window.location.href = `mailto:?bcc=${bccList}&subject=${subject}&body=${body}`;
+  };
+
+  const handleExportCSV = () => {
+    if (!event) return;
+    const headers = ["Name", "Email", "Status", "Checked In", "Responses"];
+    const rows = attendees.map(a => {
+      const responses = Object.entries(a.customResponses || {})
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; ");
+      return [
+        a.displayName || "",
+        a.email,
+        a.confirmationSent ? "Approved" : "Pending",
+        a.checkedIn ? "Yes" : "No",
+        responses
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(",");
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_guests.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: "Your guest list has been downloaded.",
+    });
   };
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-4xl animate-bounce">🐾</span>
-            <p className="text-sm font-semibold text-gray-400">Loading details...</p>
+        <div className="max-w-6xl mx-auto p-4 md:p-8 pt-24 md:pt-32 space-y-8 animate-pulse">
+          <div className="h-8 bg-black/5 dark:bg-white/5 rounded-xl w-1/3 mb-4"></div>
+          <div className="h-6 bg-black/5 dark:bg-white/5 rounded-lg w-1/4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="h-64 bg-black/5 dark:bg-white/5 rounded-2xl"></div>
+              <div className="h-40 bg-black/5 dark:bg-white/5 rounded-2xl"></div>
+            </div>
+            <div className="space-y-6">
+              <div className="h-40 bg-black/5 dark:bg-white/5 rounded-2xl"></div>
+              <div className="h-40 bg-black/5 dark:bg-white/5 rounded-2xl"></div>
+            </div>
           </div>
         </div>
       </AppLayout>
@@ -1260,7 +1348,13 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-8 border-b border-black/[0.04] dark:border-white/[0.04]">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-white uppercase" style={{ backgroundColor: event.color || "#2856E8" }}>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-white uppercase flex items-center gap-1.5" style={{ backgroundColor: event.color || "#2856E8" }}>
+                    {new Date(event.date || event.startDate).toDateString() === new Date().toDateString() && (
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                      </span>
+                    )}
                     Active
                   </span>
                   <span className="text-xs text-gray-400 font-medium">Created {event.createdAt?.toDate().toLocaleDateString()}</span>
@@ -1282,39 +1376,56 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
               </div>
             </header>
 
-            {/* Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
-              <div className="lg:col-span-2 space-y-6">
-                <Tabs defaultValue="all" className="w-full">
+            {/* Master Tabs Navigation */}
+            <Tabs defaultValue="overview" className="space-y-8 w-full">
+              <TabsList className="bg-black/5 dark:bg-white/5 p-1 rounded-xl h-auto flex-wrap w-full md:w-auto md:inline-flex justify-start">
+                <TabsTrigger value="overview" className="rounded-lg text-sm font-semibold px-6 py-2.5">Overview</TabsTrigger>
+                <TabsTrigger value="guests" className="rounded-lg text-sm font-semibold px-6 py-2.5">Guests</TabsTrigger>
+                <TabsTrigger value="settings" className="rounded-lg text-sm font-semibold px-6 py-2.5">Settings</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="guests" className="outline-none m-0 p-0">
+<motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <div className="space-y-6 max-w-5xl">
+                  <Tabs defaultValue="all" className="w-full">
                   <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl border border-black/5 dark:border-white/5 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-black/[0.04] dark:border-white/[0.04] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
                         <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100 shrink-0">
                           <Users className="w-4 h-4 text-gray-400" /> Guests
                           <span className="text-[10px] font-bold bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-full text-gray-500 dark:text-gray-400">
-                            {attendees.length}
+                            <AnimatedNumber value={attendees.length} />
                           </span>
                         </h2>
                         <TabsList className="h-auto flex-wrap bg-black/5 dark:bg-white/5 w-full sm:w-auto justify-start p-1 gap-1">
-                          <TabsTrigger value="all" className="text-xs flex-1 sm:flex-none">All ({attendees.length})</TabsTrigger>
-                          <TabsTrigger value="approved" className="text-xs flex-1 sm:flex-none">Approved ({attendees.filter(a => a.confirmationSent).length})</TabsTrigger>
-                          <TabsTrigger value="pending" className="text-xs flex-1 sm:flex-none">Pending ({attendees.filter(a => !a.confirmationSent).length})</TabsTrigger>
+                          <TabsTrigger value="all" className="text-xs flex-1 sm:flex-none">All (<AnimatedNumber value={attendees.length} />)</TabsTrigger>
+                          <TabsTrigger value="approved" className="text-xs flex-1 sm:flex-none">Approved (<AnimatedNumber value={attendees.filter(a => a.confirmationSent).length} />)</TabsTrigger>
+                          <TabsTrigger value="pending" className="text-xs flex-1 sm:flex-none">Pending (<AnimatedNumber value={attendees.filter(a => !a.confirmationSent).length} />)</TabsTrigger>
                         </TabsList>
                       </div>
-                      {attendees.filter(a => !a.confirmationSent).length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
                         <Button
-                          onClick={sendConfirmations}
-                          disabled={sending || !permissions.canApprove}
+                          onClick={handleExportCSV}
                           size="sm"
                           variant="outline"
-                          className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3 w-full md:w-auto"
-                          title={!permissions.canApprove ? "Approval permission restricted" : "Approve all pending guests"}
+                          className="rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-4 w-full sm:w-auto bg-transparent hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                         >
-                          {!permissions.canApprove ? <Lock className="w-3 h-3 mr-1.5" /> : <Send className="w-3 h-3 mr-1.5" />}
-                          {sending ? "Approving..." : !permissions.canApprove ? "Approve Restricted" : "Approve all pending"}
+                          <Download className="w-3.5 h-3.5 mr-1.5" />
+                          Export CSV
                         </Button>
-                      )}
+                        {attendees.filter(a => !a.confirmationSent).length > 0 && (
+                          <Button
+                            onClick={sendConfirmations}
+                            disabled={sending || !permissions.canApprove}
+                            size="sm"
+                            className="rounded-xl font-bold text-xs h-8 px-5 w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/20 transition-all hover:shadow-purple-500/30"
+                            title={!permissions.canApprove ? "Approval permission restricted" : "Approve all pending guests"}
+                          >
+                            {!permissions.canApprove ? <Lock className="w-3.5 h-3.5 mr-1.5" /> : <Send className="w-3.5 h-3.5 mr-1.5" />}
+                            {sending ? "Approving..." : !permissions.canApprove ? "Approve Restricted" : "Approve All Pending"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     {["all", "approved", "pending"].map(tab => {
@@ -1340,9 +1451,9 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
                               </div>
                             ) : (
                               filteredAttendees.map((a) => (
-                                <div key={a.id} className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-[#222]/50 transition-colors">
+                                <div key={a.id} className="group p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-all relative overflow-hidden">
                                   <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                                    <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex-shrink-0 flex items-center justify-center font-bold text-xs text-gray-500 dark:text-gray-400 overflow-hidden">
+                                    <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex-shrink-0 flex items-center justify-center font-bold text-sm text-gray-500 dark:text-gray-400 overflow-hidden shadow-sm border border-black/5 dark:border-white/5">
                                       {a.photoURL ? (
                                         <img src={parseAvatarUrlFromStorage(a.photoURL)} alt={a.displayName || a.email} className="w-full h-full object-cover" />
                                       ) : (
@@ -1399,34 +1510,33 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
 
                                   <div className="flex items-center justify-between sm:justify-end gap-3.5 w-full sm:w-auto border-t sm:border-none pt-3 sm:pt-0">
                                     {a.checkedIn ? (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                                        <CheckCircle className="w-3 h-3" /> Checked In
+                                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1 rounded-full shadow-sm border border-emerald-500/10">
+                                        <CheckCircle className="w-3.5 h-3.5" /> Checked In
                                       </span>
                                     ) : a.confirmationSent ? (
-                                      <div className="flex flex-col items-end gap-1 shrink-0">
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/20 px-2.5 py-0.5 rounded-full">
-                                          <Send className="w-3 h-3" /> Approved
+                                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-500/10 dark:bg-blue-500/20 px-3 py-1 rounded-full shadow-sm border border-blue-500/10">
+                                          <Send className="w-3.5 h-3.5" /> Approved
                                         </span>
                                         <button
                                           onClick={() => {
                                             navigator.clipboard.writeText(`${window.location.origin}/ticket/${id}/${a.id}`);
                                             toast({ title: "Ticket link copied!" });
                                           }}
-                                          className="text-[9px] font-bold text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors uppercase tracking-wider"
+                                          className="text-[10px] font-bold text-gray-400 hover:text-black dark:hover:text-white transition-all uppercase tracking-wider flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-y-1 sm:group-hover:translate-y-0"
                                         >
-                                          Copy ticket link
+                                          <ExternalLink className="w-3 h-3" /> Copy ticket
                                         </button>
                                       </div>
                                     ) : (
                                       <Button
                                         size="sm"
-                                        variant="outline"
                                         onClick={() => sendIndividualConfirmation(a.id)}
                                         disabled={!permissions.canApprove}
-                                        className={`rounded-xl font-semibold text-xs border-black/5 dark:border-white/10 h-8 px-3.5 bg-white dark:bg-[#1A1A1A] ${!permissions.canApprove ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+                                        className={`rounded-full font-bold text-xs h-8 px-5 bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 transition-all hover:scale-105 shadow-md ${!permissions.canApprove ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         title={!permissions.canApprove ? "Approval permission restricted" : "Approve attendee"}
                                       >
-                                        {!permissions.canApprove && <Lock className="w-3 h-3 mr-1" />}
+                                        {!permissions.canApprove && <Lock className="w-3.5 h-3.5 mr-1.5" />}
                                         Approve
                                       </Button>
                                     )}
@@ -1443,11 +1553,35 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
                     })}
                   </div>
                 </Tabs>
-              </div>
+                </div>
+</motion.div>
+              </TabsContent>
 
-              {/* Sidebar Column - Settings & Performance */}
-              <div className="space-y-6">
-                
+              <TabsContent value="overview" className="outline-none m-0 p-0">
+<motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    
+
+                    {event.capacity && (
+                      <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-3">
+                        <div className="flex justify-between items-end">
+                          <h3 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <Users className="w-4 h-4 text-gray-400" /> Event Capacity
+                          </h3>
+                          <span className="text-xs font-bold text-gray-500"><AnimatedNumber value=<AnimatedNumber value={attendees.length} /> /> / {event.capacity}</span>
+                        </div>
+                        <div className="h-2 w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(100, (attendees.length / event.capacity) * 100)}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className={`h-full rounded-full ${attendees.length / event.capacity >= 1 ? 'bg-red-500' : attendees.length / event.capacity > 0.8 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
+                          />
+                        </div>
+                      </div>
+                    )}
+
                 {/* Conversion */}
                 <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
@@ -1485,18 +1619,6 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
                       })()}
                     </div>
                   </div>
-                </div>
-
-                {/* Broadcast */}
-                <div className="bg-[#101828] text-white p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9FF00]/5 rounded-full blur-2xl pointer-events-none" />
-                  <h3 className="text-sm font-bold flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-[#D9FF00]" /> Broadcast
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed font-medium">Send announcements, location pins, or last-minute updates to all approved guests.</p>
-                  <Button onClick={handleBroadcast} className="w-full rounded-xl h-10 text-xs font-semibold bg-[#D9FF00] text-black hover:bg-[#D9FF00]/90 border-none shadow-sm">
-                    Write message
-                  </Button>
                 </div>
 
                 {/* Event Photos & AI Recap */}
@@ -1572,7 +1694,43 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
                   )}
                 </div>
 
-                {/* Co-Hosts & Permissions Info */}
+                                  </div>
+                  <div className="space-y-6">
+{/* Broadcast */}
+                <div className="bg-[#101828] text-white p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-5 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9FF00]/5 rounded-full blur-2xl pointer-events-none" />
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-[#D9FF00]" /> Broadcast Message
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed font-medium">Send pre-formatted updates directly to all approved guests.</p>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => handleBroadcast("general")} className="w-full rounded-xl h-10 text-xs font-bold bg-[#D9FF00] text-black hover:bg-[#D9FF00]/90 border-none shadow-sm transition-transform hover:scale-[1.02]">
+                      <Send className="w-3.5 h-3.5 mr-1.5" /> General Update
+                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button onClick={() => handleBroadcast("reminder")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors">
+                        <Clock className="w-3 h-3 mr-1.5 text-blue-400" /> 5h Reminder
+                      </Button>
+                      <Button onClick={() => handleBroadcast("thankyou")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors">
+                        <Heart className="w-3 h-3 mr-1.5 text-pink-400" /> Thank You
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                                  </div>
+                </div>
+</motion.div>
+              </TabsContent>
+
+              <TabsContent value="settings" className="outline-none m-0 p-0">
+<motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+{/* Co-Hosts & Permissions Info */}
                 {renderCoHostPermissionsCard()}
 
                 {/* Visibility Settings Card */}
@@ -1593,9 +1751,55 @@ ${event.userName ? `@${event.userName}` : "The Organizer"}
                     />
                   </div>
                 </div>
-
               </div>
-            </div>
+              <div className="space-y-6">
+                    {/* Edit Details */}
+                    <div className="bg-white dark:bg-[#1A1A1A] p-6 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+                      <h3 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                        <Edit3 className="w-4 h-4 text-gray-400" /> Event Details
+                      </h3>
+                      <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                        Update your live event details like title, date, location, or capacity.
+                      </p>
+                      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button className="w-full rounded-xl h-9 text-xs font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90">
+                            Edit details
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] rounded-[32px] p-6 bg-white dark:bg-[#1A1A1A] border border-black/10 dark:border-white/10 shadow-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="text-xl font-black">Edit Event</DialogTitle>
+                          </DialogHeader>
+                          <form onSubmit={handleSaveDetails} className="space-y-4 mt-4">
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-gray-500">Event Title</Label>
+                              <input required type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-gray-500">Date & Time</Label>
+                              <input type="text" value={editDate} onChange={e => setEditDate(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-gray-500">Location</Label>
+                              <input type="text" value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-gray-500">Capacity (Optional)</Label>
+                              <input type="number" placeholder="Unlimited" value={editCapacity} onChange={e => setEditCapacity(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                            </div>
+                            <Button type="submit" disabled={savingEdit} className="w-full rounded-xl h-10 mt-2 font-bold bg-black dark:bg-white text-white dark:text-black">
+                              {savingEdit ? "Saving..." : "Save Changes"}
+                            </Button>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                </div>
+</motion.div>
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </div>
