@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp, arrayUnion, query, where, getDocs, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp, arrayUnion, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/Navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink, Camera, Image as ImageIcon } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
@@ -817,20 +817,22 @@ export default function EventDetails() {
                        key="done"
                        initial={{ opacity: 0, scale: 0.95 }}
                        animate={{ opacity: 1, scale: 1 }}
-                       className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-2xl p-8 rounded-[20px] border border-gray-200 dark:border-white/10 text-center space-y-6 shadow-xl dark:shadow-2xl"
+                       className="bg-[#111827] dark:bg-black p-8 rounded-[24px] border border-white/10 text-center space-y-6 shadow-xl relative overflow-hidden"
                      >
-                       <div className="flex justify-center">
-                         <div className="w-16 h-16 bg-white dark:bg-white/10 rounded-full flex items-center justify-center text-[#111827] dark:text-white border border-gray-200 dark:border-white/20 shadow-sm">
+                       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                       <div className="flex justify-center relative z-10">
+                         <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white border border-white/20 shadow-sm backdrop-blur-sm">
                            <CheckCircle2 className="w-8 h-8" />
                          </div>
                        </div>
-                       <h3 className="text-2xl font-bold text-[#111827] dark:text-white">You're registered!</h3>
+                       <h3 className="text-2xl font-bold text-white relative z-10">You're registered!</h3>
 
-                       <div className="bg-gray-50 dark:bg-white/5 p-5 rounded-xl space-y-2 border border-gray-100 dark:border-white/5">
-                         <p className="text-[#111827] dark:text-white font-semibold text-sm">
+                       <div className="bg-white/5 p-5 rounded-xl space-y-2 border border-white/10 relative z-10 text-left">
+                         <p className="text-white font-semibold text-sm flex items-center gap-2">
+                           <span className={`w-2 h-2 rounded-full shrink-0 ${isApproved ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
                            {isApproved ? "Approved & Confirmed" : "Pending Approval"}
                          </p>
-                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
+                         <p className="text-xs font-medium text-white/70 leading-relaxed">
                            {isApproved 
                              ? "You're on the guest list! Your ticket has been emailed to you."
                              : "The host will review your request. You'll receive a ticket via email once confirmed."}
@@ -1427,8 +1429,8 @@ export default function EventDetails() {
 
             {/* About Section */}
             <div className="pt-8">
-               <h3 className="text-sm font-bold text-[#111827] dark:text-white mb-4 uppercase tracking-widest opacity-80">About Event</h3>
-               <div className="prose prose-lg dark:prose-invert text-gray-600 dark:text-gray-400 leading-relaxed font-medium whitespace-pre-wrap text-[15px]">
+               <h3 className="text-sm font-bold text-current opacity-70 mb-4 uppercase tracking-widest">About Event</h3>
+               <div className="prose prose-lg dark:prose-invert leading-relaxed font-semibold whitespace-pre-wrap text-[16px] text-current opacity-90">
                  {event.description || "No description provided."}
                </div>
             </div>

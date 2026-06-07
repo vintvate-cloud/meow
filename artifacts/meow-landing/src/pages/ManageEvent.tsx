@@ -47,7 +47,8 @@ import {
   Eye,
   X,
   Download,
-  Edit3
+  Edit3,
+  Star
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -545,7 +546,7 @@ export default function ManageEvent() {
 
 
 
-  const handleBroadcast = (templateId: "general" | "reminder" | "thankyou" = "general") => {
+  const handleBroadcast = (templateId: "general" | "reminder" | "thankyou" | "feedback" = "general") => {
     const approvedEmails = attendees.filter(a => a.confirmationSent).map(a => a.email);
     if (approvedEmails.length === 0) {
       toast({
@@ -585,6 +586,9 @@ export default function ManageEvent() {
     } else if (templateId === "thankyou") {
       subjectText = `📸 Thank you for attending ${event.title}!`;
       bodyText = `Hi everyone,\n\nWe just wanted to send a huge thank you to everyone who joined us for ${event.title}! Your energy made it unforgettable.\n\nKeep an eye out for photos, and we hope to see you at our next event!\n\nCheers,`;
+    } else if (templateId === "feedback") {
+      subjectText = `How did we do? Rate ${event.title} ⭐`;
+      bodyText = `Hi everyone,\n\nThank you for coming to ${event.title}! We are always looking to improve and throw even better events in the future.\n\nCould you take 10 seconds to reply to this email with a rating from 1 to 5 stars?\n⭐ = Not great\n⭐⭐⭐⭐⭐ = Amazing!\n\nAny other feedback is also hugely appreciated.\n\nThanks again,`;
     } else {
       subjectText = `Important Updates: ${event.title} ✨`;
       bodyText = `Hi everyone! 👋\n\nWe are incredibly excited to host you at ${event.title}! As we get closer to the event, we wanted to share some important details.\n\n📍 Venue Details\nLocation: ${eventVenue}\n\n📅 Date & Time\nWhen: ${eventDateStr} at ${eventTimeStr}\n\n🎟️ Check-in Information\nPlease make sure to have your digital ticket ready for a smooth check-in process at the door. You can find your unique ticket link in your original approval email.\n\nCan't wait to see you there!`;
@@ -1710,12 +1714,15 @@ export default function ManageEvent() {
                     <Button onClick={() => handleBroadcast("general")} className="w-full rounded-xl h-10 text-xs font-bold bg-[#D9FF00] text-black hover:bg-[#D9FF00]/90 border-none shadow-sm transition-transform hover:scale-[1.02]">
                       <Send className="w-3.5 h-3.5 mr-1.5" /> General Update
                     </Button>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button onClick={() => handleBroadcast("reminder")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors">
-                        <Clock className="w-3 h-3 mr-1.5 text-blue-400" /> 5h Reminder
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <Button onClick={() => handleBroadcast("reminder")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors px-1">
+                        <Clock className="w-3 h-3 mr-1.5 text-blue-400 shrink-0" /> 5h Reminder
                       </Button>
-                      <Button onClick={() => handleBroadcast("thankyou")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors">
-                        <Heart className="w-3 h-3 mr-1.5 text-pink-400" /> Thank You
+                      <Button onClick={() => handleBroadcast("thankyou")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors px-1">
+                        <Heart className="w-3 h-3 mr-1.5 text-pink-400 shrink-0" /> Thank You
+                      </Button>
+                      <Button onClick={() => handleBroadcast("feedback")} variant="outline" className="w-full rounded-xl h-9 text-[10px] font-semibold border-white/10 bg-white/5 hover:bg-white/10 text-white transition-colors px-1">
+                        <Star className="w-3 h-3 mr-1.5 text-yellow-400 shrink-0" /> Feedback
                       </Button>
                     </div>
                   </div>
