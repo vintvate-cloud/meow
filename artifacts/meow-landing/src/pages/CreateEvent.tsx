@@ -239,6 +239,7 @@ export default function CreateEvent() {
     title: "",
     description: "",
     date: "",
+    endDate: "",
     location: "",
     theme: "cream-cozy",
     creativeUrl: "",
@@ -276,6 +277,7 @@ export default function CreateEvent() {
               title: data.title || "",
               description: data.description || "",
               date: data.date || "",
+              endDate: data.endDate || "",
               location: data.location || "",
               theme: data.theme || "cream-cozy",
               creativeUrl: data.creativeUrl || "",
@@ -909,35 +911,71 @@ export default function CreateEvent() {
             <div className="space-y-6">
               {!formData.isPreLaunch ? (
                 <>
-                  <div className="flex items-start gap-5">
-                    <div className="w-12 h-14 rounded-xl bg-current/5 border border-current/10 flex flex-col items-center justify-center overflow-hidden shadow-sm relative focus-within:ring-2 focus-within:ring-current/20 transition-all">
-                       <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-current/10">
-                         {formData.date ? new Date(formData.date).toLocaleString('en-US', { month: 'short' }) : "Mon"}
-                       </div>
-                       <div className="text-lg font-bold leading-none pt-1 pb-1">
-                         {formData.date ? new Date(formData.date).getDate() : "DD"}
-                       </div>
-                       <input
-                         type="datetime-local"
-                         value={formData.date}
-                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                         onClick={(e) => {
-                           try {
-                             if ('showPicker' in HTMLInputElement.prototype) {
-                               (e.target as HTMLInputElement).showPicker();
-                             }
-                           } catch (err) {}
-                         }}
-                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                         required={!formData.isPreLaunch}
-                       />
-                    </div>
-                    <div className="pt-1">
-                      <div className="font-bold text-lg text-current">
-                        {formData.date ? new Date(formData.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) : "Select Date & Time"}
+                  <div className="flex flex-col sm:flex-row items-start gap-5">
+                    <div className="flex items-start gap-5 flex-1 w-full">
+                      <div className="w-12 h-14 rounded-xl bg-current/5 border border-current/10 flex flex-col items-center justify-center overflow-hidden shadow-sm relative focus-within:ring-2 focus-within:ring-current/20 transition-all shrink-0">
+                         <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-current/10">
+                           {formData.date ? new Date(formData.date).toLocaleString('en-US', { month: 'short' }) : "Mon"}
+                         </div>
+                         <div className="text-lg font-bold leading-none pt-1 pb-1">
+                           {formData.date ? new Date(formData.date).getDate() : "DD"}
+                         </div>
+                         <input
+                           type="datetime-local"
+                           value={formData.date}
+                           onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                           onClick={(e) => {
+                             try {
+                               if ('showPicker' in HTMLInputElement.prototype) {
+                                 (e.target as HTMLInputElement).showPicker();
+                               }
+                             } catch (err) {}
+                           }}
+                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                           required={!formData.isPreLaunch}
+                         />
                       </div>
-                      <div className="opacity-60 font-medium text-sm mt-1 text-current">
-                        {formData.date ? new Date(formData.date).toLocaleTimeString([], { timeStyle: 'short' }) : "Time not set"}
+                      <div className="pt-1 flex-1">
+                        <div className="font-bold text-[10px] uppercase tracking-wider opacity-60 mb-0.5">Start</div>
+                        <div className="font-bold text-base text-current leading-tight">
+                          {formData.date ? new Date(formData.date).toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' }) : "Select Start"}
+                        </div>
+                        <div className="opacity-60 font-medium text-xs mt-1 text-current">
+                          {formData.date ? new Date(formData.date).toLocaleTimeString([], { timeStyle: 'short' }) : "Time"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-5 flex-1 w-full">
+                      <div className="w-12 h-14 rounded-xl bg-current/5 border border-current/10 flex flex-col items-center justify-center overflow-hidden shadow-sm relative focus-within:ring-2 focus-within:ring-current/20 transition-all shrink-0">
+                         <div className="text-[9px] uppercase tracking-wider font-bold opacity-60 w-full text-center py-1 border-b border-current/10">
+                           {formData.endDate ? new Date(formData.endDate).toLocaleString('en-US', { month: 'short' }) : "Mon"}
+                         </div>
+                         <div className="text-lg font-bold leading-none pt-1 pb-1">
+                           {formData.endDate ? new Date(formData.endDate).getDate() : "DD"}
+                         </div>
+                         <input
+                           type="datetime-local"
+                           value={formData.endDate}
+                           onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                           onClick={(e) => {
+                             try {
+                               if ('showPicker' in HTMLInputElement.prototype) {
+                                 (e.target as HTMLInputElement).showPicker();
+                               }
+                             } catch (err) {}
+                           }}
+                           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                         />
+                      </div>
+                      <div className="pt-1 flex-1">
+                        <div className="font-bold text-[10px] uppercase tracking-wider opacity-60 mb-0.5">End (Optional)</div>
+                        <div className="font-bold text-base text-current leading-tight">
+                          {formData.endDate ? new Date(formData.endDate).toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' }) : "Select End"}
+                        </div>
+                        <div className="opacity-60 font-medium text-xs mt-1 text-current">
+                          {formData.endDate ? new Date(formData.endDate).toLocaleTimeString([], { timeStyle: 'short' }) : "Time"}
+                        </div>
                       </div>
                     </div>
                   </div>

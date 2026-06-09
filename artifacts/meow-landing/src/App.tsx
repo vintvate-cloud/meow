@@ -17,6 +17,7 @@ import Ticket from "@/pages/Ticket";
 import Settings from "@/pages/Settings";
 import Onboarding from "@/pages/Onboarding";
 import HostProfile from "@/pages/HostProfile";
+import Register from "@/pages/Register";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,7 @@ function Router() {
       <ProtectedRoute path="/manage/:id" component={ManageEvent} />
       <ProtectedRoute path="/scan/:id" component={QRScanner} />
       <Route path="/e/:id" component={EventDetails} />
+      <Route path="/register/:id" component={Register} />
       <Route path="/ticket/:eventId/:rsvpId" component={Ticket} />
       <Route path="/p/:username" component={HostProfile} />
 

@@ -201,14 +201,14 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        <div className="w-full lg:w-1/2 relative h-[600px] mt-16 lg:mt-0">
+        <div className="w-full lg:w-1/2 relative h-[450px] sm:h-[500px] lg:h-[600px] mt-12 lg:mt-0 flex flex-col items-center sm:block">
           <motion.div
             whileHover={{ y: -10, scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            className="absolute top-10 left-10 w-64 p-6 rounded-3xl shadow-2xl z-20 gsap-parallax cursor-pointer" style={{ backgroundColor: '#2457FF', color: 'white' }}
+            className="relative sm:absolute sm:top-10 sm:left-10 w-[90%] max-w-[300px] sm:w-64 p-5 sm:p-6 rounded-3xl shadow-2xl z-20 gsap-parallax cursor-pointer mb-[-60px] sm:mb-0 ml-[-20px] sm:ml-0" style={{ backgroundColor: '#2457FF', color: 'white' }}
           >
-            <div className="text-sm font-bold mb-2 opacity-80">TONIGHT</div>
-            <div className="text-2xl font-black mb-4 leading-tight">Design Drink & Draw</div>
+            <div className="text-xs sm:text-sm font-bold mb-2 opacity-80">TONIGHT</div>
+            <div className="text-xl sm:text-2xl font-black mb-3 sm:mb-4 leading-tight">Design Drink & Draw</div>
             <div className="flex gap-2">
               <div className="px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: '#D9FF00', color: "var(--foreground)" }}>RSVP</div>
               <div className="px-3 py-1 rounded-full text-xs font-bold bg-white/20">34 Attending</div>
@@ -216,32 +216,32 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, -20, 0], rotate: [2, 1, 2] }}
+            animate={{ y: [0, -10, 0], rotate: [2, 1, 2] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-40 right-10 w-72 p-6 rounded-3xl shadow-2xl z-10 gsap-parallax cursor-pointer" style={{ backgroundColor: '#E8C8EC', color: "var(--foreground)" }}
+            className="relative sm:absolute sm:top-40 sm:right-10 w-[90%] max-w-[320px] sm:w-72 p-5 sm:p-6 rounded-3xl shadow-2xl z-10 gsap-parallax cursor-pointer mb-[-40px] sm:mb-0 ml-[40px] sm:ml-0" style={{ backgroundColor: '#E8C8EC', color: "var(--foreground)" }}
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full" style={{ backgroundColor: '#79001B' }}></div>
+            <div className="flex items-center gap-3 mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shrink-0" style={{ backgroundColor: '#79001B' }}></div>
               <div>
-                <div className="font-bold">Sarah invited you</div>
-                <div className="text-sm opacity-70">to Brooklyn Pottery Club</div>
+                <div className="font-bold text-sm sm:text-base">Sarah invited you</div>
+                <div className="text-xs sm:text-sm opacity-70">to Brooklyn Pottery Club</div>
               </div>
             </div>
-            <Button className="w-full rounded-full h-10 font-bold border-none" style={{ backgroundColor: '#111827', color: '#E8C8EC' }}>Accept Invite</Button>
+            <Button className="w-full rounded-full h-10 font-bold border-none text-xs sm:text-sm" style={{ backgroundColor: '#111827', color: '#E8C8EC' }}>Accept Invite</Button>
           </motion.div>
 
           <motion.div
-            animate={{ y: [0, -12, 0], rotate: [-4, -2, -4] }}
+            animate={{ y: [0, -8, 0], rotate: [-4, -2, -4] }}
             whileHover={{ scale: 1.05, rotate: 0 }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute bottom-20 left-20 w-56 p-5 rounded-3xl shadow-2xl z-30 gsap-parallax cursor-pointer" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
+            className="relative sm:absolute sm:bottom-10 lg:bottom-20 sm:left-20 w-[60%] max-w-[200px] sm:w-56 p-4 sm:p-5 rounded-3xl shadow-2xl z-30 gsap-parallax cursor-pointer mr-auto sm:mr-0 ml-[20px] sm:ml-0 mt-8 sm:mt-0" style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl" style={{ backgroundColor: '#D9FF00' }}></div>
-              <div className="font-bold text-xl">QR Ticket</div>
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl shrink-0" style={{ backgroundColor: '#D9FF00' }}></div>
+              <div className="font-bold text-lg sm:text-xl">QR Ticket</div>
             </div>
-            <div className="w-full aspect-square rounded-xl opacity-20 border-4 border-dashed" style={{ borderColor: '#111827' }}></div>
+            <div className="w-full aspect-square rounded-xl opacity-20 border-[3px] sm:border-4 border-dashed" style={{ borderColor: '#111827' }}></div>
           </motion.div>
         </div>
       </section>
@@ -836,22 +836,37 @@ export default function Home() {
 
           <Accordion type="single" collapsible className="space-y-4 w-full" onValueChange={setActiveFaq}>
             {[
-              "How is Meow different from Eventbrite?",
-              "Is Meow free to use?",
-              "Can I sell tickets through Meow?",
-              "How do communities work on Meow?",
-              "Can I embed my Meow page elsewhere?"
-            ].map((q, i) => (
+              {
+                q: "How is Meow different from Luma?",
+                a: "While Luma is great, MEOW is built for creators who want complete control over their brand and audience. We offer instant Stripe payouts, absolutely zero hidden checkout fees, and true community features that don't force your attendees to download yet another app."
+              },
+              {
+                q: "Is Meow free to use?",
+                a: "Yes! Hosting free events is 100% free forever. For paid tickets, we only charge a tiny flat fee to cover processing, with zero sneaky service fees added at checkout for your attendees."
+              },
+              {
+                q: "Can I sell tickets through Meow?",
+                a: "Absolutely. You can sell VIP passes, early-bird tickets, or accept donations. All payouts are routed instantly to your connected Stripe account so you get your money the moment a ticket is sold."
+              },
+              {
+                q: "How do communities work on Meow?",
+                a: "Instead of a one-off event page, MEOW lets you turn your RSVP list into a living community. Attendees can chat, share photos, and stay hyped long after the party ends."
+              },
+              {
+                q: "Can I embed my Meow page elsewhere?",
+                a: "Yes! Every event and community generates a beautiful, responsive embed snippet that you can paste directly into your website, Notion, or link-in-bio."
+              }
+            ].map((faq, i) => (
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
                 className={`bg-white dark:bg-card dark:text-card-foreground rounded-3xl px-6 border-none transition-all duration-300 ${activeFaq === `item-${i}` ? 'border-l-4 border-l-[#D9FF00]' : 'border-l-4 border-l-transparent'}`}
               >
-                <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline" style={{ color: "var(--foreground)" }}>
-                  {q}
+                <AccordionTrigger className="text-xl font-bold py-6 hover:no-underline text-left" style={{ color: "var(--foreground)" }}>
+                  {faq.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-lg font-medium opacity-80 pb-6" style={{ color: "var(--foreground)" }}>
-                  We built Meow for creators who want to own their audience. It's beautiful, fast, and gives you full control over your community data. Sign up to see the difference.
+                  {faq.a}
                 </AccordionContent>
               </AccordionItem>
             ))}

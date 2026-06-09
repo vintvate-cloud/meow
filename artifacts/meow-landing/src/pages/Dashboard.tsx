@@ -355,17 +355,23 @@ export default function Dashboard() {
           {/* Controls: Tab Switcher & Search */}
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center pt-2 border-t border-gray-100 dark:border-[#222]">
             {/* Tab Pill Selector */}
-            <div className="flex bg-gray-100 dark:bg-white/5 rounded-full p-1 self-start">
+            <div className="flex bg-gray-100 dark:bg-white/5 rounded-full p-1 self-start relative">
               <button 
                 onClick={() => setActiveTab('hosting')} 
-                className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all ${activeTab === 'hosting' ? 'bg-white dark:bg-[#1A1A1A] text-foreground shadow-sm' : 'text-gray-400 hover:text-foreground'}`}
+                className={`relative z-10 px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'hosting' ? 'text-foreground' : 'text-gray-400 hover:text-foreground'}`}
               >
+                {activeTab === 'hosting' && (
+                  <motion.div layoutId="active-tab" className="absolute inset-0 bg-white dark:bg-[#1A1A1A] rounded-full shadow-sm -z-10" />
+                )}
                 Hosting
               </button>
               <button 
                 onClick={() => setActiveTab('attending')} 
-                className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all ${activeTab === 'attending' ? 'bg-white dark:bg-[#1A1A1A] text-foreground shadow-sm' : 'text-gray-400 hover:text-foreground'}`}
+                className={`relative z-10 px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'attending' ? 'text-foreground' : 'text-gray-400 hover:text-foreground'}`}
               >
+                {activeTab === 'attending' && (
+                  <motion.div layoutId="active-tab" className="absolute inset-0 bg-white dark:bg-[#1A1A1A] rounded-full shadow-sm -z-10" />
+                )}
                 Attending
               </button>
             </div>
@@ -385,12 +391,31 @@ export default function Dashboard() {
 
           {/* Event Listing */}
           <div className="space-y-4">
-            {loading ? (
-              <div className="py-20 text-center text-xs font-semibold text-gray-400 animate-pulse">
-                Loading events...
-              </div>
-            ) : activeTab === 'hosting' ? (
-              filteredHosting.length === 0 ? (
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div key="loading" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: -10}} transition={{duration: 0.2}}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-5 rounded-[24px] shadow-sm flex flex-col justify-between gap-5 h-[160px] animate-pulse">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-[16px] bg-gray-200 dark:bg-white/5 shrink-0" />
+                      <div className="flex-1 space-y-3 py-1">
+                        <div className="h-4 bg-gray-200 dark:bg-white/5 rounded-full w-3/4" />
+                        <div className="h-3 bg-gray-100 dark:bg-white/5 rounded-full w-1/2" />
+                        <div className="h-3 bg-gray-100 dark:bg-white/5 rounded-full w-2/3" />
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-white/5 pt-4">
+                      <div className="h-8 bg-gray-200 dark:bg-white/5 rounded-xl w-24" />
+                      <div className="h-8 bg-gray-100 dark:bg-white/5 rounded-xl w-32" />
+                    </div>
+                  </div>
+                ))}
+                  </div>
+                </motion.div>
+              ) : activeTab === 'hosting' ? (
+                <motion.div key="hosting" initial={{opacity: 0, x: -10}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: 10}} transition={{duration: 0.2}}>
+                  {filteredHosting.length === 0 ? (
                 <EmptyState 
                   message="You aren't hosting any events." 
                   actionText="Start your first event" 
@@ -398,47 +423,56 @@ export default function Dashboard() {
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredHosting.map(event => (
-                    <div 
-                      key={event.id} 
-                      className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-5 rounded-[24px] shadow-sm flex flex-col justify-between gap-5 transition-all hover:shadow-xl hover:-translate-y-1 group"
+                  {filteredHosting.map((event, i) => (
+                    <motion.div 
+                      key={event.id}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="relative bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-5 rounded-[24px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col justify-between gap-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-black/10 dark:hover:border-white/10 group overflow-hidden"
                     >
-                      <div className="flex items-start gap-4">
+                      {/* Subtle Background Glow */}
+                      <div 
+                        className="absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-[0.03] dark:group-hover:opacity-[0.08]" 
+                        style={{ backgroundColor: event.color || '#D9FF00' }} 
+                      />
+
+                      <div className="flex items-start gap-4 relative z-10">
                         {/* Event Color Accent Block */}
                         <div 
-                          className="w-16 h-16 rounded-[16px] flex flex-col items-center justify-center shrink-0 overflow-hidden relative shadow-inner" 
+                          className="w-16 h-16 rounded-[16px] flex flex-col items-center justify-center shrink-0 overflow-hidden relative shadow-inner group-hover:shadow-lg transition-shadow duration-300" 
                           style={{ backgroundColor: event.color || '#D9FF00' }}
                         >
                           {event.creativeUrl ? (
-                            <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
                           ) : (
-                            <span className="text-[20px] font-black text-black">🐾</span>
+                            <span className="text-[20px] font-black text-black group-hover:scale-110 transition-transform duration-500">🐾</span>
                           )}
                         </div>
 
                         {/* Title & Info */}
                         <div className="min-w-0 flex-1">
                           {event.isPreLaunch && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/10 uppercase mb-1">
-                              <Sparkles className="w-3 h-3" /> Pre-Launch
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/10 uppercase mb-1.5 border border-purple-500/20">
+                              <Sparkles className="w-2.5 h-2.5" /> Pre-Launch
                             </span>
                           )}
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-base font-black text-foreground line-clamp-2 leading-tight mb-1">{event.title}</h4>
+                            <h4 className="text-base font-black text-foreground line-clamp-2 leading-tight mb-1 group-hover:text-purple-500 dark:group-hover:text-purple-400 transition-colors">{event.title}</h4>
                             <Link href={`/e/${event.id}`}>
-                              <button className="text-gray-400 hover:text-foreground shrink-0 mt-1">
+                              <button className="text-gray-400 hover:text-foreground shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0" title="View live page">
                                 <ExternalLink className="w-4 h-4" />
                               </button>
                             </Link>
                           </div>
                           
-                          <div className="space-y-1 mt-2">
-                            <p className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 opacity-70" /> {event.isPreLaunch ? event.tentativeDate : new Date(event.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                          <div className="space-y-1.5 mt-2">
+                            <p className="text-[11px] font-semibold text-gray-500 flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 opacity-60" /> {event.isPreLaunch ? event.tentativeDate : new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                             </p>
                             {event.location && (
-                              <p className="text-xs font-medium text-gray-400 flex items-center gap-1.5 line-clamp-1">
-                                <MapPin className="w-3.5 h-3.5 opacity-70 shrink-0" /> {event.location}
+                              <p className="text-[11px] font-medium text-gray-400 flex items-center gap-1.5 line-clamp-1">
+                                <MapPin className="w-3.5 h-3.5 opacity-60 shrink-0" /> {event.location}
                               </p>
                             )}
                           </div>
@@ -446,68 +480,66 @@ export default function Dashboard() {
                       </div>
  
                       {/* Tool Actions & Switch Visibility */}
-                      <div className="flex items-center justify-between border-t border-gray-100 dark:border-[#222] pt-4 mt-auto">
-                        {/* Clicks/RSVP statistics count */}
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300" title={event.isPreLaunch ? "Interested count" : "RSVP count"}>
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <span>{event.isPreLaunch ? event.interestedCount || 0 : event.rsvpCount || 0}</span>
-                        </div>
+                      <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4 mt-auto relative z-10">
+                        {/* Guests Button (Prominent Action) */}
+                        <Link href={`/manage/${event.id}`}>
+                          <button className="flex items-center gap-2 px-3.5 py-1.5 bg-foreground text-background hover:bg-foreground/90 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow active:scale-95 group/btn">
+                            <Users className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform" />
+                            {event.isPreLaunch ? 'Signups' : 'Guests'} 
+                            <span className="opacity-70 font-semibold text-[10px]">({event.isPreLaunch ? event.interestedCount || 0 : event.rsvpCount || 0})</span>
+                          </button>
+                        </Link>
 
-                        {/* Event controls */}
-                        <div className="flex items-center gap-1">
+                        {/* Secondary Event Controls */}
+                        <div className="flex items-center gap-0.5 bg-gray-50 dark:bg-white/5 rounded-xl p-1 border border-black/5 dark:border-white/5">
                           <button
                             onClick={() => handleShareEvent(event.id, event.title)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
+                            className="p-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg text-gray-400 hover:text-foreground transition-all hover:shadow-sm active:scale-95"
                             title="Copy link"
                           >
-                            <Share2 className="w-4 h-4" />
+                            <Share2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setActiveQRDialog(event.id)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
+                            className="p-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg text-gray-400 hover:text-foreground transition-all hover:shadow-sm active:scale-95"
                             title="View QR Code"
                           >
-                            <QrCode className="w-4 h-4" />
+                            <QrCode className="w-3.5 h-3.5" />
                           </button>
-                          <Link href={`/edit-event/${event.id}`}>
-                            <button
-                              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
-                              title="Edit event"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                          </Link>
                           <Link href={`/manage/${event.id}`}>
                             <button
-                              className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 hover:text-foreground transition-colors"
-                              title="Manage settings"
+                              className="p-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg text-gray-400 hover:text-foreground transition-all hover:shadow-sm active:scale-95"
+                              title="Manage event settings"
                             >
-                              <Settings className="w-4 h-4" />
+                              <Settings className="w-3.5 h-3.5" />
                             </button>
                           </Link>
-                          <button
-                            onClick={() => handleDeleteEvent(event.id)}
-                            className="p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl text-gray-400 hover:text-red-500 transition-colors"
-                            title="Delete event"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          
-                          <div className="w-px h-4 bg-gray-200 dark:bg-[#333] mx-1"></div>
-                          
-                          <Switch
-                            checked={event.isPublic !== false}
-                            onCheckedChange={() => handleToggleVisibility(event.id, event.isPublic !== false)}
-                            className="scale-90"
-                          />
+                          <Link href={`/edit-event/${event.id}`}>
+                            <button
+                              className="p-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg text-gray-400 hover:text-foreground transition-all hover:shadow-sm active:scale-95"
+                              title="Edit event details"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                          </Link>
+                          <div className="w-px h-3.5 bg-gray-200 dark:bg-white/10 mx-1"></div>
+                          <div className="px-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg transition-all" title="Toggle visibility">
+                            <Switch
+                              checked={event.isPublic !== false}
+                              onCheckedChange={() => handleToggleVisibility(event.id, event.isPublic !== false)}
+                              className="scale-75 origin-center"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              )
-            ) : (
-              filteredAttending.length === 0 ? (
+                )}
+                </motion.div>
+              ) : (
+                <motion.div key="attending" initial={{opacity: 0, x: 10}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -10}} transition={{duration: 0.2}}>
+                  {filteredAttending.length === 0 ? (
                 <EmptyState 
                   message="You aren't attending any events yet." 
                   actionText="Discover events" 
@@ -515,33 +547,39 @@ export default function Dashboard() {
                 />
               ) : (
                 <div className="relative pl-6 ml-2 sm:ml-4 border-l-2 border-gray-100 dark:border-white/5 space-y-6 pt-2 pb-6">
-                  {filteredAttending.map(event => (
-                    <div key={event.id} className="relative">
+                  {filteredAttending.map((event, i) => (
+                    <motion.div 
+                      key={event.id} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="relative group"
+                    >
                       {/* Timeline Dot */}
-                      <div className="absolute -left-[31px] sm:-left-[39px] top-6 w-3 h-3 rounded-full bg-white dark:bg-[#0A0A0A] border-[2.5px] border-[#101828] dark:border-white/40 shadow-sm z-10 ring-4 ring-[#FAF9F6] dark:ring-[#0A0A0A]"></div>
+                      <div className="absolute -left-[31px] sm:-left-[39px] top-6 w-3 h-3 rounded-full bg-white dark:bg-[#0A0A0A] border-[2.5px] border-[#101828] dark:border-white/40 shadow-sm z-10 ring-4 ring-[#FAF9F6] dark:ring-[#0A0A0A] transition-all duration-300 group-hover:scale-125 group-hover:bg-[#101828] dark:group-hover:bg-white group-hover:border-white dark:group-hover:border-[#0A0A0A]"></div>
                       
                       <div 
                         onClick={() => setLocation(`/e/${event.id}`)}
-                        className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-4 sm:p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
+                        className="bg-white dark:bg-[#121212] border border-black/5 dark:border-white/5 p-4 sm:p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                       >
                         <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
                           {/* Event Color Accent Block */}
                           <div 
-                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative shadow-inner" 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative shadow-inner group-hover:shadow-md transition-shadow" 
                             style={{ backgroundColor: event.color || '#D9FF00' }}
                           >
                             {event.creativeUrl ? (
-                              <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+                              <img src={event.creativeUrl} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" />
                             ) : (
-                              <span className="text-black font-black text-sm drop-shadow-sm">🎫</span>
+                              <span className="text-black font-black text-sm drop-shadow-sm group-hover:scale-110 transition-transform duration-300">🎫</span>
                             )}
                           </div>
 
                           {/* Title & Info */}
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-[15px] font-bold text-foreground truncate">{event.title}</h4>
+                            <h4 className="text-[15px] font-bold text-foreground truncate group-hover:text-purple-500 dark:group-hover:text-purple-400 transition-colors">{event.title}</h4>
                             <p className="text-[11px] font-semibold text-gray-400 mt-1 flex flex-wrap items-center gap-1.5">
-                              <span className="bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-gray-500 dark:text-gray-300">
+                              <span className="bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-gray-500 dark:text-gray-300 group-hover:bg-purple-50 dark:group-hover:bg-purple-500/10 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                 {event.isPreLaunch ? event.tentativeDate : new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
                               </span>
                               <span className="truncate max-w-[150px]">{event.location || "Online"}</span>
@@ -558,14 +596,16 @@ export default function Dashboard() {
                           }`}>
                             {event.rsvpStatus}
                           </span>
-                          <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+                          <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:translate-x-1 group-hover:text-foreground transition-all duration-300" />
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              )
-            )}
+                )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 

@@ -7,24 +7,13 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/Navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink, Camera, Image as ImageIcon } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink, Camera, Image as ImageIcon, User } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
 import { parseAvatarUrlFromStorage } from "@/lib/avatars";
 
-const THEMES_MAP: Record<string, { bg: string, text: string, accent: string, starburst: string, bgGradient?: string }> = {
-  "cream-cozy": { bg: "#FAF8F5", text: "#101828", accent: "#8129D9", starburst: "#8129D9" },
-  "sleek-midnight": { bg: "#0A0A0A", text: "#FFFFFF", accent: "#D9FF00", starburst: "#D9FF00" },
-  "luma-aura": { bg: "#0d0a14", text: "#FFFFFF", accent: "#FFFFFF", starburst: "#8129D9", bgGradient: "radial-gradient(circle at 15% 50%, rgba(129, 41, 217, 0.25), transparent 25%), radial-gradient(circle at 85% 30%, rgba(217, 41, 100, 0.2), transparent 25%)" },
-  "glass-aurora": { bg: "#ffffff", text: "#101828", accent: "#101828", starburst: "#00F0FF", bgGradient: "linear-gradient(135deg, rgba(230, 240, 255, 1) 0%, rgba(255, 230, 240, 1) 100%)" },
-  "obsidian-mesh": { bg: "#050505", text: "#FFFFFF", accent: "#FFFFFF", starburst: "#333333", bgGradient: "radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.5) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.5) 0, transparent 50%)" },
-  "ethereal-blur": { bg: "#f3f4f6", text: "#111827", accent: "#4f46e5", starburst: "#4f46e5", bgGradient: "radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f3f4f6 80%)" },
-  "sunset-mirage": { bg: "#1a0b12", text: "#FFFFFF", accent: "#FF7B00", starburst: "#FF3300", bgGradient: "radial-gradient(circle at 100% 0%, rgba(255, 123, 0, 0.3) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(255, 51, 0, 0.3) 0%, transparent 40%)" },
-  "oceanic-deep": { bg: "#020813", text: "#E0F2FE", accent: "#38BDF8", starburst: "#0369A1", bgGradient: "radial-gradient(circle at 50% 50%, rgba(3, 105, 161, 0.2) 0%, transparent 60%), linear-gradient(180deg, #020813 0%, #082f49 100%)" },
-  "emerald-oasis": { bg: "#022c22", text: "#F0FDF4", accent: "#34D399", starburst: "#059669", bgGradient: "radial-gradient(ellipse at top left, rgba(5, 150, 105, 0.4) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(16, 185, 129, 0.2) 0%, transparent 50%)" },
-  "peachy-clean": { bg: "#fff5f0", text: "#431407", accent: "#EA580C", starburst: "#F97316", bgGradient: "linear-gradient(120deg, #fff5f0 0%, #ffedd5 100%)" }
-};
+import { getThemeColors } from "@/lib/theme-colors";
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -88,8 +77,10 @@ export default function EventDetails() {
         } else {
           toast({ title: "Event not found", variant: "destructive" });
         }
-      } catch (error) {
-        console.error("Error fetching event:", error);
+      } catch (error: any) {
+        if (error?.code !== 'permission-denied') {
+          console.error("Error fetching event:", error);
+        }
       } finally {
         setLoading(false);
       }
@@ -130,8 +121,10 @@ export default function EventDetails() {
           }
           setCoHostProfiles(allCoHosts);
         }
-      } catch (error) {
-        console.error("Error fetching profiles:", error);
+      } catch (error: any) {
+        if (error?.code !== 'permission-denied') {
+          console.error("Error fetching profiles:", error);
+        }
       }
     };
     fetchProfiles();
@@ -150,8 +143,10 @@ export default function EventDetails() {
             setIsApproved(true);
           }
         }
-      } catch (err) {
-        console.error("Error checking RSVP status", err);
+      } catch (err: any) {
+        if (err?.code !== 'permission-denied') {
+          console.error("Error checking RSVP status", err);
+        }
       }
     };
     checkRsvpStatus();
@@ -166,8 +161,10 @@ export default function EventDetails() {
           .map(doc => doc.data())
           .filter((r: any) => r.confirmationSent || r.checkedIn);
         setApprovedAttendees(list);
-      } catch (err) {
-        console.error("Error fetching approved attendees for gallery", err);
+      } catch (err: any) {
+        if (err?.code !== 'permission-denied') {
+          console.error("Error fetching approved attendees for gallery", err);
+        }
       }
     };
     fetchApproved();
@@ -175,7 +172,7 @@ export default function EventDetails() {
 
   // Real-time listener for validation campaign RSVPs and votes
   useEffect(() => {
-    if (!id || !event?.isPreLaunch) return;
+    if (!id) return;
 
     // Listen to RSVPs subcollection in real time
     const unsubscribeRSVPs = onSnapshot(
@@ -226,7 +223,11 @@ export default function EventDetails() {
           }
         }
       },
-      (err) => console.error("Real-time RSVPs error", err)
+      (err: any) => {
+        if (err?.code !== 'permission-denied') {
+          console.error("Real-time RSVPs error", err);
+        }
+      }
     );
 
     // Listen to Comments subcollection in real time
@@ -238,7 +239,11 @@ export default function EventDetails() {
         list.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setComments(list);
       },
-      (err) => console.error("Real-time comments error", err)
+      (err: any) => {
+        if (err?.code !== 'permission-denied') {
+          console.error("Real-time comments error", err);
+        }
+      }
     );
 
     return () => {
@@ -268,13 +273,13 @@ export default function EventDetails() {
     const sessionKey = `viewed-${id}`;
     if (!sessionStorage.getItem(sessionKey)) {
       sessionStorage.setItem(sessionKey, "true");
-      try {
-        updateDoc(doc(db, "events", id), {
-          views: increment(1)
-        });
-      } catch (e) {
-        console.error("Failed to increment views", e);
-      }
+      updateDoc(doc(db, "events", id), {
+        views: increment(1)
+      }).catch((e: any) => {
+        if (e?.code !== 'permission-denied') {
+          console.error("Failed to increment views", e);
+        }
+      });
     }
   }, [id, event]);
 
@@ -424,32 +429,7 @@ export default function EventDetails() {
     }
   }, [user, email]);
 
-  const themeColors = (() => {
-    const color = event?.color || '#D9FF00';
-    let base = {
-      bg: isDark ? "#0A0A0A" : "#F3F0E8",
-      text: isDark ? "#FFFFFF" : "#111827",
-      accent: color,
-      starburst: color
-    };
-
-    if (event?.theme === "dynamic") {
-      base = {
-        bg: color,
-        text: event?.isDark ? "#FFFFFF" : "#111827",
-        accent: event?.isDark ? "#FFFFFF" : "#111827",
-        starburst: color
-      };
-    } else if (event?.theme && THEMES_MAP[event.theme]) {
-      base = { ...THEMES_MAP[event.theme] };
-      // Override accent if an extracted color is somehow set alongside a standard theme
-      if (event?.color) {
-        base.accent = event.color;
-        base.starburst = event.color;
-      }
-    }
-    return base;
-  })();
+  const themeColors = getThemeColors(event?.theme || "cream-cozy", event, isDark);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-black text-4xl">MEOW...</div>;
   if (!event) return <div className="min-h-screen flex items-center justify-center">Event not found</div>;
@@ -478,7 +458,7 @@ export default function EventDetails() {
       </div>
 
       {/* Back Button Only (No Navbar) */}
-      <div className="relative z-10 px-6 py-6 md:px-12 md:py-8 max-w-[1100px] mx-auto">
+      <div className="relative z-10 px-4 pt-4 pb-0 md:px-12 md:py-8 max-w-[1100px] mx-auto">
         <button
           onClick={() => {
             // Safe fallback if history is empty
@@ -494,8 +474,8 @@ export default function EventDetails() {
         </button>
       </div>
 
-      <div className="max-w-[1100px] mx-auto px-6 pt-10 md:pt-16 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 lg:gap-16">
+      <div className="max-w-[1100px] mx-auto px-4 pt-6 md:px-6 md:pt-16 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8 lg:gap-16">
           
           {/* LEFT COLUMN */}
           <div className="space-y-6">
@@ -533,74 +513,11 @@ export default function EventDetails() {
               </button>
             </div>
 
-            {/* Tagline */}
-            <p className="text-sm font-medium leading-relaxed pt-2 opacity-80" style={{ color: themeColors.text }}>
-              {event.description?.slice(0, 120) || "Join us for an amazing experience."}...
-            </p>
-
-            {/* Hosted By section */}
-            <div className="pt-6">
-               <h3 className="text-xs font-bold mb-4 uppercase tracking-widest opacity-80" style={{ color: themeColors.text }}>Hosted By</h3>
-               <div className="flex flex-wrap items-center gap-6">
-                 <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
-                   <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
-                      <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
-                        {hostProfile?.photoURL ? (
-                          <img src={parseAvatarUrlFromStorage(hostProfile.photoURL)} alt={hostProfile.displayName} className="w-full h-full object-cover" />
-                        ) : (
-                          (hostProfile?.displayName || event.userName || "A")?.[0]?.toUpperCase()
-                        )}
-                      </div>
-                      <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "A Community Member"}</span>
-                   </div>
-                 </Link>
-                 
-                 {coHostProfiles.map((coHost, idx) => (
-                   <Link key={idx} href={`/p/${coHost.username}`}>
-                     <div className="flex items-center gap-3 inline-flex cursor-pointer hover:opacity-80 transition-opacity">
-                        <div className="w-8 h-8 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
-                          {coHost.photoURL ? (
-                            <img src={parseAvatarUrlFromStorage(coHost.photoURL)} alt={coHost.displayName} className="w-full h-full object-cover" />
-                          ) : (
-                            coHost.displayName?.[0]?.toUpperCase() || coHost.username?.[0]?.toUpperCase()
-                          )}
-                        </div>
-                        <span className="text-sm font-bold opacity-95" style={{ color: themeColors.text }}>{coHost.displayName || coHost.username}</span>
-                     </div>
-                   </Link>
-                 ))}
-               </div>
-            </div>
-
-            {/* Attendees Preview */}
-            <div className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {allRSVPs.slice(0, 5).map((rsvp: any, i: number) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 overflow-hidden bg-white/20 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
-                      {rsvp.avatar ? (
-                        <img src={rsvp.avatar} alt="Attendee" className="w-full h-full object-cover" />
-                      ) : (
-                        rsvp.name?.[0]?.toUpperCase() || rsvp.email?.[0]?.toUpperCase() || "?"
-                      )}
-                    </div>
-                  ))}
-                  {(event.rsvpCount || allRSVPs.length) === 0 && (
-                     <div className="w-8 h-8 rounded-full border-2 bg-white/20 dark:bg-white/10 flex items-center justify-center text-xs font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
-                      ?
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm font-semibold opacity-80" style={{ color: themeColors.text }}>
-                  {(event.rsvpCount || allRSVPs.length) > 0 ? `${event.rsvpCount || allRSVPs.length} people attending` : "Be the first to RSVP!"}
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-10 pt-2 lg:pl-6">
-            <h1 className="text-4xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]" style={{ fontFamily: "Inter, sans-serif", color: themeColors.text }}>
+          <div className="space-y-6 md:space-y-10 pt-0 md:pt-2 lg:pl-6">
+            <h1 className="text-3xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]" style={{ fontFamily: "Inter, sans-serif", color: themeColors.text }}>
               {event.title}
             </h1>
 
@@ -697,120 +614,26 @@ export default function EventDetails() {
             <div className="pt-4 space-y-6">
               {!event.isPreLaunch ? (
                 <AnimatePresence mode="wait">
-                  {!user ? (
+                  {!rsvpDone ? (
                     <motion.div
-                      key="auth-required"
+                      key="register-btn"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-white/10 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-black/5 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl"
+                      className="bg-white/10 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-black/5 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl p-6 md:p-10 text-center"
                     >
-                       <div className="px-6 py-4 border-b border-black/5 dark:border-white/10 bg-white/10 dark:bg-white/[0.02]">
-                         <h3 className="text-sm font-bold opacity-60" style={{ color: themeColors.text }}>Registration</h3>
-                       </div>
-                       
-                       <div className="p-6 space-y-6 text-center">
-                          <div className="flex flex-col items-center gap-3 bg-amber-500/10 dark:bg-amber-500/20 p-5 rounded-2xl border border-amber-500/25 max-w-sm mx-auto shadow-sm">
-                             <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                                <Lock className="w-5 h-5" />
-                             </div>
-                             <div className="space-y-1">
-                                <div className="text-sm font-bold text-amber-800 dark:text-amber-300">Login Required to RSVP</div>
-                                <div className="text-xs font-semibold opacity-80 leading-relaxed" style={{ color: themeColors.text }}>
-                                   You must be signed in to request to join this event and receive your ticket.
-                                </div>
-                             </div>
-                          </div>
-
-                          <div className="pt-2">
-                            <Link href={`/login?redirect=${encodeURIComponent(`/e/${event.id}`)}`}>
-                              <Button
-                                className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] shadow-md border-none text-white"
-                                style={{ backgroundColor: themeColors.accent }}
-                              >
-                                Login to RSVP
-                              </Button>
-                            </Link>
-                          </div>
-                       </div>
-                    </motion.div>
-                  ) : !rsvpDone ? (
-                    <motion.div
-                      key="form"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-white/10 dark:bg-white/[0.04] backdrop-blur-2xl rounded-[20px] border border-black/5 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl"
-                    >
-                       <div className="px-6 py-4 border-b border-black/5 dark:border-white/10 bg-white/10 dark:bg-white/[0.02]">
-                         <h3 className="text-sm font-bold opacity-60" style={{ color: themeColors.text }}>Registration</h3>
-                       </div>
-                       
-                       <div className="p-6 space-y-6">
-                          <div className="flex items-start gap-3 bg-white/10 dark:bg-white/[0.03] p-4 rounded-xl border border-black/5 dark:border-white/5">
-                             <div className="p-1.5 bg-white/20 dark:bg-white/10 rounded-lg mt-0.5 border border-black/5 dark:border-transparent shadow-sm">
-                                <Users className="w-4 h-4 opacity-60" style={{ color: themeColors.text }} />
-                             </div>
-                             <div>
-                                <div className="text-sm font-bold" style={{ color: themeColors.text }}>Approval Required</div>
-                                <div className="text-xs opacity-60 mt-1" style={{ color: themeColors.text }}>Your registration is subject to host approval.</div>
-                             </div>
-                          </div>
-
-                          <div className="text-sm font-medium opacity-85" style={{ color: themeColors.text }}>
-                             Welcome, {user?.displayName?.split(" ")[0] || "Guest"}! To join the event, please register below.
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center text-xs font-bold border border-black/5 dark:border-white/20 shadow-sm" style={{ color: themeColors.text }}>
-                                {user?.displayName?.[0] || email?.[0]?.toUpperCase() || "?"}
-                             </div>
-                             <div className="text-sm">
-                                <span className="font-bold mr-2" style={{ color: themeColors.text }}>{user?.displayName || "Guest"}</span>
-                                <span className="opacity-60" style={{ color: themeColors.text }}>{user?.email || email}</span>
-                             </div>
-                          </div>
-
-                          <form onSubmit={handleRSVP} className="space-y-4 pt-2">
-                            {(!user || !user.email) && (
-                              <div className="space-y-1.5 text-left">
-                                <label className="text-xs font-bold opacity-80 pl-1" style={{ color: themeColors.text }}>
-                                  Email Address <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                  placeholder="Enter your email"
-                                  className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
-                                  value={email}
-                                  onChange={(e) => setEmail(e.target.value)}
-                                  required
-                                />
-                              </div>
-                            )}
-                            
-                            {event.customFields?.map((field: any, idx: number) => (
-                               <div key={idx} className="space-y-1.5 text-left">
-                                 <label className="text-xs font-bold opacity-80 pl-1" style={{ color: themeColors.text }}>
-                                   {field.label} {field.required && <span className="text-red-500">*</span>}
-                                 </label>
-                                 <Input
-                                   placeholder={field.placeholder || "Your answer"}
-                                   className="h-12 rounded-xl bg-white dark:bg-black/40 border-gray-200 dark:border-white/10 focus:border-[#111827] dark:focus:border-white/30 text-[#111827] dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-medium shadow-sm"
-                                   value={customResponses[field.label] || ""}
-                                   onChange={(e) => setCustomResponses({ ...customResponses, [field.label]: e.target.value })}
-                                   required={field.required}
-                                 />
-                               </div>
-                            ))}
-
-                             <Button
-                               disabled={rsvpLoading}
-                               className="w-full h-12 rounded-xl font-bold transition-all hover:scale-[1.02] mt-2 shadow-md border-none text-white"
-                               style={{ backgroundColor: themeColors.accent }}
-                             >
-                               {rsvpLoading ? "Processing..." : "Request to Join"}
-                             </Button>
-                          </form>
-                       </div>
+                      <h3 className="text-2xl md:text-3xl font-black mb-2" style={{ color: themeColors.text }}>Ready to join?</h3>
+                      <p className="text-sm md:text-base opacity-70 mb-8 font-medium" style={{ color: themeColors.text }}>
+                        Secure your spot and get your ticket for {event.title}.
+                      </p>
+                      <Link href={`/register/${event.id}`}>
+                        <Button
+                          className="w-full h-14 rounded-xl font-bold text-lg transition-all hover:scale-[1.02] shadow-xl border-none text-white"
+                          style={{ backgroundColor: themeColors.accent }}
+                        >
+                          Register Now
+                        </Button>
+                      </Link>
                     </motion.div>
                   ) : (
                     <motion.div
@@ -1433,8 +1256,95 @@ export default function EventDetails() {
                <div className="prose prose-lg dark:prose-invert leading-relaxed font-semibold whitespace-pre-wrap text-[16px] text-current opacity-90">
                  {event.description || "No description provided."}
                </div>
+             </div>
+
+            {/* Compact Attendees Preview at the bottom */}
+            <div className="pt-8 flex items-center gap-3">
+              <div className="flex -space-x-3">
+                {Array.from({ length: Math.min(3, event.rsvpCount || allRSVPs.length || 0) }).map((_, i) => {
+                  const rsvp = allRSVPs[i];
+                  const avatarUrl = rsvp?.userId === user?.uid && user?.photoURL ? user.photoURL : rsvp?.avatar;
+                  return (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 overflow-hidden bg-white/20 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
+                      {avatarUrl ? (
+                        <img src={parseAvatarUrlFromStorage(avatarUrl)} alt="Attendee" className="w-full h-full object-cover" />
+                      ) : (
+                        rsvp?.name?.[0]?.toUpperCase() || rsvp?.email?.[0]?.toUpperCase() || <User className="w-4 h-4 opacity-70" />
+                      )}
+                    </div>
+                  );
+                })}
+                {(event.rsvpCount || allRSVPs.length || 0) === 0 && (
+                   <div className="w-8 h-8 rounded-full border-2 bg-white/20 dark:bg-white/10 flex items-center justify-center text-xs font-bold shadow-sm" style={{ borderColor: themeColors.bg, color: themeColors.text }}>
+                    <User className="w-4 h-4 opacity-70" />
+                  </div>
+                )}
+              </div>
+              <div className="text-sm font-semibold opacity-80" style={{ color: themeColors.text }}>
+                {(event.rsvpCount || allRSVPs.length || 0) > 3 
+                  ? `+ ${(event.rsvpCount || allRSVPs.length || 0) - 3} attending` 
+                  : (event.rsvpCount || allRSVPs.length || 0) > 0 
+                    ? "attending" 
+                    : "Be the first to RSVP!"
+                }
+              </div>
             </div>
 
+            {/* Map & Host Section at the bottom */}
+            {!event.isPreLaunch && event.location && (
+              <div className="pt-10 space-y-6">
+                <div className="w-full h-[250px] rounded-[24px] overflow-hidden border border-black/5 dark:border-white/10 shadow-sm relative">
+                  {/* Embedded Google Maps via free embed URL */}
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0, filter: isDark ? 'invert(90%) hue-rotate(180deg) contrast(100%)' : 'none' }}
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(event.location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                    allowFullScreen
+                  />
+                </div>
+
+                <div className="bg-white/5 dark:bg-white/[0.02] rounded-[24px] border border-black/5 dark:border-white/10 p-6 md:p-8 backdrop-blur-md">
+                   <h3 className="text-sm font-bold mb-6 uppercase tracking-widest opacity-80" style={{ color: themeColors.text }}>Hosted By</h3>
+                   <div className="flex flex-wrap items-center gap-6">
+                     <Link href={hostProfile?.username ? `/p/${hostProfile.username}` : "#"}>
+                       <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+                          <div className="w-12 h-12 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-sm font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
+                            {hostProfile?.photoURL ? (
+                              <img src={parseAvatarUrlFromStorage(hostProfile.photoURL)} alt={hostProfile.displayName} className="w-full h-full object-cover" />
+                            ) : (
+                              (hostProfile?.displayName || event.userName || "A")?.[0]?.toUpperCase()
+                            )}
+                          </div>
+                          <div>
+                            <span className="text-base font-bold opacity-95 block" style={{ color: themeColors.text }}>{hostProfile?.displayName || event.userName || "A Community Member"}</span>
+                            <span className="text-xs font-medium opacity-60" style={{ color: themeColors.text }}>Main Host</span>
+                          </div>
+                       </div>
+                     </Link>
+                     
+                     {coHostProfiles.map((coHost, idx) => (
+                       <Link key={idx} href={`/p/${coHost.username}`}>
+                         <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+                            <div className="w-12 h-12 rounded-full bg-white dark:bg-white/10 flex items-center justify-center text-sm font-bold border border-gray-200 dark:border-white/20 shadow-sm overflow-hidden" style={{ color: themeColors.text }}>
+                              {coHost.photoURL ? (
+                                <img src={parseAvatarUrlFromStorage(coHost.photoURL)} alt={coHost.displayName} className="w-full h-full object-cover" />
+                              ) : (
+                                coHost.displayName?.[0]?.toUpperCase() || coHost.username?.[0]?.toUpperCase()
+                              )}
+                            </div>
+                            <div>
+                              <span className="text-base font-bold opacity-95 block" style={{ color: themeColors.text }}>{coHost.displayName || coHost.username}</span>
+                              <span className="text-xs font-medium opacity-60" style={{ color: themeColors.text }}>Co-Host</span>
+                            </div>
+                         </div>
+                       </Link>
+                     ))}
+                   </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
