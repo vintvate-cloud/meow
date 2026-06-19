@@ -422,7 +422,8 @@ export default function ManageEvent() {
 
       const rsvpRef = doc(db, "events", id, "rsvps", attendeeId);
       await updateDoc(rsvpRef, {
-        confirmationSent: true
+        confirmationSent: true,
+        status: "approved"
       });
 
       const ticketUrl = `${window.location.origin}/ticket/${id}/${attendeeId}`;
@@ -455,7 +456,7 @@ export default function ManageEvent() {
         });
       }
 
-      setAttendees(prev => prev.map(a => a.id === attendeeId ? { ...a, confirmationSent: true } : a));
+      setAttendees(prev => prev.map(a => a.id === attendeeId ? { ...a, confirmationSent: true, status: "approved" } : a));
 
       toast({
         title: "Approved!",
@@ -483,7 +484,7 @@ export default function ManageEvent() {
     try {
       await Promise.all(pending.map(async (a) => {
         const rsvpRef = doc(db, "events", id!, "rsvps", a.id);
-        await updateDoc(rsvpRef, { confirmationSent: true });
+        await updateDoc(rsvpRef, { confirmationSent: true, status: "approved" });
 
         const ticketUrl = `${window.location.origin}/ticket/${id}/${a.id}`;
         const qrData = JSON.stringify({ eventId: id, rsvpId: a.id });
@@ -513,7 +514,7 @@ export default function ManageEvent() {
         successCount++;
       }));
 
-      setAttendees(prev => prev.map(a => ({ ...a, confirmationSent: true })));
+      setAttendees(prev => prev.map(a => (!a.confirmationSent ? { ...a, confirmationSent: true, status: "approved" } : a)));
 
       toast({
         title: "Bulk Approval Complete",
@@ -527,6 +528,28 @@ export default function ManageEvent() {
       });
     } finally {
       setSending(false);
+    }
+  };
+
+  const rejectAttendee = async (attendeeId: string) => {
+    try {
+      if (!id) throw new Error("Missing event ID");
+      const rsvpRef = doc(db, "events", id, "rsvps", attendeeId);
+      await updateDoc(rsvpRef, {
+        status: "rejected",
+        confirmationSent: false
+      });
+      setAttendees(prev => prev.filter(a => a.id !== attendeeId));
+      toast({
+        title: "Registration Rejected",
+        description: "The ticket slot is now available again."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Action Failed",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -1533,16 +1556,45 @@ export default function ManageEvent() {
                                         </button>
                                       </div>
                                     ) : (
-                                      <Button
-                                        size="sm"
-                                        onClick={() => sendIndividualConfirmation(a.id)}
-                                        disabled={!permissions.canApprove}
-                                        className={`rounded-full font-bold text-xs h-8 px-5 bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 transition-all hover:scale-105 shadow-md ${!permissions.canApprove ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        title={!permissions.canApprove ? "Approval permission restricted" : "Approve attendee"}
-                                      >
-                                        {!permissions.canApprove && <Lock className="w-3.5 h-3.5 mr-1.5" />}
-                                        Approve
-                                      </Button>
+                                      <div className="flex items-center gap-2">
+                                        {a.paymentScreenshotUrl && (
+                                          <Dialog>
+                                            <DialogTrigger asChild>
+                                              <Button variant="outline" size="sm" className="rounded-full font-bold text-[10px] h-8 px-3 border-black/10 dark:border-white/10">
+                                                <DollarSign className="w-3 h-3 mr-1 text-emerald-500" /> Verify
+                                              </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-md bg-white dark:bg-[#1A1A1A] border-none rounded-3xl shadow-2xl p-6">
+                                              <DialogHeader>
+                                                <DialogTitle>Payment Verification</DialogTitle>
+                                              </DialogHeader>
+                                              <div className="flex flex-col items-center space-y-4 pt-4">
+                                                <img src={a.paymentScreenshotUrl} alt="Payment" className="max-w-full max-h-[50vh] rounded-xl object-contain shadow-sm border border-black/5 dark:border-white/5" />
+                                              </div>
+                                            </DialogContent>
+                                          </Dialog>
+                                        )}
+                                        <Button
+                                          size="sm"
+                                          onClick={() => sendIndividualConfirmation(a.id)}
+                                          disabled={!permissions.canApprove}
+                                          className={`rounded-full font-bold text-xs h-8 px-4 bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/80 transition-all shadow-sm ${!permissions.canApprove ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                          title={!permissions.canApprove ? "Approval permission restricted" : "Approve attendee"}
+                                        >
+                                          {!permissions.canApprove && <Lock className="w-3.5 h-3.5 mr-1.5" />}
+                                          Approve
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => rejectAttendee(a.id)}
+                                          disabled={!permissions.canApprove}
+                                          className="w-8 h-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-500/10 p-0"
+                                          title="Reject & Free Ticket Limit"
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      </div>
                                     )}
                                     <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full">
                                       <MoreHorizontal className="w-4 h-4 text-gray-400" />

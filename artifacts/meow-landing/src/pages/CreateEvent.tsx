@@ -262,6 +262,9 @@ export default function CreateEvent() {
     foodOptions: [] as string[],
     themeOptions: [] as string[],
     timingOptions: [] as string[],
+    ticketLimit: "" as string | number,
+    upiQrCodeUrl: "",
+    ticketPrice: "" as string | number,
   });
 
   useEffect(() => {
@@ -300,6 +303,9 @@ export default function CreateEvent() {
               foodOptions: data.foodOptions || [],
               themeOptions: data.themeOptions || [],
               timingOptions: data.timingOptions || [],
+              ticketLimit: data.ticketLimit || "",
+              ticketPrice: data.ticketPrice || "",
+              upiQrCodeUrl: data.upiQrCodeUrl || "",
             });
             if (data.customFields) setCustomFields(data.customFields);
           }
@@ -417,6 +423,56 @@ export default function CreateEvent() {
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const [uploadingUpi, setUploadingUpi] = useState(false);
+
+  const handleUpiQrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    
+    setUploadingUpi(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      
+      let cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      let uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+      
+      if (!cloudName || cloudName === "your_cloudinary_cloud_name") {
+        cloudName = "dih7y95sc";
+      }
+      if (!uploadPreset || uploadPreset === "your_cloudinary_upload_preset") {
+        uploadPreset = "linkhub_unsigned";
+      }
+
+      formDataUpload.append("upload_preset", uploadPreset);
+      
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error?.message || "Cloudinary upload failed");
+      }
+
+      const data = await res.json();
+      setFormData(prev => ({ ...prev, upiQrCodeUrl: data.secure_url }));
+      toast({
+        title: "UPI QR uploaded!",
+        description: "Your QR code is ready.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Upload failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingUpi(false);
     }
   };
 
@@ -891,6 +947,50 @@ export default function CreateEvent() {
                    checked={formData.isPreLaunch} 
                    onCheckedChange={(checked) => setFormData({ ...formData, isPreLaunch: checked })} 
                  />
+               </div>
+
+               <div className="pt-4 border-t border-current/10 space-y-4">
+                 <h3 className="text-xs font-bold uppercase tracking-widest opacity-80">Ticketing & Payments</h3>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                     <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Ticket Price (₹)</label>
+                     <Input 
+                       type="number"
+                       placeholder="Free if empty"
+                       value={formData.ticketPrice}
+                       onChange={e => setFormData({...formData, ticketPrice: e.target.value})}
+                       className="h-10 bg-current/5 border-current/10 rounded-xl font-bold"
+                     />
+                   </div>
+                   <div className="space-y-1">
+                     <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Ticket Limit</label>
+                     <Input 
+                       type="number"
+                       placeholder="Unlimited if empty"
+                       value={formData.ticketLimit}
+                       onChange={e => setFormData({...formData, ticketLimit: e.target.value})}
+                       className="h-10 bg-current/5 border-current/10 rounded-xl font-bold"
+                     />
+                   </div>
+                 </div>
+                 
+                 <div className="space-y-2 mt-4">
+                   <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Host UPI QR Code</label>
+                   {formData.upiQrCodeUrl ? (
+                     <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-current/20">
+                       <img src={formData.upiQrCodeUrl} className="w-full h-full object-cover" alt="UPI QR" />
+                       <button type="button" onClick={() => setFormData({...formData, upiQrCodeUrl: ""})} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1"><X className="w-3 h-3"/></button>
+                     </div>
+                   ) : (
+                     <div className="relative">
+                       <input type="file" accept="image/*" onChange={handleUpiQrUpload} disabled={uploadingUpi} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10" />
+                       <Button type="button" disabled={uploadingUpi} variant="outline" className="w-full bg-current/5 border-current/10 h-10 rounded-xl font-bold text-xs">
+                         {uploadingUpi ? "Uploading..." : "Upload Payment QR"}
+                       </Button>
+                     </div>
+                   )}
+                   <p className="text-[10px] opacity-60 font-medium">Attendees will upload screenshots of their payment to this QR code for verification.</p>
+                 </div>
                </div>
             </div>
           </div>

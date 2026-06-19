@@ -24,6 +24,10 @@ export default function Register() {
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [rsvpDone, setRsvpDone] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
+  
+  const [paymentScreenshotUrl, setPaymentScreenshotUrl] = useState("");
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const [isPaymentPending, setIsPaymentPending] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -64,6 +68,37 @@ export default function Register() {
     }
   }, [eventId, user, authLoading, toast]);
 
+  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingScreenshot(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      
+      let cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dih7y95sc";
+      let uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "linkhub_unsigned";
+
+      formDataUpload.append("upload_preset", uploadPreset);
+      
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (!res.ok) throw new Error("Screenshot upload failed");
+
+      const data = await res.json();
+      setPaymentScreenshotUrl(data.secure_url);
+      toast({ title: "Screenshot uploaded!" });
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingScreenshot(false);
+    }
+  };
+
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!eventId || !event) return;
@@ -74,6 +109,26 @@ export default function Register() {
 
     setRsvpLoading(true);
     try {
+      if (event.ticketLimit) {
+        const limit = parseInt(event.ticketLimit);
+        const allRsvpsSnap = await getDocs(collection(db, `events/${eventId}/rsvps`));
+        const validRsvps = allRsvpsSnap.docs.filter(d => {
+          const s = d.data().status;
+          return s !== "rejected" && s !== "cancelled";
+        });
+        if (validRsvps.length >= limit) {
+          toast({ title: "Event is sold out!", variant: "destructive" });
+          setRsvpLoading(false);
+          return;
+        }
+      }
+
+      if (event.upiQrCodeUrl && event.ticketPrice && !paymentScreenshotUrl) {
+        toast({ title: "Payment screenshot is required", variant: "destructive" });
+        setRsvpLoading(false);
+        return;
+      }
+
       const rsvpsRef = collection(db, `events/${eventId}/rsvps`);
       let alreadyRegistered = false;
       let alreadyApproved = false;
@@ -97,9 +152,12 @@ export default function Register() {
          return;
       }
 
-      // Check auto-approval
+      // Check auto-approval and payment
       let status = "pending";
-      if (event.approvalType === "auto") {
+      if (event.upiQrCodeUrl && event.ticketPrice) {
+        status = "payment_pending";
+        setIsPaymentPending(true);
+      } else if (event.approvalType === "auto") {
         status = "approved";
       }
 
@@ -112,7 +170,9 @@ export default function Register() {
         customResponses,
         status,
         createdAt: serverTimestamp(),
-        interestLevel: "interested"
+        interestLevel: "interested",
+        paymentScreenshotUrl: paymentScreenshotUrl || null,
+        ticketPrice: event.ticketPrice || null
       };
 
       await addDoc(rsvpsRef, rsvpData);
@@ -234,7 +294,7 @@ export default function Register() {
                         </div>
                       )}
                       
-                      {event.customFields?.map((field: any, idx: number) => (
+                       {event.customFields?.map((field: any, idx: number) => (
                          <div key={idx} className="space-y-1.5 text-left">
                            <label className="text-xs font-bold opacity-80 pl-1">
                              {field.label} {field.required && <span className="text-red-500">*</span>}
@@ -248,6 +308,40 @@ export default function Register() {
                            />
                          </div>
                       ))}
+
+                      {event.upiQrCodeUrl && event.ticketPrice && (
+                        <div className="space-y-4 text-left bg-white/10 dark:bg-white/[0.03] p-4 rounded-xl border border-black/5 dark:border-white/5">
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-bold">Ticket Payment: ₹{event.ticketPrice}</h4>
+                            <p className="text-xs opacity-70">Scan the QR code below to pay for your ticket, then upload the screenshot.</p>
+                          </div>
+                          
+                          <div className="flex justify-center py-2">
+                            <div className="bg-white p-2 rounded-xl">
+                              <img src={event.upiQrCodeUrl} alt="UPI QR Code" className="w-40 h-40 object-cover rounded-lg" />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-bold opacity-80 pl-1">
+                              Payment Screenshot <span className="text-red-500">*</span>
+                            </label>
+                            {paymentScreenshotUrl ? (
+                              <div className="flex items-center gap-3">
+                                <img src={paymentScreenshotUrl} alt="Screenshot" className="w-16 h-16 rounded-xl object-cover border border-white/20" />
+                                <span className="text-xs font-bold text-emerald-500 flex items-center gap-1"><CheckCircle2 className="w-4 h-4"/> Uploaded</span>
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <input type="file" accept="image/*" onChange={handleScreenshotUpload} disabled={uploadingScreenshot} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10" />
+                                <Button type="button" disabled={uploadingScreenshot} variant="outline" className="w-full bg-black/5 dark:bg-white/5 border-gray-200 dark:border-white/10 h-14 rounded-xl font-bold">
+                                  {uploadingScreenshot ? "Uploading..." : "Upload Screenshot"}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                        <Button
                          disabled={rsvpLoading}
@@ -276,13 +370,15 @@ export default function Register() {
 
                  <div className="bg-white/5 p-6 rounded-xl space-y-2 border border-white/10 relative z-10 text-left max-w-sm mx-auto">
                    <p className="text-white font-semibold text-base flex items-center gap-2">
-                     <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isApproved ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-                     {isApproved ? "Approved & Confirmed" : "Pending Approval"}
+                     <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isApproved ? 'bg-emerald-400 animate-pulse' : (isPaymentPending ? 'bg-blue-400 animate-pulse' : 'bg-amber-400')}`} />
+                     {isApproved ? "Approved & Confirmed" : (isPaymentPending ? "Payment Verification Pending" : "Pending Approval")}
                    </p>
                    <p className="text-sm font-medium text-white/70 leading-relaxed mt-2">
                      {isApproved 
                        ? "You're on the guest list! Your ticket has been emailed to you."
-                       : "The host will review your request. You'll receive a ticket via email once confirmed."}
+                       : (isPaymentPending 
+                          ? "Your ticket will be mailed once the payment is verified by the host." 
+                          : "The host will review your request. You'll receive a ticket via email once confirmed.")}
                    </p>
                  </div>
 
