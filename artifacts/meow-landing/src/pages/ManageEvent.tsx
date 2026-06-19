@@ -113,6 +113,7 @@ export default function ManageEvent() {
   const [editTitle, setEditTitle] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editLocation, setEditLocation] = useState("");
+  const [editTicketLimit, setEditTicketLimit] = useState("");
   const [editCapacity, setEditCapacity] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -121,6 +122,7 @@ export default function ManageEvent() {
       setEditTitle(event.title || "");
       setEditDate(event.date || event.startDate || "");
       setEditLocation(event.location || "");
+      setEditTicketLimit(event.ticketLimit ? String(event.ticketLimit) : "");
       setEditCapacity(event.capacity ? String(event.capacity) : "");
     }
   }, [event, isEditDialogOpen]);
@@ -134,9 +136,10 @@ export default function ManageEvent() {
          title: editTitle,
          date: editDate,
          location: editLocation,
+         ticketLimit: editTicketLimit ? editTicketLimit : null,
          capacity: editCapacity ? parseInt(editCapacity) : null
       });
-      setEvent({ ...event, title: editTitle, date: editDate, location: editLocation, capacity: editCapacity ? parseInt(editCapacity) : null });
+      setEvent({ ...event, title: editTitle, date: editDate, location: editLocation, ticketLimit: editTicketLimit ? editTicketLimit : null, capacity: editCapacity ? parseInt(editCapacity) : null });
       toast({ title: "Event updated successfully" });
       setIsEditDialogOpen(false);
     } catch(err: any) {
@@ -1581,14 +1584,14 @@ export default function ManageEvent() {
                           <h3 className="text-sm font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
                             <Users className="w-4 h-4 text-gray-400" /> Event Capacity
                           </h3>
-                          <span className="text-xs font-bold text-gray-500"><AnimatedNumber value=<AnimatedNumber value={attendees.length} /> /> / {event.capacity}</span>
+                          <span className="text-xs font-bold text-gray-500"><AnimatedNumber value={attendees.filter(a => a.status !== 'rejected' && a.status !== 'cancelled').length} /> / {event.ticketLimit || event.capacity}</span>
                         </div>
                         <div className="h-2 w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
                           <motion.div 
                             initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(100, (attendees.length / event.capacity) * 100)}%` }}
+                            animate={{ width: `${Math.min(100, (attendees.filter(a => a.status !== 'rejected' && a.status !== 'cancelled').length / (parseInt(event.ticketLimit) || event.capacity)) * 100)}%` }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
-                            className={`h-full rounded-full ${attendees.length / event.capacity >= 1 ? 'bg-red-500' : attendees.length / event.capacity > 0.8 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
+                            className={`h-full rounded-full ${(attendees.filter(a => a.status !== 'rejected' && a.status !== 'cancelled').length / (parseInt(event.ticketLimit) || event.capacity)) >= 1 ? 'bg-red-500' : (attendees.filter(a => a.status !== 'rejected' && a.status !== 'cancelled').length / (parseInt(event.ticketLimit) || event.capacity)) > 0.8 ? 'bg-yellow-500' : 'bg-emerald-500'}`}
                           />
                         </div>
                       </div>
@@ -1800,8 +1803,14 @@ export default function ManageEvent() {
                               <input type="text" value={editLocation} onChange={e => setEditLocation(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
                             </div>
                             <div className="space-y-1.5">
-                              <Label className="text-xs font-bold text-gray-500">Capacity (Optional)</Label>
+                              <Label className="text-xs font-bold text-gray-500">Tickets Available For Sale</Label>
+                              <input type="number" placeholder="e.g. 50" value={editTicketLimit} onChange={e => setEditTicketLimit(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                              <p className="text-[10px] text-gray-400">Controls the "Tickets Left" counter.</p>
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label className="text-xs font-bold text-gray-500">Total Venue Capacity (Optional)</Label>
                               <input type="number" placeholder="Unlimited" value={editCapacity} onChange={e => setEditCapacity(e.target.value)} className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 text-gray-900 dark:text-gray-100" />
+                              <p className="text-[10px] text-gray-400">Internal stat for your dashboard.</p>
                             </div>
                             <Button type="submit" disabled={savingEdit} className="w-full rounded-xl h-10 mt-2 font-bold bg-black dark:bg-white text-white dark:text-black">
                               {savingEdit ? "Saving..." : "Save Changes"}

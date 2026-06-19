@@ -263,6 +263,7 @@ export default function CreateEvent() {
     themeOptions: [] as string[],
     timingOptions: [] as string[],
     ticketLimit: "" as string | number,
+    capacity: "" as string | number,
     upiQrCodeUrl: "",
     ticketPrice: "" as string | number,
   });
@@ -304,6 +305,7 @@ export default function CreateEvent() {
               themeOptions: data.themeOptions || [],
               timingOptions: data.timingOptions || [],
               ticketLimit: data.ticketLimit || "",
+              capacity: data.capacity || "",
               ticketPrice: data.ticketPrice || "",
               upiQrCodeUrl: data.upiQrCodeUrl || "",
             });
@@ -963,7 +965,7 @@ export default function CreateEvent() {
                      />
                    </div>
                    <div className="space-y-1">
-                     <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Ticket Limit</label>
+                     <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Tickets For Sale</label>
                      <Input 
                        type="number"
                        placeholder="Unlimited if empty"
@@ -975,7 +977,20 @@ export default function CreateEvent() {
                  </div>
                  
                  <div className="space-y-2 mt-4">
-                   <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Host UPI QR Code</label>
+                   
+                  <div className="space-y-1 mt-4">
+                    <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Total Venue Capacity (Optional)</label>
+                    <Input 
+                      type="number"
+                      placeholder="Unlimited if empty"
+                      value={formData.capacity}
+                      onChange={e => setFormData({...formData, capacity: e.target.value})}
+                      className="h-10 bg-current/5 border-current/10 rounded-xl font-bold"
+                    />
+                    <p className="text-[9px] opacity-60 font-medium">Internal tracking for your dashboard.</p>
+                  </div>
+
+                    <label className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Host UPI QR Code</label>
                    {formData.upiQrCodeUrl ? (
                      <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-current/20">
                        <img src={formData.upiQrCodeUrl} className="w-full h-full object-cover" alt="UPI QR" />

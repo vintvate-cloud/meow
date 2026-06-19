@@ -577,7 +577,13 @@ export default function EventDetails() {
                           {event.ticketPrice ? `₹${event.ticketPrice}` : "Free Registration"}
                         </div>
                         <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>
-                          {event.ticketLimit ? `Capacity: ${event.ticketLimit} attendees` : "Open to all"}
+                          {event.capacity && event.ticketLimit 
+                            ? `Venue Capacity: ${event.capacity} • Selling ${event.ticketLimit} tickets`
+                            : event.capacity 
+                              ? `Venue Capacity: ${event.capacity} attendees`
+                              : event.ticketLimit 
+                                ? `Total Tickets: ${event.ticketLimit}`
+                                : "Open to all"}
                         </div>
                       </div>
                     </div>
