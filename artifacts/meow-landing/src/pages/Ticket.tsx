@@ -78,7 +78,7 @@ END:VCALENDAR`;
           (rsvpSnap) => {
             if (rsvpSnap.exists()) {
               const rsvpData = rsvpSnap.data();
-              if (rsvpData.confirmationSent || rsvpData.checkedIn) {
+              if (rsvpData.confirmationSent || rsvpData.checkedIn || rsvpData.status === "approved") {
                 setData({
                   event: eventDoc.data(),
                   rsvp: rsvpData,
