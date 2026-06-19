@@ -24,6 +24,7 @@ export default function Register() {
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [rsvpDone, setRsvpDone] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
+  const [remainingTickets, setRemainingTickets] = useState<number | null>(null);
   
   const [paymentScreenshotUrl, setPaymentScreenshotUrl] = useState("");
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
@@ -42,7 +43,18 @@ export default function Register() {
         const docRef = doc(db, "events", eventId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setEvent({ id: docSnap.id, ...docSnap.data() });
+          const eventData = { id: docSnap.id, ...docSnap.data() };
+          setEvent(eventData);
+
+          if (eventData.ticketLimit) {
+            const limit = parseInt(eventData.ticketLimit);
+            const allRsvpsSnap = await getDocs(collection(db, `events/${eventId}/rsvps`));
+            const validRsvps = allRsvpsSnap.docs.filter(d => {
+              const s = d.data().status;
+              return s !== "rejected" && s !== "cancelled";
+            });
+            setRemainingTickets(Math.max(0, limit - validRsvps.length));
+          }
         } else {
           toast({ title: "Event not found", variant: "destructive" });
         }
@@ -250,6 +262,11 @@ export default function Register() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-black mb-2">{event.title}</h1>
             <p className="opacity-70 font-medium">{new Date(event.date).toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            {remainingTickets !== null && (
+              <div className={`mt-3 inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${remainingTickets > 0 ? 'bg-black/10 dark:bg-white/10 text-current' : 'bg-red-500/10 text-red-500'}`}>
+                {remainingTickets > 0 ? `${remainingTickets} Tickets Remaining` : 'Sold Out'}
+              </div>
+            )}
           </div>
 
           <AnimatePresence mode="wait">
@@ -344,11 +361,11 @@ export default function Register() {
                       )}
 
                        <Button
-                         disabled={rsvpLoading}
-                         className="w-full h-14 rounded-xl font-bold text-lg transition-all hover:scale-[1.02] shadow-xl border-none text-white mt-4"
-                         style={{ backgroundColor: themeColors.accent }}
+                         disabled={rsvpLoading || remainingTickets === 0}
+                         className={`w-full h-14 rounded-xl font-bold text-lg transition-all shadow-xl border-none text-white mt-4 ${remainingTickets === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
+                         style={{ backgroundColor: remainingTickets === 0 ? '#666' : themeColors.accent }}
                        >
-                         {rsvpLoading ? "Processing..." : "Complete Registration"}
+                         {rsvpLoading ? "Processing..." : remainingTickets === 0 ? "Sold Out" : "Complete Registration"}
                        </Button>
                     </form>
                  </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/Navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink, Camera, Image as ImageIcon, User } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, CheckCircle2, Download, ArrowLeft, Sparkles, MessageSquare, Send, Heart, Trophy, Flame, HelpCircle, Check, ExternalLink, Camera, Image as ImageIcon, User, Ticket } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/hooks/use-auth";
 import { Sun, Moon, Lock } from "lucide-react";
@@ -250,7 +250,9 @@ export default function EventDetails() {
       unsubscribeRSVPs();
       unsubscribeComments();
     };
-  }, [id, event, user, email]);
+  }, [id, user, email]);
+
+  const remainingTickets = event?.ticketLimit ? Math.max(0, parseInt(event.ticketLimit) - allRSVPs.filter(r => r.status !== 'rejected' && r.status !== 'cancelled').length) : null;
 
   // Extract ref from search parameter and increment views once per session
   useEffect(() => {
@@ -517,9 +519,11 @@ export default function EventDetails() {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6 md:space-y-10 pt-0 md:pt-2 lg:pl-6">
-            <h1 className="text-3xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]" style={{ fontFamily: "Inter, sans-serif", color: themeColors.text }}>
-              {event.title}
-            </h1>
+            <div>
+              <h1 className="text-3xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]" style={{ fontFamily: "Inter, sans-serif", color: themeColors.text }}>
+                {event.title}
+              </h1>
+            </div>
 
             {/* Info rows */}
             <div className="space-y-6">
@@ -537,7 +541,7 @@ export default function EventDetails() {
                   </div>
 
                   <div className="flex items-start gap-5">
-                    <div className="w-12 h-12 rounded-xl bg-white/10 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center shadow-sm">
+                    <div className="w-12 h-12 rounded-xl bg-white/10 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center shadow-sm shrink-0">
                        <MapPin className="w-5 h-5 opacity-60" style={{ color: themeColors.text }} />
                     </div>
                     <div className="pt-1 flex-1">
@@ -560,6 +564,28 @@ export default function EventDetails() {
                         {isApproved || user?.uid === event.userId ? "Click to open in Google Maps" : "RSVP to get the exact location"}
                       </div>
                     </div>
+                  </div>
+
+                  {/* TICKET & PRICING ROW */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-start gap-5 flex-1">
+                      <div className="w-12 h-12 rounded-xl bg-white/10 dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center shadow-sm shrink-0">
+                         <Ticket className="w-5 h-5 opacity-60" style={{ color: themeColors.text }} />
+                      </div>
+                      <div className="pt-1 flex-1">
+                        <div className="font-bold text-lg" style={{ color: themeColors.text }}>
+                          {event.ticketPrice ? `₹${event.ticketPrice}` : "Free Registration"}
+                        </div>
+                        <div className="opacity-60 font-medium text-sm mt-1" style={{ color: themeColors.text }}>
+                          {event.ticketLimit ? `Capacity: ${event.ticketLimit} attendees` : "Open to all"}
+                        </div>
+                      </div>
+                    </div>
+                    {remainingTickets !== null && (
+                      <div className={`shrink-0 inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border border-black/5 dark:border-white/10 ${remainingTickets > 0 ? 'bg-white/30 dark:bg-white/10 backdrop-blur-sm' : 'bg-red-500/10 text-red-500 border-red-500/20'}`} style={{ color: remainingTickets > 0 ? themeColors.text : undefined }}>
+                        {remainingTickets > 0 ? `${remainingTickets} Tickets Left` : 'Sold Out'}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (

@@ -455,9 +455,13 @@ export default function Onboarding() {
 
             {/* Title / Status message */}
             <div className="space-y-3">
-              <h2 className="text-3xl font-black tracking-tight text-foreground uppercase">
-                Setting Up Shop
-              </h2>
+              <motion.h2 
+                animate={{ opacity: [0.5, 1, 0.5] }} 
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                className="text-3xl font-black tracking-tight text-foreground uppercase"
+              >
+                Setting Up Profile
+              </motion.h2>
               
               <div className="h-8 flex items-center justify-center">
                 <AnimatePresence mode="wait">

@@ -427,34 +427,10 @@ export default function ManageEvent() {
       });
 
       const ticketUrl = `${window.location.origin}/ticket/${id}/${attendeeId}`;
-      const qrData = JSON.stringify({ eventId: id, rsvpId: attendeeId });
-      const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
+      const subject = encodeURIComponent(`Your Ticket for ${event.title}`);
+      const body = encodeURIComponent(`Hi ${attendee.displayName || ''},\n\nYour payment has been verified and your ticket is officially approved for ${event.title}!\n\nHere is your digital ticket link. Please have this ready at the door:\n${ticketUrl}\n\nCan't wait to see you there!\n\nBest regards,\n${event.userName ? `@${event.userName}` : 'The Organizer'}`);
       
-      try {
-        await emailjs.send(
-          import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          import.meta.env.VITE_EMAILJS_TICKET_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-          {
-            to_email: attendee.email,
-            event_name: event.title,
-            ticket_url: ticketUrl,
-            qr_image_url: qrImageUrl,
-            otp: ticketUrl,
-            passcode: event.title,
-            time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : "",
-            location: event.location,
-            event_url: `${window.location.origin}/e/${id}`
-          },
-          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        );
-      } catch (emailError: any) {
-        console.error("Failed to send ticket email:", emailError);
-        toast({
-          title: "Approved, but email failed",
-          description: "Attendee approved, but there was an error sending the ticket email.",
-          variant: "destructive"
-        });
-      }
+      window.location.href = `mailto:${attendee.email}?subject=${subject}&body=${body}`;
 
       setAttendees(prev => prev.map(a => a.id === attendeeId ? { ...a, confirmationSent: true, status: "approved" } : a));
 
@@ -485,40 +461,20 @@ export default function ManageEvent() {
       await Promise.all(pending.map(async (a) => {
         const rsvpRef = doc(db, "events", id!, "rsvps", a.id);
         await updateDoc(rsvpRef, { confirmationSent: true, status: "approved" });
-
-        const ticketUrl = `${window.location.origin}/ticket/${id}/${a.id}`;
-        const qrData = JSON.stringify({ eventId: id, rsvpId: a.id });
-        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`;
-        
-        try {
-          await emailjs.send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            import.meta.env.VITE_EMAILJS_TICKET_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-            {
-              to_email: a.email,
-              event_name: event.title,
-              ticket_url: ticketUrl,
-              qr_image_url: qrImageUrl,
-              otp: ticketUrl,
-              passcode: event.title,
-              time: event.date ? new Date(event.date).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' }) : "",
-              location: event.location,
-              event_url: `${window.location.origin}/e/${id}`
-            },
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-          );
-        } catch (err) {
-          console.error(`Failed to send email to ${a.email}:`, err);
-        }
-
         successCount++;
       }));
 
       setAttendees(prev => prev.map(a => (!a.confirmationSent ? { ...a, confirmationSent: true, status: "approved" } : a)));
 
+      const bccList = pending.map(a => a.email).join(',');
+      const subject = encodeURIComponent(`Your Tickets for ${event.title}`);
+      const body = encodeURIComponent(`Hi everyone,\n\nYour tickets have been officially approved for ${event.title}!\n\nPlease log into your account to access your digital pass.\n\nEvent Link: ${window.location.origin}/e/${id}\n\nCan't wait to see you there!\n\nBest regards,\n${event.userName ? `@${event.userName}` : 'The Organizer'}`);
+      
+      window.location.href = `mailto:?bcc=${bccList}&subject=${subject}&body=${body}`;
+
       toast({
         title: "Bulk Approval Complete",
-        description: `Successfully approved and emailed QR tickets to ${successCount} guests.`,
+        description: `Approved ${successCount} guests. Your mail client should open shortly to send the notification.`,
       });
     } catch (error: any) {
       toast({
